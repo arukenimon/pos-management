@@ -4,7 +4,7 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Package, Load
 import { toast } from "react-toastify";
 import CustomerLayout from "@/Layouts/CustomerLayout";
 import { Cart } from './Index';
-import { Product } from '../Auth/Admin/Products/Index';
+import { Product } from '../Auth/Admin/Products/Inventory';
 import { only } from 'node:test';
 import { set } from 'date-fns';
 import { ca } from 'date-fns/locale';

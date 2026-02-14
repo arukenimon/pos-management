@@ -1,4 +1,4 @@
-import { Product, stocks } from "@/Pages/Auth/Admin/Products/Index";
+import { Product, stocks } from "@/Pages/Auth/Admin/Products/Inventory";
 import { queryOptions } from "@tanstack/react-query"
 
 

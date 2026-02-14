@@ -15,7 +15,7 @@ class ProductController extends Controller
     
 
 
-    function ProductsPage(Request $request){
+    function Inventory(Request $request){
         $search = $request->query('search');
         $status = $request->query('status');
            $products = Products::query()
@@ -50,7 +50,7 @@ class ProductController extends Controller
             }
         })->orderBy('created_at', 'desc')
         ->get();
-        return Inertia::render('Auth/Admin/Products/Index', [
+        return Inertia::render('Auth/Admin/Products/Inventory', [
             'products' => $products,
             'filters' => [
                 'search' => $search,
@@ -83,7 +83,7 @@ class ProductController extends Controller
         $product = stocks::findOrFail($id);
         $product->delete();
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.inventory');
     }
 
     function AddStock(Request $request, $id){
@@ -101,7 +101,7 @@ class ProductController extends Controller
             'updated_at' => now(),
         ]);
 
-        return redirect()->route('admin.products.index');
+        return redirect()->route('admin.products.inventory');
     }
 
     function AddProductPage(){
@@ -146,7 +146,7 @@ class ProductController extends Controller
             return back()->with('error', 'Failed to adding product: ' . $e->getMessage());
         }
 
-        return redirect()->route('admin.products.index')->with('success', 'Product added successfully');
+        return redirect()->route('admin.products.inventory')->with('success', 'Product added successfully');
     }
     function UpdateProduct(Request $request, $id){
          $request->validate([
@@ -178,6 +178,6 @@ class ProductController extends Controller
             return back()->with('error', 'Failed to update product: ' . $e->getMessage());
         }
 
-        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully');
+        return redirect()->route('admin.products.inventory')->with('success', 'Product updated successfully');
     }
 }

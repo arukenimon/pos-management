@@ -2,7 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { FormEventHandler, useEffect, useState } from 'react';
-import { Product } from './Index';
+import { Product } from './Inventory';
 import Modal from './Modal/Modal';
 import { set } from 'date-fns';
 
@@ -158,26 +158,28 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            <Link href="/admin/products" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+                            <Link href={route('admin.products.inventory')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
                                 Products
                             </Link>
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
-                            <span>Add New Product</span>
+                            <span>
+                                {product ? 'Edit Product' : 'Add New Product'}
+                            </span>
                         </div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            Add New Product
+                            {product ? 'Edit Product' : 'Add New Product'}
                         </h1>
                     </div>
                     <Link
-                        href="/admin/products"
+                        href={route('admin.products.inventory')}
                         className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                         <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Products
+                        Back to Inventory
                     </Link>
                 </div>
             }
@@ -537,7 +539,7 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                                 </button>
 
                                 <Link
-                                    href="/admin/products"
+                                    href={route('admin.products.inventory')}
                                     className="w-full inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
                                 >
                                     Cancel
@@ -547,7 +549,7 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                     </div>
                 </div>
             </form>
-            <Modal open={stockModalOpen} onOpenChange={setStockModalOpen} selectedProduct={product ?? null} />
+            {/* <Modal open={stockModalOpen} onOpenChange={setStockModalOpen} selectedProduct={product ?? null} /> */}
         </AdminLayout>
     );
 }

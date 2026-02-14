@@ -1,4 +1,4 @@
-import { Product } from "../Auth/Admin/Products/Index";
+import { Product } from "../Auth/Admin/Products/Inventory";
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { ShoppingCart, Search, Package, LogIn, UserPlus, LogOut } from 'lucide-react';

@@ -104,7 +104,7 @@ export default function Products({ auth, products, filters, analytics }: Product
         setSearchQuery(value);
 
         router.get(
-            route('admin.products.index'),
+            route('admin.products.inventory'),
             { search: value, status: filters.status },
             {
                 preserveScroll: true,
@@ -122,7 +122,7 @@ export default function Products({ auth, products, filters, analytics }: Product
         //setSelectedStatus(value);
 
         router.get(
-            route('admin.products.index'),
+            route('admin.products.inventory'),
             { search: filters.search, status: value },
             {
                 preserveScroll: true,
@@ -219,6 +219,7 @@ export default function Products({ auth, products, filters, analytics }: Product
     const { data, setData, post, delete: deletestock, put, processing, errors, recentlySuccessful, reset, clearErrors } = useForm({
         quantity: 0,
         price: 0,
+        selling_price: 0,
     })
 
 
@@ -677,57 +678,88 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                         <div className="space-y-4 py-4">
                             {/* Add Price also */}
-                            <div>
-                                <label htmlFor="stock-quantity" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-                                    Quantity to Add
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        name="stock-quantity"
-                                        id="stock-quantity"
-                                        min="1"
-                                        value={data.quantity}
-                                        onChange={(e) => setData('quantity', parseInt(e.target.value) || 0)}
-                                        className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
-                                        placeholder="0"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                            <div className='flex gap-4 justify-between'>
+                                <div className='w-full'>
+                                    <label htmlFor="stock-quantity" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                        Quantity to Add
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            name="stock-quantity"
+                                            id="stock-quantity"
+                                            min="1"
+                                            value={data.quantity}
+                                            onChange={(e) => setData('quantity', parseInt(e.target.value) || 0)}
+                                            className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                            placeholder="0"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                                        </div>
                                     </div>
+                                    {errors.quantity && (
+                                        <p className="mt-2 text-sm text-red-600" id="quantity-error">
+                                            {errors.quantity}
+                                        </p>
+                                    )}
                                 </div>
-                                {errors.quantity && (
-                                    <p className="mt-2 text-sm text-red-600" id="quantity-error">
-                                        {errors.quantity}
-                                    </p>
-                                )}
-                            </div>
-                            <div>
-                                <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-                                    Price per Stock
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        name="stock-price"
-                                        id="stock-price"
-                                        min="0"
-                                        step="0.01"
-                                        value={data.price}
-                                        onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
-                                        className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
-                                        placeholder="0.00"
-                                    />
-                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+
+                                <div className='w-full'>
+                                    <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                        Cost Price
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            name="stock-price"
+                                            id="stock-price"
+                                            min="0"
+                                            step="0.01"
+                                            value={data.price}
+                                            onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
+                                            className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                            placeholder="0.00"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                                        </div>
                                     </div>
+                                    {errors.price && (
+                                        <p className="mt-2 text-sm text-red-600" id="price-error">
+                                            {errors.price}
+                                        </p>
+                                    )}
                                 </div>
-                                {errors.price && (
-                                    <p className="mt-2 text-sm text-red-600" id="price-error">
-                                        {errors.price}
-                                    </p>
-                                )}
+
+                                {/* <div className='w-full'>
+                                    <label htmlFor="stock-selling-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                        Selling Price
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type="number"
+                                            name="stock-selling-price"
+                                            id="stock-selling-price"
+                                            min="0"
+                                            step="0.01"
+                                            value={data.selling_price}
+                                            onChange={(e) => setData('selling_price', parseFloat(e.target.value) || 0)}
+                                            className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                            placeholder="0.00"
+                                        />
+                                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                            <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                                        </div>
+                                    </div>
+                                    {errors.selling_price && (
+                                        <p className="mt-2 text-sm text-red-600" id="selling-price-error">
+                                            {errors.selling_price}
+                                        </p>
+                                    )}
+                                </div> */}
                             </div>
+
 
                             {/* Current info */}
                             <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-3">

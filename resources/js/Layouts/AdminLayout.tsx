@@ -93,9 +93,15 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             icon: ProductsIcon,
             children: [
                 {
-                    name: 'All Products',
-                    href: '/admin/products',
-                    routename: 'admin.products.index',
+                    name: 'Product list',
+                    href: '#',
+                    icon: ProductsIcon,
+                    badge: '12',
+                },
+                {
+                    name: 'Inventory',
+                    href: '/admin/products/inventory',
+                    routename: 'admin.products.inventory',
                     icon: ProductsIcon,
                 },
                 {

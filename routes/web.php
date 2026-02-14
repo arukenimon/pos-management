@@ -12,7 +12,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin', function () {
         return Inertia::render('Auth/Admin/AdminDashboard');
     })->name('admin.dashboard');
-    Route::get('/admin/products', [ProductController::class, 'ProductsPage'])->name('admin.products.index');
+    Route::get('/admin/products/inventory', [ProductController::class, 'Inventory'])->name('admin.products.inventory');
     
     
     Route::get('/admin/products/create', [ProductController::class, 'AddProductPage'])->name('admin.products.create');

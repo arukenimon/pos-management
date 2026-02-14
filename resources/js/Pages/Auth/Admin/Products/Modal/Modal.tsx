@@ -1,7 +1,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/Components/ui/dialog';
 import { useState } from 'react';
-import { Product, stocks } from '../Index';
+import { Product, stocks } from '../Inventory';
 import { toast } from 'react-toastify';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productQueryOptions } from '@/queryOptions/Products/queryOptions';

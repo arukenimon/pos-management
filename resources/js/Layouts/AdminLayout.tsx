@@ -92,12 +92,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             isParent: true,
             icon: ProductsIcon,
             children: [
-                {
-                    name: 'Product list',
-                    href: '#',
-                    icon: ProductsIcon,
-                    badge: '12',
-                },
+
                 {
                     name: 'Inventory',
                     href: '/admin/products/inventory',

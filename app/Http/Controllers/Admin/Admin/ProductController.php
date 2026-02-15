@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\products;
-use App\Models\stocks;
+use App\Models\Product;
+use App\Models\Variant;
+use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -18,7 +19,7 @@ class ProductController extends Controller
     function Inventory(Request $request){
         $search = $request->query('search');
         $status = $request->query('status');
-           $products = Products::query()
+           $products = Product::query()
         ->with('stocks')
         ->when($search, fn ($q) =>
             $q->where('name', 'like', "%{$search}%")
@@ -57,30 +58,30 @@ class ProductController extends Controller
                 'status' => $status,
             ],
             'analytics' => [
-                'total' => Products::count(),
-                'safe' => Products::whereHas('stocks', function ($q) {
+                'total' => Product::count(),
+                'safe' => Product::whereHas('stocks', function ($q) {
                     $q->select('product_id')
                       ->groupBy('product_id')
                       ->havingRaw('SUM(quantity) > 10');
                 })->count(),
-                'low' => Products::whereHas('stocks', function ($q) {
+                'low' => Product::whereHas('stocks', function ($q) {
                     $q->select('product_id')
                       ->groupBy('product_id')
                       ->havingRaw('SUM(quantity) BETWEEN 1 AND 10');
                 })->count(),
-                'critical' => Products::whereHas('stocks', function ($q) {
+                'critical' => Product::whereHas('stocks', function ($q) {
                     $q->select('product_id')
                       ->groupBy('product_id')
                       ->havingRaw('SUM(quantity) = 0');
                 })->count(),
-                'active' => Products::where('status', 'active')->count(),
-                'inactive' => Products::where('status', 'inactive')->count(),
+                'active' => Product::where('status', 'active')->count(),
+                'inactive' => Product::where('status', 'inactive')->count(),
             ],
         ]);
     }
 
     function DeleteProductStock($id){
-        $product = stocks::findOrFail($id);
+        $product = Stock::findOrFail($id);
         $product->delete();
 
         return redirect()->route('admin.products.inventory');
@@ -93,7 +94,7 @@ class ProductController extends Controller
             
         ]);
 
-        stocks::insert([
+        Stock::insert([
             'product_id' => $id,
             'quantity' => $request->quantity,
             'price' => $request->price,
@@ -113,7 +114,7 @@ class ProductController extends Controller
 
     function EditProductPage($id){
 
-        $product = Products::findOrFail($id);
+        $product = Product::with(['variants'])->findOrFail($id);
 
         return Inertia::render('Auth/Admin/Products/ModifyProduct',[
             'product' => $product
@@ -128,18 +129,33 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:100',
             'images' => 'nullable|array',
             'images.*' => 'string',
+
+            'variants' => 'nullable|array',
+            'variants.*.name' => 'required|string|max:255',
+            'variants.*.base_price' => 'required|numeric|min:0',
+            'variants.*.cost_each' => 'required|numeric|min:0',
+            'variants.*.product_id' => 'required|exists:products,id'
         ]);
 
+        dd($request->all());
         
         try{
             DB::beginTransaction();
             
-            Products::create([
+            Product::create([
                 'name' => $request->name,
                 'description' => $request->description,
                 'sku' => $request->sku,
                 'images' => $request->input('images', []),
             ]);
+
+            Variant::create([
+                'name' => 'Default Variant',
+                'base_price' => 0,
+                'cost_each' => 0,
+                'product_id' => $product->id,
+            ]);
+
             DB::commit();
         }catch(\Exception $e){
             DB::rollBack();
@@ -155,17 +171,41 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:100',
             'images' => 'nullable|array',
             'images.*' => 'string',
+
+            'variants' => 'nullable|array',
+            'variants.*.name' => 'required|string|max:255',
+            'variants.*.base_price' => 'required|numeric|min:0',
+            'variants.*.cost_each' => 'required|numeric|min:0',
         ]);
+        // dd($request->all());
         try{
             DB::beginTransaction();
-            $product = Products::findOrFail($id);
+            $product = Product::findOrFail($id);
             $product->update([
                 'name' => $request->name,
                 'description' => $request->description,
                 'sku' => $request->sku,
             ]);
 
-            
+            if ($request->has('variants')) {
+                foreach ($request->input('variants') as $variantData) {
+                    $variant = Variant::find($variantData['id']);
+                    if($variant){
+                        $variant->update([
+                            'name' => $variantData['name'],
+                            'base_price' => $variantData['base_price'],
+                            'cost_each' => $variantData['cost_each'],
+                        ]);
+                    } else {
+                        Variant::create([
+                            'name' => $variantData['name'],
+                            'base_price' => $variantData['base_price'],
+                            'cost_each' => $variantData['cost_each'],
+                            'product_id' => $product->id,
+                        ]);
+                    }
+                }
+            }
     
             $product->update([
                 'images' => $request->input('images', $product->images ?? []),

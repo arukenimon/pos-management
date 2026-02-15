@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/Components/ui/dialog';
+import { Variant } from './ModifyProduct';
 
 export interface Product {
     id: number;
@@ -18,6 +19,7 @@ export interface Product {
     created_at?: string;
     status: 'active' | 'inactive' | 'out_of_stock';
     stocks?: stocks[];
+    variants?: Variant[];
 }
 
 export interface ProductsPageProps extends PageProps {

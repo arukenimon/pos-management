@@ -5,6 +5,7 @@ import { FormEventHandler, useEffect, useState } from 'react';
 import { Product } from './Inventory';
 import Modal from './Modal/Modal';
 import { set } from 'date-fns';
+import CustomTooltip from '@/Components/CustomTooltip';
 
 interface Category {
     id: number;
@@ -14,6 +15,18 @@ interface Category {
 interface AddProductProps extends PageProps {
     categories?: Category[];
     product?: Product;
+}
+
+interface PriceTier {
+    min_quantity: number; // The minimum quantity for this tier
+    price: number;
+}
+
+export interface Variant {
+    id?: string;
+    name: string;
+    base_price: number;
+    cost_each: number;
 }
 
 export default function ModifyProduct({ auth, categories: initialCategories, product }: AddProductProps) {
@@ -39,6 +52,8 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
         sku: string | null;
         description?: string;
         images: string[] | null;
+        hasVariants?: boolean;
+        variants?: Variant[];
     }>({
         name: product ? product.name : '',
         sku: product ? product.sku : '',
@@ -48,8 +63,11 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
         // status: product ? product.status : 'active',
         description: product ? product.description : '',
         images: product?.images ?? null,
+        hasVariants: false,
+        variants: product?.variants ?? [],
     });
 
+    useEffect(() => console.log('product prop:', product), [product]);
 
     // This effect sets the initial image preview if editing an existing product with an image
     useEffect(() => {
@@ -60,9 +78,9 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
             } else if (value.startsWith('/storage/')) {
                 setImagePreview(value);
             } else if (value.startsWith('storage/')) {
-                setImagePreview(`/${value}`);
+                setImagePreview(`/₱{value}`);
             } else {
-                setImagePreview(`/storage/${value}`);
+                setImagePreview(`/storage/₱{value}`);
             }
         }
     }, [existingImageRemoved, imagePreview, product]);
@@ -152,6 +170,44 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
     };
 
     const [stockModalOpen, setStockModalOpen] = useState(false);
+
+    const [priceTiers, setPriceTiers] = useState<PriceTier[]>([]);
+
+    useEffect(() => console.log('Current price tiers:', priceTiers), [priceTiers]);
+
+    const [priceTierQuantity, setPriceTierQuantity] = useState<number>(0);
+    const [priceTierPrice, setPriceTierPrice] = useState<number>(0);
+
+    // Variant state
+    const [variants, setVariants] = useState<Variant[]>(product?.variants ?? []);
+    const [variantName, setVariantName] = useState<string>('');
+    const [variantbase_price, setVariantbase_price] = useState<number>(0);
+    const [variantcost_each, setVariantcost_each] = useState<number>(0);
+
+    const addVariant = () => {
+        if (variantName && variantbase_price > 0 && variantcost_each >= 0) {
+            const newVariant: Variant = {
+                id: Date.now().toString(),
+                name: variantName,
+                base_price: variantbase_price,
+                cost_each: variantcost_each,
+            };
+            setVariants([...variants, newVariant]);
+            // Reset form
+            setVariantName('');
+            setVariantbase_price(0);
+            setVariantcost_each(0);
+        }
+    };
+
+    const removeVariant = (id: string) => {
+        setVariants(variants.filter(v => v.id !== id));
+    };
+
+    useEffect(() => setData('variants', variants), [variants])
+
+    useEffect(() => console.log('Current variants:', data.variants), [data.variants]);
+
     return (
         <AdminLayout
             header={
@@ -216,100 +272,12 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                                         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>
                                     )}
                                 </div>
-                                {/* SKU */}
-                                <div>
-                                    <label htmlFor="sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        SKU <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="flex gap-2">
-                                        <div className="flex-1">
-                                            <input
-                                                id="sku"
-                                                type="text"
-                                                value={data.sku || ''}
-                                                onChange={(e) => setData('sku', e.target.value)}
-                                                className="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                                                placeholder="e.g., PRD-001 or scan barcode"
-                                                required
-                                            />
-                                        </div>
-                                        <button
-                                            type="button"
-                                            onClick={handleBarcodeScanner}
-                                            disabled={isScanning}
-                                            className="inline-flex items-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-sm font-medium rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            title="Scan barcode with camera or use physical scanner"
-                                        >
-                                            {isScanning ? (
-                                                <>
-                                                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                                                    </svg>
-                                                </>
-                                            )}
-                                        </button>
-                                    </div>
-                                    {errors.sku && (
-                                        <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.sku}</p>
-                                    )}
-                                    {scanError && (
-                                        <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                                            <p className="text-xs text-yellow-800 dark:text-yellow-400 flex items-start gap-2">
-                                                <svg className="h-4 w-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
-                                                <span>{scanError}</span>
-                                            </p>
-                                        </div>
-                                    )}
-                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                        💡 Tip: Click scan button to use camera, or use a physical barcode scanner (will auto-fill)
-                                    </p>
-                                </div>
-                                {/* Selling Price */}
-                                {/* <div>
-                                    <label htmlFor="selling_price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Selling Price <span className="text-red-500">*</span>
-                                    </label>
-                                    <div className="relative">
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span className="text-gray-500 dark:text-gray-400">₱</span>
-                                        </div>
-                                        <input
-                                            id="selling_price"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            value={0}
-                                            //onChange={(e) => setData('selling_price', parseFloat(e.target.value))}
-                                            className="block w-full pl-8 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                            placeholder="0.00"
-                                        />
-                                    </div>
-                                </div> */}
-
-                                {/* Add Stocks */}
-                                {/* <div>
-                                    <button onClick={() => setStockModalOpen(true)} type="button" className="inline-flex items-center px-4 py-2 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 text-sm font-medium rounded-lg transition-colors duration-200">
-                                        <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        Add Stocks
-                                    </button>
-                                </div> */}
 
 
                                 {/* Description */}
                                 <div>
                                     <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Description
+                                        Description (Optional)
                                     </label>
                                     <textarea
                                         id="description"
@@ -323,6 +291,307 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                                         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>
                                     )}
                                 </div>
+
+                                {/* Check if this product has variants (e.g., different sizes or colors) and show variant options if true. Otherwise, show regular price and stock fields. */}
+                                {/* Use checkbox */}
+                                <div>
+                                    <label htmlFor="has-variants" className="inline-flex items-center text-sm text-gray-700 dark:text-gray-300">
+                                        <input
+                                            id="has-variants"
+                                            type="checkbox"
+                                            checked={data.hasVariants}
+                                            onChange={(e) => setData('hasVariants', e.target.checked)}
+                                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-2">This product has variants (e.g., different sizes or colors)</span>
+                                    </label>
+                                </div>
+
+
+                                {data.hasVariants ? (
+                                    <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                            Variants
+                                            <CustomTooltip label='This section allows you to manage different variants of the product, such as sizes or colors.' />
+                                        </h2>
+
+                                        {/* Display Added Variants */}
+                                        {variants.length > 0 && (
+                                            <div className="mt-6">
+                                                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+                                                    Added Variants ({variants.length})
+                                                </h3>
+                                                <div className="overflow-x-auto">
+                                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                                        <thead className="bg-gray-50 dark:bg-gray-900">
+                                                            <tr>
+                                                                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Name
+                                                                </th>
+                                                                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Base Price
+                                                                </th>
+                                                                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Cost Each
+                                                                </th>
+                                                                <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Profit Margin
+                                                                </th>
+                                                                <th scope="col" className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                                            {variants.map((variant) => {
+                                                                const profitMargin = variant.base_price - variant.cost_each;
+                                                                const profitPercentage = variant.cost_each > 0 ? ((profitMargin / variant.cost_each) * 100)?.toFixed(1) : '0';
+                                                                return (
+                                                                    <tr key={variant.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                                                        <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
+                                                                            {variant.name}
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                                                            ₱{variant?.base_price}
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                                                            ₱{variant?.cost_each}
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-sm">
+                                                                            <span className={`inline-flex items-center ₱{profitMargin > 0
+                                                                                ? 'text-green-700 dark:text-green-400'
+                                                                                : profitMargin < 0
+                                                                                    ? 'text-red-700 dark:text-red-400'
+                                                                                    : 'text-gray-700 dark:text-gray-300'
+                                                                                }`}>
+                                                                                ₱{profitMargin.toFixed(2)} ({profitPercentage}%)
+                                                                            </span>
+                                                                        </td>
+                                                                        <td className="px-4 py-3 text-sm text-right">
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => removeVariant(variant?.id ?? '')}
+                                                                                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                                                                            >
+                                                                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                );
+                                                            })}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+                                            {/* Product Name */}
+                                            <div >
+                                                <label htmlFor="variant-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                    Name <span className="text-red-500">*</span>
+                                                </label>
+                                                <input
+                                                    id="variant-name"
+                                                    type="text"
+                                                    value={variantName}
+                                                    onChange={(e) => setVariantName(e.target.value)}
+                                                    className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                    placeholder="e.g., Small, Red, 500ml"
+                                                />
+                                            </div>
+                                            <div className='w-full'>
+                                                <label htmlFor="variant-base-price" className="block text-sm font-medium  text-gray-700 dark:text-gray-200">
+                                                    Base Price
+                                                    <CustomTooltip label='The amount you charge customers for one unit of this product.' />
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        name="variant-base-price"
+                                                        id="variant-base-price"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={variantbase_price || ''}
+                                                        onChange={(e) => setVariantbase_price(parseFloat(e.target.value) || 0)}
+                                                        className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className='w-full'>
+                                                <label htmlFor="variant-cost-each" className="block text-sm font-medium  text-gray-700 dark:text-gray-200">
+                                                    Cost Each
+                                                    <CustomTooltip label='The amount it costs you to produce or purchase one unit of this product.' />
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        name="variant-cost-each"
+                                                        id="variant-cost-each"
+                                                        min="0"
+                                                        step="0.01"
+                                                        value={variantcost_each || ''}
+                                                        onChange={(e) => setVariantcost_each(parseFloat(e.target.value) || 0)}
+                                                        className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className='w-full justify-end'>
+                                            <button onClick={addVariant} type="button" className="w-full flex items-center justify-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-sm font-medium rounded-lg transition-colors duration-200">
+                                                <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                </svg>
+                                                Add Variant
+                                            </button>
+                                        </div>
+
+                                        {errors.variants && (
+                                            <div className="mt-4 text-sm text-red-600 dark:text-red-400">
+                                                {errors.variants}
+                                            </div>)
+                                        }
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className='flex justify-between gap-4'>
+                                            <div className='w-full'>
+                                                <label htmlFor="base-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                                    Base Price
+                                                    <CustomTooltip label='The amount you charge customers for one unit of this product.' />
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        name="base-price"
+                                                        id="base-price"
+                                                        min="1"
+                                                        // value={data.base_price}
+                                                        // onChange={(e) => setData('base_price', parseInt(e.target.value) || 0)}
+                                                        className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                        placeholder="0"
+                                                    />
+                                                    {/* <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                                            </div> */}
+                                                </div>
+                                                {/* {errors.quantity && (
+                                            <p className="mt-2 text-sm text-red-600" id="quantity-error">
+                                                {errors.quantity}
+                                            </p>
+                                        )} */}
+                                            </div>
+                                            <div className='w-full'>
+                                                <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                                    Cost Each
+                                                    <CustomTooltip label='The amount it costs you to produce or purchase one unit of this product.' />
+                                                </label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="number"
+                                                        name="stock-price"
+                                                        id="stock-price"
+                                                        min="0"
+                                                        step="0.01"
+                                                        // value={data.price}
+                                                        // onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
+                                                        className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                        placeholder="0.00"
+                                                    />
+                                                    {/* <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span className="text-gray-500 dark:text-gray-400 sm:text-sm">₱</span>
+                                            </div> */}
+                                                </div>
+                                                {/* {errors.price && (
+                                            <p className="mt-2 text-sm text-red-600" id="price-error">
+                                                {errors.price}
+                                            </p>
+                                        )} */}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                Price Tiers (Bulk Pricing)
+                                                <CustomTooltip label='Offers special pricing based on quantity purchased. For example, buy 10 or more and get a 10% discount. This encourages customers to buy in larger quantities and helps you move more inventory.' />
+                                            </h2>
+
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2'>
+                                                <div className='w-full justify-end'>
+                                                    <label htmlFor="base-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                                        If quantity is at least...
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            name="base-price"
+                                                            id="base-price"
+                                                            min="1"
+                                                            value={priceTierQuantity}
+                                                            onChange={(e) => setPriceTierQuantity(parseInt(e.target.value) || 0)}
+                                                            className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                            placeholder="0"
+                                                        />
+                                                        {/* <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                    <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                                                </div> */}
+                                                    </div>
+                                                    {/* {errors.quantity && (
+                                            <p className="mt-2 text-sm text-red-600" id="quantity-error">
+                                                {errors.quantity}
+                                            </p>
+                                        )} */}
+                                                </div>
+                                                <div className='w-full justify-end'>
+                                                    <label htmlFor="base-price" className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        Set total price to...
+                                                    </label>
+                                                    <div className="relative">
+                                                        <input
+                                                            type="number"
+                                                            name="base-price"
+                                                            id="base-price"
+                                                            min="1"
+                                                            value={priceTierPrice}
+                                                            onChange={(e) => setPriceTierPrice(parseInt(e.target.value) || 0)}
+                                                            className="block w-full border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                                            placeholder="0"
+                                                        />
+                                                        {/* <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                    <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                                                </div> */}
+                                                    </div>
+                                                    {/* {errors.quantity && (
+                                            <p className="mt-2 text-sm text-red-600" id="quantity-error">
+                                                {errors.quantity}
+                                            </p>
+                                        )} */}
+                                                </div>
+                                            </div>
+                                            {/* Button Add */}
+                                            <div className='w-full'>
+                                                <button onClick={() => {
+                                                    if (priceTierQuantity > 0 && priceTierPrice > 0) {
+                                                        setPriceTiers([...priceTiers, { min_quantity: priceTierQuantity, price: priceTierPrice }]);
+                                                        setPriceTierQuantity(0);
+                                                        setPriceTierPrice(0);
+                                                    }
+                                                }} type="button" className="w-full flex items-center justify-center px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-sm font-medium rounded-lg transition-colors duration-200">
+                                                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                    Add Tier
+                                                </button>
+                                            </div>
+                                        </div></>
+                                )}
+
+
+
                             </div>
                         </div>
 
@@ -339,7 +608,7 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                                         </label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <span className="text-gray-500 dark:text-gray-400">$</span>
+                                                <span className="text-gray-500 dark:text-gray-400">₱</span>
                                             </div>
                                             <input
                                                 id="price"
@@ -492,7 +761,7 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                         </div> */}
 
                         {/* Quick Tips */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6">
+                        {/* <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 p-6">
                             <div className="flex items-start gap-3">
                                 <svg className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -510,7 +779,7 @@ export default function ModifyProduct({ auth, categories: initialCategories, pro
                                     </ul>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Action Buttons */}
                         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">

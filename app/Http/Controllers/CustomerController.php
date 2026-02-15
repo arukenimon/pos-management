@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cart;
-use App\Models\products;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -15,7 +15,7 @@ class CustomerController extends Controller
 
     public function index(){
 
-        $products = products::with(['stocks','cartItems' => function($query) {
+        $products = Product::with(['stocks','cartItems' => function($query) {
             $query->where('customer_id', Auth::id());
         }])->whereHas('stocks')->get();
 

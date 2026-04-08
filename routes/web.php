@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\Admin\ProductController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\PosController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,13 +25,15 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/admin/products/edit/{id}', [ProductController::class, 'EditProductPage'])->name('admin.products.edit');
     Route::put('/admin/products/edit/{id}', [ProductController::class, 'UpdateProduct'])->name('admin.products.edit.post');
 
-    Route::post('/admin/products/add-stock/{id}', [ProductController::class, 'AddStock'])->name('admin.products.add-stock');
+    Route::post('/admin/products/add-stock/{variant_id}', [ProductController::class, 'AddStock'])->name('admin.products.add-stock');
 
     Route::delete('/admin/products/stocks/delete/{id}', [ProductController::class, 'DeleteProductStock'])->name('admin.products.stocks.delete');
 
+    Route::get('/admin/pos',[PosController::class,'index'])->name('admin.pos.index');
+    Route::post('/admin/pos/checkout', [PosController::class, 'checkout'])->name('admin.pos.checkout');
 
-    
-
+    Route::get('/admin/sales', [SalesController::class, 'index'])->name('admin.sales.index');
+    Route::get('/admin/sales/{id}', [SalesController::class, 'show'])->name('admin.sales.show');
 });
 
 
@@ -40,7 +44,7 @@ Route::middleware(['admin'])->group(function () {
 Route::get('/', [CustomerController::class, 'index'])->name('admin.customers.index');
 
 Route::middleware(['customer'])->group(function () {
-    Route::post('/cart/add/{product_id}', [CustomerController::class, 'addToCart'])->name('customer.cart.add');
+    Route::post('/cart/add/{variant_id}', [CustomerController::class, 'addToCart'])->name('customer.cart.add');
     Route::delete('/cart/remove/{cart_id}', [CustomerController::class, 'removeFromCart'])->name('customer.cart.remove');
 
     Route::get('/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');

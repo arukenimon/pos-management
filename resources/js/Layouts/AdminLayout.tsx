@@ -6,6 +6,7 @@ import { User } from '@/types';
 import { ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import useToasts from '@/hooks/useToasts';
+import { Computer } from 'lucide-react';
 
 // Icon Components
 const HomeIcon = ({ className }: { className?: string }) => (
@@ -88,7 +89,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
         {
             name: 'Products',
             // routename: '',
-            href: '#',
+            href: '/admin/products/',
             isParent: true,
             icon: ProductsIcon,
             children: [
@@ -99,17 +100,24 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                     routename: 'admin.products.inventory',
                     icon: ProductsIcon,
                 },
-                {
-                    name: 'Categories',
-                    href: '#',
-                    icon: ProductsIcon,
-                },
+                // {
+                //     name: 'Categories',
+                //     href: '#',
+                //     icon: ProductsIcon,
+                // },
             ],
         },
         {
-            name: 'Orders',
-            href: '#',
+            name: 'Sales',
+            href: '/admin/sales',
+            routename: 'admin.sales.index',
             icon: ShoppingCartIcon,
+        },
+        {
+            name: 'POS',
+            href: '/admin/pos',
+            routename: 'admin.pos.index',
+            icon: Computer,
             badge: '3',
         },
         {

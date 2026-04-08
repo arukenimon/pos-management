@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('variants', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->decimal('base_price', 8, 2);
-            $table->decimal('cost_each', 8, 2);
-            $table->foreignId('product_id')->constrained('products')->onDelete('cascade'); // if product is deleted, delete variants
+            $table->foreignId('cashier_id')->constrained('users')->cascadeOnDelete();
+            $table->decimal('total', 10, 2);
+            $table->enum('payment_method', ['cash', 'card']);
+            $table->decimal('cash_received', 10, 2)->nullable();
+            $table->decimal('change_given', 10, 2)->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('variants');
+        Schema::dropIfExists('orders');
     }
 };

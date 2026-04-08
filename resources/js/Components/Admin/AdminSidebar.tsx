@@ -65,7 +65,7 @@ const AdminSidebar = ({
     const renderNavItem = (item: SidebarNavItem, level: number = 0) => {
         const hasChildren = item.children && item.children.length > 0;
 
-        const active = isActive(item.href) || item.children?.some(child => isActive(child.href));
+        const active = isActive(item.href) || (item.children?.some(child => isActive(child.href)));
 
 
         const isExpanded = expandedItems.has(item.name);

@@ -4,15 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Cart extends Model
+class Inventory extends Model
 {
     protected $fillable = [
-        'customer_id',
         'product_variant_id',
         'quantity',
+        'cost_price',
+        'selling_price',
     ];
-
-    protected $table = 'cart';
 
     public function variant()
     {

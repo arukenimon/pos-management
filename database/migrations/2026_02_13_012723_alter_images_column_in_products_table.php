@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('ALTER TABLE products ADD COLUMN images text[] NULL');
+        //DB::statement('ALTER TABLE products ADD COLUMN images text[] NULL');
     }
 
     /**
@@ -19,6 +19,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('ALTER TABLE products DROP COLUMN images');
+        //DB::statement('ALTER TABLE products DROP COLUMN images');
     }
 };

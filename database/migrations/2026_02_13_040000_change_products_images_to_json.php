@@ -7,11 +7,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE products ALTER COLUMN images TYPE json USING to_json(images)');
+        //DB::statement('ALTER TABLE products ALTER COLUMN images TYPE json USING to_json(images)');
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE products ALTER COLUMN images TYPE text[] USING ARRAY(SELECT json_array_elements_text(images))');
+       // DB::statement('ALTER TABLE products ALTER COLUMN images TYPE text[] USING ARRAY(SELECT json_array_elements_text(images))');
     }
 };

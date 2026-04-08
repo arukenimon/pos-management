@@ -10,10 +10,6 @@ class Product extends Model
 
     protected $fillable = [
         'name',
-        'sku',
-        // 'category_id',
-        // 'price',
-        // 'stock',
         'status',
         'description',
         'images',
@@ -25,16 +21,11 @@ class Product extends Model
 
     public function variants()
     {
-        return $this->hasMany(Variant::class, 'product_id', 'id');
+        return $this->hasMany(ProductVariant::class);
     }
 
-    public function stocks()
-    {
-        return $this->hasMany(Stock::class, 'product_id', 'id');
-    }
-    
     public function cartItems()
     {
-        return $this->hasMany(Cart::class, 'product_id', 'id');
+        return $this->hasManyThrough(Cart::class, ProductVariant::class, 'product_id', 'product_variant_id');
     }
 }

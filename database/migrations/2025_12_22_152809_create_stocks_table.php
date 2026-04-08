@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('stocks', function (Blueprint $table) {
             $table->increments('id');
-            $table->foreignId('product_id')
-            ->constrained()          // references users.id
-            ->cascadeOnDelete();     // ON DELETE CASCADE, this will delete all stocks if product is deleted
+            $table->unsignedInteger('product_id');
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->cascadeOnDelete();    // ON DELETE CASCADE, this will delete all stocks if product is deleted
             $table->integer('quantity')->default(0);
             $table->timestamps();
         });

@@ -9,7 +9,9 @@ use App\Models\AttributeValue;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -66,7 +68,18 @@ class ProductController extends Controller
 
     function DeleteProductStock($id)
     {
-        Inventory::findOrFail($id)->delete();
+        $inventory = Inventory::findOrFail($id);
+
+        StockMovement::create([
+            'product_variant_id' => $inventory->product_variant_id,
+            'inventory_id'       => $inventory->id,
+            'type'               => 'deletion',
+            'quantity'           => -$inventory->quantity,
+            'note'               => 'Stock batch deleted',
+            'performed_by'       => Auth::id(),
+        ]);
+
+        $inventory->delete();
 
         return redirect()->route('admin.products.inventory');
     }
@@ -80,11 +93,19 @@ class ProductController extends Controller
 
         $variant = \App\Models\ProductVariant::findOrFail($variant_id);
 
-        Inventory::create([
+        $inventory = Inventory::create([
             'product_variant_id' => $variant_id,
             'quantity'           => $request->quantity,
             'cost_price'         => $request->cost_price,
             'selling_price'      => $variant->price ?? 0,
+        ]);
+
+        StockMovement::create([
+            'product_variant_id' => $variant_id,
+            'inventory_id'       => $inventory->id,
+            'type'               => 'purchase',
+            'quantity'           => $request->quantity,
+            'performed_by'       => Auth::id(),
         ]);
 
         return redirect()->route('admin.products.inventory');

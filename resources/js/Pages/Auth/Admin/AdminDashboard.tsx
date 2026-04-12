@@ -1,111 +1,98 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
+import { TrendingUp, ShoppingCart, Users, BarChart2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
 
-interface DashboardStats {
-    totalRevenue: string;
-    totalOrders: number;
-    totalCustomers: number;
-    averageOrderValue: string;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Stats {
+    total_revenue: number;
+    total_orders: number;
+    today_revenue: number;
+    today_orders: number;
+    avg_order_value: number;
+    total_customers: number;
+}
+
+interface Movement {
+    id: number;
+    type: 'purchase' | 'sale' | 'adjustment' | 'deletion';
+    quantity: number;
+    note: string | null;
+    created_at: string;
+    performed_by: string | null;
+    variant_sku: string | null;
+    product_name: string | null;
+    product_image: string | null;
+    variant_label: string | null;
 }
 
 interface DashboardProps extends PageProps {
-    stats?: DashboardStats;
+    stats: Stats;
+    recentMovements: Movement[];
 }
 
-export default function AdminDashboard({ auth, stats }: DashboardProps) {
-    // Default stats if not provided
-    const defaultStats: DashboardStats = {
-        totalRevenue: '$12,426',
-        totalOrders: 156,
-        totalCustomers: 1, averageOrderValue: '$79.65',
-    };
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-    const dashboardStats = stats || defaultStats;
+const fmt = (n: number) =>
+    'P' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // Stats cards configuration
+const resolveImage = (v: string | null) => {
+    if (!v) return null;
+    if (v.startsWith('data:') || v.startsWith('http://') || v.startsWith('https://')) return v;
+    if (v.startsWith('/storage/')) return v;
+    if (v.startsWith('storage/')) return `/${v}`;
+    return `/storage/${v}`;
+};
+
+const movementColor = (type: Movement['type']) => ({
+    purchase:   'text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30',
+    sale:       'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30',
+    adjustment: 'text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30',
+    deletion:   'text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30',
+}[type]);
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function AdminDashboard({ auth, stats, recentMovements }: DashboardProps) {
     const statsCards = [
         {
             title: 'Total Revenue',
-            value: dashboardStats.totalRevenue,
-            change: '+12.5%',
-            changeType: 'increase' as const,
-            icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
-            bgColor: 'bg-blue-500',
+            value: fmt(stats.total_revenue),
+            sub: `${fmt(stats.today_revenue)} today`,
+            icon: <TrendingUp className="h-6 w-6" />,
+            bg: 'bg-blue-500',
         },
         {
             title: 'Total Orders',
-            value: dashboardStats.totalOrders.toString(),
-            change: '+8.2%',
-            changeType: 'increase' as const,
-            icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-            ),
-            bgColor: 'bg-green-500',
+            value: stats.total_orders.toLocaleString(),
+            sub: `${stats.today_orders} today`,
+            icon: <ShoppingCart className="h-6 w-6" />,
+            bg: 'bg-green-500',
         },
         {
-            title: 'Total Customers',
-            value: dashboardStats.totalCustomers.toString(),
-            change: '+15.3%',
-            changeType: 'increase' as const,
-            icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-            ),
-            bgColor: 'bg-purple-500',
+            title: 'Customers',
+            value: stats.total_customers.toLocaleString(),
+            sub: 'Registered',
+            icon: <Users className="h-6 w-6" />,
+            bg: 'bg-purple-500',
         },
         {
             title: 'Avg. Order Value',
-            value: dashboardStats.averageOrderValue,
-            change: '-2.4%',
-            changeType: 'decrease' as const,
-            icon: (
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-            ),
-            bgColor: 'bg-orange-500',
+            value: fmt(stats.avg_order_value),
+            sub: 'Per transaction',
+            icon: <BarChart2 className="h-6 w-6" />,
+            bg: 'bg-orange-500',
         },
     ];
-
-    // Recent orders data
-    const recentOrders = [
-        { id: '#ORD-001', customer: 'John Doe', amount: '$125.00', status: 'Completed', date: '2 min ago' },
-        { id: '#ORD-002', customer: 'Jane Smith', amount: '$89.50', status: 'Processing', date: '15 min ago' },
-        { id: '#ORD-003', customer: 'Bob Johnson', amount: '$245.00', status: 'Completed', date: '1 hour ago' },
-        { id: '#ORD-004', customer: 'Alice Williams', amount: '$67.25', status: 'Pending', date: '2 hours ago' },
-        { id: '#ORD-005', customer: 'Charlie Brown', amount: '$199.99', status: 'Completed', date: '3 hours ago' },
-    ];
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'Completed':
-                return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-            case 'Processing':
-                return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-            case 'Pending':
-                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-            default:
-                return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-        }
-    };
 
     return (
         <AdminLayout
             header={
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Sari Sari Store - Dashboard
-                    </h1>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Welcome back, ! Here's what's happening today.
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        Welcome back, {auth.user.name}. Here's what's happening today.
                     </p>
                 </div>
             }
@@ -113,168 +100,99 @@ export default function AdminDashboard({ auth, stats }: DashboardProps) {
             <Head title="Admin Dashboard" />
 
             <div className="space-y-6">
+
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {statsCards.map((stat, index) => (
-                        <div
-                            key={index}
-                            className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow duration-200"
-                        >
-                            <div className="p-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                            {stat.title}
-                                        </p>
-                                        <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
-                                            {stat.value}
-                                        </p>
-                                        <p className={`mt-2 text-sm font-medium ${stat.changeType === 'increase'
-                                            ? 'text-green-600 dark:text-green-400'
-                                            : 'text-red-600 dark:text-red-400'
-                                            }`}>
-                                            {stat.change} from last month
-                                        </p>
-                                    </div>
-                                    <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                                        <div className="text-white">
-                                            {stat.icon}
-                                        </div>
-                                    </div>
-                                </div>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {statsCards.map((stat, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between shadow-sm">
+                            <div>
+                                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{stat.title}</p>
+                                <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{stat.sub}</p>
+                            </div>
+                            <div className={`${stat.bg} p-3 rounded-lg text-white flex-shrink-0`}>
+                                {stat.icon}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Charts and Tables Row */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    {/* Sales Chart */}
-                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Sales Overview
-                            </h3>
-                            <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                                {/* Placeholder for chart */}
-                                <div className="text-center">
-                                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                    </svg>
-                                    <p className="mt-2 text-sm">Chart will be displayed here</p>
-                                </div>
-                            </div>
-                        </div>
+                {/* Recent Stock Movements */}
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Recent Stock Activity</h3>
+                        <Link
+                            href={route('admin.inventory.movements')}
+                            className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+                        >
+                            View all →
+                        </Link>
                     </div>
 
-                    {/* Top Products */}
-                    <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                Top Products - Today
-                            </h3>
-                            <div className="space-y-4">
-                                {[1, 2, 3, 4, 5].map((item) => (
-                                    <div key={item} className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-lg bg-gray-200 dark:bg-gray-700" />
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                    Product {item}
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                    {50 - item * 5} sales
-                                                </p>
-                                            </div>
+                    {recentMovements.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                            <Package className="h-10 w-10 mb-2 opacity-30" />
+                            <p className="text-sm">No stock movements yet</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {recentMovements.map(m => {
+                                const img = resolveImage(m.product_image);
+                                const isIn = m.quantity > 0;
+                                return (
+                                    <div key={m.id} className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
+                                        {/* Thumbnail */}
+                                        <div className="w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden">
+                                            {img
+                                                ? <img src={img} alt={m.product_name ?? ''} className="w-full h-full object-cover" />
+                                                : <div className="w-full h-full flex items-center justify-center"><Package className="h-4 w-4 text-gray-400" /></div>
+                                            }
                                         </div>
-                                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                                            ${(1000 - item * 150).toFixed(2)}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Recent Orders Table */}
-                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
-                    <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                Recent Orders
-                            </h3>
-                            <a href="/admin/orders" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-                                View all →
-                            </a>
+                                        {/* Product info */}
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{m.product_name}</p>
+                                            <p className="text-xs text-gray-400 truncate">{m.variant_label}</p>
+                                        </div>
+
+                                        {/* type badge */}
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize flex-shrink-0 ${movementColor(m.type)}`}>
+                                            {m.type}
+                                        </span>
+
+                                        {/* quantity */}
+                                        <div className={`flex items-center gap-1 text-sm font-bold flex-shrink-0 ${isIn ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                                            {isIn ? <ArrowUpCircle className="h-4 w-4" /> : <ArrowDownCircle className="h-4 w-4" />}
+                                            {Math.abs(m.quantity)}
+                                        </div>
+
+                                        {/* time */}
+                                        <p className="text-[10px] text-gray-400 flex-shrink-0 hidden sm:block">{m.created_at}</p>
+                                    </div>
+                                );
+                            })}
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead>
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            Order ID
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            Customer
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            Amount
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            Status
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                            Date
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                                    {recentOrders.map((order) => (
-                                        <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                                {order.id}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {order.customer}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-semibold">
-                                                {order.amount}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                {order.date}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     {[
-                        { title: 'Add Product', icon: '📦', href: '/admin/products/create' },
-                        { title: 'New Order', icon: '🛒', href: '/admin/orders/create' },
-                        { title: 'Add User', icon: '👤', href: '/admin/users/create' },
-                        { title: 'Reports', icon: '📊', href: '/admin/reports' },
-                    ].map((action, index) => (
-                        <a
-                            key={index}
-                            href={action.href}
-                            className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 hover:border-indigo-500 dark:hover:border-indigo-500 group"
+                        { title: 'Add Product',      emoji: '📦', href: route('admin.products.create') },
+                        { title: 'Point of Sale',    emoji: '🛒', href: route('admin.pos.index') },
+                        { title: 'Sales History',    emoji: '📋', href: route('admin.sales.index') },
+                        { title: 'Stock Movements',  emoji: '📊', href: route('admin.inventory.movements') },
+                    ].map((a, i) => (
+                        <Link
+                            key={i}
+                            href={a.href}
+                            className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-sm transition-all group text-center"
                         >
-                            <div className="text-4xl mb-2">{action.icon}</div>
-                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
-                                {action.title}
-                            </h4>
-                        </a>
+                            <div className="text-3xl mb-2">{a.emoji}</div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                {a.title}
+                            </p>
+                        </Link>
                     ))}
                 </div>
             </div>

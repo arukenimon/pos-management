@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -91,6 +92,17 @@ class PosController extends Controller
                     if ($remaining <= 0) break;
                     $deduct = min($remaining, $inv->quantity);
                     $inv->decrement('quantity', $deduct);
+
+                    StockMovement::create([
+                        'product_variant_id' => $line['variant']->id,
+                        'inventory_id'       => $inv->id,
+                        'type'               => 'sale',
+                        'quantity'           => -$deduct,
+                        'reference_type'     => Order::class,
+                        'reference_id'       => $order->id,
+                        'performed_by'       => Auth::id(),
+                    ]);
+
                     $remaining -= $deduct;
                 }
             }

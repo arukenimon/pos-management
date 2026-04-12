@@ -1,371 +1,280 @@
 # Point of Sale (POS) System
 
-A modern, full-stack Point of Sale system built with Laravel, React, TypeScript, and Inertia.js. Perfect for small to medium-sized retail businesses, sari-sari stores, and shops.
+A modern, full-stack Point of Sale system built with Laravel, React, TypeScript, and Inertia.js. Designed for small to medium-sized retail businesses and sari-sari stores.
 
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat&logo=typescript&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
 
+---
+
 ## 🌟 Features
 
-### Admin Features
-- **Dashboard Analytics** - Overview of products, stocks, and sales
-- **Product Management**
-  - Create, Read, Update, Delete (CRUD) products
-  - SKU management with barcode scanning support
-  - Multiple image upload support (stored as JSON)
-  - Product status tracking (Active, Inactive, Out of Stock)
-  - Detailed product descriptions
-- **Stock Management**
-  - Add stocks with quantity and pricing
-  - Track stock levels (Safe, Low, Critical)
-  - View stock history with timestamps
-  - Delete individual stock entries
-- **Barcode Scanner Integration**
-  - Camera-based barcode scanning
-  - Physical barcode scanner support
-  - Automatic SKU population
+### Admin — Point of Sale
+- Fast product search by name or SKU (Enter key adds first result)
+- Click a product to add it to the cart; variant picker dialog for multi-variant products
+- Cart with typeable quantity input (in addition to +/− buttons), remove, and clear
+- Payment method selection — **Cash** (with change calculation) and **Card**
+- FIFO stock deduction on checkout
+- **Mobile-optimised** — tabs switch between Products panel and Cart panel on small screens
 
-### Customer Features
-- **Product Browsing** - View all available products with images
-- **Shopping Cart**
-  - Add/remove items
-  - Update quantities
-  - Real-time cart updates
-  - Persistent cart storage
-- **Checkout** - Complete purchase process
-- **User Authentication** - Secure login and registration
+### Admin — Dashboard
+- Real-time KPI cards: Total Revenue, Total Orders, Average Order Value, Customers
+- "Today" sub-stats on each card
+- **Recent Stock Activity** feed — last 10 stock movements with product thumbnail, movement type badge, and quantity direction
+- Quick-action links: Add Product, POS, Sales History, Stock Movements
 
-### General Features
-- **Role-Based Access Control** - Admin and Customer roles
-- **Responsive Design** - Works on desktop, tablet, and mobile
-- **Dark Mode Support** - Easy on the eyes
-- **Real-time Updates** - Using React Query for data synchronization
-- **Toast Notifications** - User-friendly feedback
-- **Image Preview** - Before uploading product images
+### Admin — Analytics (`/admin/analytics`)
+- Period selector: Today / 7 days / 30 days / 90 days
+- KPI cards: Revenue, Orders, Avg Order Value, Units Sold
+- **Revenue & Orders over time** — dual-axis area chart
+- **Top Products by Units Sold** — horizontal bar chart (units + revenue)
+- **Payment Method split** — donut chart with per-method breakdown
+- **Stock In vs Out trend** — grouped bar chart per day
+- **Sales by Hour of Day** — bar chart for peak-hour analysis
+- Built with **Recharts** (no extra install needed)
+
+### Admin — Stock Movements (`/admin/inventory/movements`)
+- Paginated, filterable log of every stock change (purchase, sale, adjustment, deletion)
+- Filter by type, product/SKU search, and date range
+- Summary cards: Total Units In, Total Units Out, Purchase count, Sale count
+- Each row: product thumbnail, variant, type badge, directional quantity, note, performed-by, timestamp
+
+### Admin — Product & Inventory Management
+- Full CRUD with multiple image upload (stored as JSON)
+- Product variants with attributes (size, colour, etc.)
+- SKU management with barcode scanner support (camera & USB/Bluetooth)
+- Stock batches with cost price and selling price per batch
+- Stock status labels: Safe / Low / Critical
+- Delete individual stock batches
+
+### Admin — Sales History
+- Paginated orders list with search and payment-method filter
+- Per-order detail view with line items
+- Analytics summary cards (total sales, revenue, today's figures)
+
+### Customer
+- Product catalogue with variant support
+- Shopping cart (add, remove, update quantity)
+- Checkout flow
+
+---
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **Laravel 12** - Modern PHP framework
-- **Laravel Sanctum** - API authentication
-- **Laravel Breeze** - Authentication scaffolding
-- **Inertia.js** - Server-side routing with client-side rendering
+| Layer | Technology |
+|---|---|
+| Backend | Laravel 12, Sanctum, Breeze, Inertia.js |
+| Frontend | React 18, TypeScript, Tailwind CSS 3 |
+| Charts | Recharts 2 |
+| UI primitives | Radix UI, Lucide React |
+| Forms | React Hook Form + Zod |
+| Data fetching | React Query (TanStack Query v5) |
+| Build | Vite 7, TypeScript 5 |
 
-### Frontend
-- **React 18** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS 3** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-- **React Query** - Data fetching and caching
-- **React Hook Form** - Form management
-- **Lucide React** - Icon library
-
-### Development Tools
-- **Vite** - Lightning-fast build tool
-- **TypeScript** - Static type checking
-- **Laravel Pint** - PHP code style fixer
-- **Ziggy** - Laravel routes in JavaScript
+---
 
 ## 📋 Prerequisites
 
-Before you begin, ensure you have the following installed:
 - PHP >= 8.2
 - Composer
 - Node.js >= 18.x
-- NPM or Yarn
-- SQLite (default) or MySQL/PostgreSQL
+- NPM
+- MySQL / PostgreSQL / SQLite
+
+---
 
 ## 🚀 Installation
 
-### 1. Clone the Repository
+### 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/pos.git
 cd pos
 ```
 
-### 2. Install PHP Dependencies
+### 2. Install dependencies
 ```bash
 composer install
-```
-
-### 3. Install JavaScript Dependencies
-```bash
 npm install
 ```
 
-### 4. Environment Setup
+### 3. Environment setup
 ```bash
-# Copy the example environment file
 cp .env.example .env
-
-# Generate application key
 php artisan key:generate
 ```
 
-### 5. Database Setup
+### 4. Database setup
 ```bash
-# Create database (SQLite is default)
+# SQLite (default)
 touch database/database.sqlite
 
-# Run migrations
+# Run all migrations (includes stock_movements table)
 php artisan migrate
 
-# (Optional) Seed database with sample data
+# Optional: seed sample data
 php artisan db:seed
 ```
 
-### 6. Storage Link
+### 5. Storage link
 ```bash
 php artisan storage:link
 ```
 
-### 7. Build Assets
+### 6. Build & serve
 ```bash
-# Development
-npm run dev
-
-# Production
-npm run build
-```
-
-### 8. Start Development Server
-```bash
-# Option 1: Start all services (recommended)
+# Development (both servers)
 composer dev
 
-# Option 2: Start individually
-php artisan serve         # Backend (port 8000)
-npm run dev              # Frontend (Vite dev server)
+# Or separately:
+php artisan serve   # http://localhost:8000
+npm run dev
+
+# Production build
+npm run build
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
 ```
 
-Visit [http://localhost:8000](http://localhost:8000) to view the application.
+---
 
 ## 📁 Project Structure
 
 ```
 pos/
 ├── app/
-│   ├── Http/
-│   │   ├── Controllers/      # Controllers (Admin, Customer)
-│   │   ├── Middleware/       # Custom middleware
-│   │   └── Requests/         # Form requests
-│   └── Models/               # Eloquent models (Product, Stock, Cart, User)
+│   ├── Http/Controllers/
+│   │   ├── Admin/
+│   │   │   ├── DashboardController.php       # Real stats + recent movements
+│   │   │   ├── AnalyticsController.php       # Charts data (revenue, products, stock)
+│   │   │   ├── PosController.php             # POS index + checkout (FIFO)
+│   │   │   ├── SalesController.php           # Orders list & detail
+│   │   │   ├── StockMovementController.php   # Movements log page
+│   │   │   └── Admin/ProductController.php   # Product & inventory CRUD
+│   │   └── CustomerController.php
+│   └── Models/
+│       ├── Product.php
+│       ├── ProductVariant.php
+│       ├── Inventory.php          # Stock batches
+│       ├── StockMovement.php      # Movement log entries
+│       ├── Order.php
+│       ├── OrderItem.php
+│       ├── Cart.php
+│       └── User.php
 ├── database/
-│   ├── migrations/           # Database migrations
-│   └── seeders/              # Database seeders
-├── resources/
-│   ├── js/
-│   │   ├── Components/       # Reusable React components
-│   │   ├── Layouts/          # Page layouts (Admin, Customer, Guest)
-│   │   ├── Pages/            # Inertia.js pages
-│   │   │   ├── Auth/         # Authentication pages
-│   │   │   │   └── Admin/    # Admin dashboard & products
-│   │   │   └── Customer/     # Customer shopping interface
-│   │   ├── hooks/            # Custom React hooks
-│   │   └── types/            # TypeScript types
-│   └── css/
-│       └── app.css           # Tailwind CSS
-├── routes/
-│   ├── web.php               # Web routes
-│   ├── api.php               # API routes
-│   └── auth.php              # Authentication routes
-└── public/                   # Public assets
+│   └── migrations/                # Includes stock_movements migration
+├── resources/js/
+│   ├── Layouts/AdminLayout.tsx
+│   └── Pages/Auth/Admin/
+│       ├── AdminDashboard.tsx     # Real-data dashboard + activity feed
+│       ├── Analytics/Index.tsx    # Analytics page with Recharts
+│       ├── Inventory/Movements.tsx # Stock movements log
+│       ├── POS/Index.tsx          # POS terminal (mobile-friendly)
+│       ├── Sales/                 # Sales history & order detail
+│       └── Products/              # Product CRUD + inventory
+└── routes/web.php
 ```
 
-## 🔐 User Roles & Permissions
+---
 
-### Admin Role
-- Access to `/admin` dashboard
-- Full CRUD operations on products
-- Manage stock levels
-- View analytics
+## 🔐 Routes Reference
 
-### Customer Role
-- Browse products on homepage
-- Add items to cart
-- Checkout process
-- Manage profile
+### Admin (requires `admin` middleware)
 
-## 🗄️ Database Schema
+| Method | URL | Description |
+|---|---|---|
+| GET | `/admin` | Dashboard |
+| GET | `/admin/analytics` | Analytics & charts |
+| GET | `/admin/inventory/movements` | Stock movements log |
+| GET | `/admin/pos` | POS terminal |
+| POST | `/admin/pos/checkout` | Process sale |
+| GET | `/admin/sales` | Sales history |
+| GET | `/admin/sales/{id}` | Order detail |
+| GET | `/admin/products/inventory` | Inventory management |
+| GET | `/admin/products/create` | Add product |
+| POST | `/admin/products/create` | Store product |
+| GET | `/admin/products/edit/{id}` | Edit product |
+| PUT | `/admin/products/edit/{id}` | Update product |
+| POST | `/admin/products/add-stock/{variant_id}` | Add stock batch |
+| DELETE | `/admin/products/stocks/delete/{id}` | Delete stock batch |
 
-### Products Table
-- `id` - Primary key
-- `name` - Product name
-- `sku` - Stock Keeping Unit (barcode)
-- `description` - Product description
-- `images` - JSON array of image paths
-- `status` - active | inactive | out_of_stock
-- `created_at`, `updated_at`
+### Customer
 
-### Stocks Table
-- `id` - Primary key
-- `product_id` - Foreign key to products
-- `quantity` - Stock quantity
-- `price` - Product price
-- `created_at`, `updated_at`
+| Method | URL | Description |
+|---|---|---|
+| GET | `/` | Product catalogue |
+| POST | `/cart/add/{variant_id}` | Add to cart |
+| DELETE | `/cart/remove/{cart_id}` | Remove from cart |
+| PUT | `/cart/quantity/update/{cart_id}` | Update cart quantity |
+| GET | `/checkout` | Checkout page |
 
-### Cart Table
-- `id` - Primary key
-- `customer_id` - Foreign key to users
-- `product_id` - Foreign key to products
-- `quantity` - Item quantity
-- `created_at`, `updated_at`
+---
 
-### Users Table
-- `id` - Primary key
-- `name` - User name
-- `email` - Email address
-- `password` - Hashed password
-- `role` - admin | customer
-- `created_at`, `updated_at`
+## 🗄️ Key Database Tables
 
-## 🎯 API Endpoints
+| Table | Purpose |
+|---|---|
+| `products` | Product catalogue |
+| `product_variants` | SKU / price per variant |
+| `inventories` | Stock batches (FIFO deduction) |
+| `stock_movements` | Audit log of every stock change |
+| `orders` | Completed sales |
+| `order_items` | Line items per order |
+| `carts` | Customer cart items |
+| `users` | Admin & customer accounts |
 
-### Admin Routes (Requires Admin Role)
-```
-GET    /admin                              # Admin dashboard
-GET    /admin/products                     # List all products
-GET    /admin/products/create              # Create product form
-POST   /admin/products/create              # Store new product
-GET    /admin/products/edit/{id}           # Edit product form
-PUT    /admin/products/edit/{id}           # Update product
-POST   /admin/products/add-stock/{id}      # Add stock to product
-DELETE /admin/products/stocks/delete/{id}  # Delete stock entry
-GET    /admin/products/stocks/{productId}  # Get product stocks (API)
-```
+### `stock_movements` columns
+- `product_variant_id` — which variant
+- `inventory_id` — which batch (nullable)
+- `type` — `purchase` | `sale` | `adjustment` | `deletion`
+- `quantity` — positive = stock in, negative = stock out
+- `reference_type` / `reference_id` — polymorphic link (e.g. to `Order`)
+- `performed_by` — user who triggered it
 
-### Customer Routes
-```
-GET    /                           # Product catalog
-POST   /cart/add/{product_id}      # Add to cart
-DELETE /cart/remove/{cart_id}      # Remove from cart
-PUT    /cart/quantity/update/{id}  # Update cart quantity
-GET    /checkout                   # Checkout page
-```
-
-## 🎨 UI Components
-
-Built with Radix UI and custom components:
-- Dialogs/Modals
-- Dropdown Menus
-- Forms & Inputs
-- Toast Notifications
-- Data Tables
-- Accordion
-- Avatar
-- Progress Bars
-- And more...
-
-## 📸 Screenshots
-
-### Admin Dashboard
-- Product management interface
-- Stock analytics
-- CRUD operations
-
-### Customer View
-- Product catalog
-- Shopping cart
-- Checkout process
+---
 
 ## 🧪 Testing
 
 ```bash
-# Run PHP tests
 php artisan test
-
-# Run specific test
-php artisan test --filter ProductTest
 ```
 
-## 🔧 Configuration
+---
 
-### Database
-Edit `.env` file:
-```env
-DB_CONNECTION=sqlite
-# Or for MySQL:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=pos_db
-# DB_USERNAME=root
-# DB_PASSWORD=
-```
+## 🚢 Production Deployment
 
-### Image Storage
-Images are stored in `storage/app/public/` and symlinked to `public/storage/`.
-
-### Barcode Scanner
-The system supports:
-- Browser-based camera scanning (requires HTTPS in production)
-- Physical USB/Bluetooth barcode scanners
-
-## 🚢 Deployment
-
-### Build for Production
 ```bash
-# Install dependencies
 composer install --optimize-autoloader --no-dev
 npm install
-
-# Build assets
 npm run build
-
-# Optimize Laravel
+php artisan migrate --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
 
-### Environment
 ```env
 APP_ENV=production
 APP_DEBUG=false
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+---
 
 ## 📝 License
 
-This project is licensed under the MIT License.
-
-## 👥 Authors
-
-Your Name - [@yourhandle](https://github.com/yourusername)
-
-## 🙏 Acknowledgments
-
-- Laravel team for the amazing framework
-- Inertia.js for seamless SPA experience
-- Radix UI for accessible components
-- Tailwind CSS for styling utilities
-
-## 📞 Support
-
-For support, email your-email@example.com or open an issue in this repository.
-
-## 🗺️ Roadmap
-
-- [ ] Sales reports and analytics
-- [ ] Invoice generation
-- [ ] Multiple payment methods
-- [ ] Inventory alerts
-- [ ] Customer management
-- [ ] Sales history
-- [ ] Export data to CSV/Excel
-- [ ] Multi-store support
-- [ ] Receipt printing
-- [ ] Discount and promotion system
+MIT License
 
 ---
 
-**Built with ❤️ using Laravel and React**
+## 🙏 Acknowledgments
+
+- [Laravel](https://laravel.com) — backend framework
+- [Inertia.js](https://inertiajs.com) — SPA without the API
+- [Recharts](https://recharts.org) — React charting library
+- [Radix UI](https://www.radix-ui.com) — accessible component primitives
+- [Tailwind CSS](https://tailwindcss.com) — utility-first styling
+- [Lucide](https://lucide.dev) — icon library
+
+

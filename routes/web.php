@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\Admin\ProductController;
+use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\StockMovementController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\PosController;
@@ -11,9 +14,9 @@ use Inertia\Inertia;
 
 Route::middleware(['admin'])->group(function () {
     //
-    Route::get('/admin', function () {
-        return Inertia::render('Auth/Admin/AdminDashboard');
-    })->name('admin.dashboard');
+    Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/analytics', [AnalyticsController::class, 'index'])->name('admin.analytics');
+    Route::get('/admin/inventory/movements', [StockMovementController::class, 'index'])->name('admin.inventory.movements');
     Route::get('/admin/products/inventory', [ProductController::class, 'Inventory'])->name('admin.products.inventory');
     
     

@@ -70,6 +70,7 @@ export default function POSIndex({ products }: POSPageProps) {
     const [cashReceived, setCashReceived] = useState('');
     const [variantPickerProduct, setVariantPickerProduct] = useState<POSProduct | null>(null);
     const [processing, setProcessing] = useState(false);
+    const [mobileTab, setMobileTab] = useState<'products' | 'cart'>('products');
 
     const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,6 +116,7 @@ export default function POSIndex({ products }: POSPageProps) {
         toast.success(`${product.name}${label} added`);
         setVariantPickerProduct(null);
         setSearchQuery('');
+        setMobileTab('cart');
     }, []);
 
     const handleProductClick = (product: POSProduct) => {
@@ -132,6 +134,31 @@ export default function POSIndex({ products }: POSPageProps) {
             if (newQty <= 0) return acc; // remove
             if (newQty > item.variant.total_stock) { toast.error('Not enough stock'); return [...acc, item]; }
             return [...acc, { ...item, quantity: newQty }];
+        }, []));
+    };
+
+    const setQty = (variantId: number, value: string) => {
+        const num = parseInt(value, 10);
+        if (isNaN(num) || value === '') {
+            // allow clearing the field temporarily — handled on blur
+            setCart(prev => prev.map(item =>
+                item.variant.id === variantId ? { ...item, quantity: 0 } : item
+            ));
+            return;
+        }
+        if (num <= 0) { removeFromCart(variantId); return; }
+        setCart(prev => prev.map(item => {
+            if (item.variant.id !== variantId) return item;
+            if (num > item.variant.total_stock) { toast.error('Not enough stock'); return item; }
+            return { ...item, quantity: num };
+        }));
+    };
+
+    const commitQty = (variantId: number) => {
+        setCart(prev => prev.reduce<CartItem[]>((acc, item) => {
+            if (item.variant.id !== variantId) return [...acc, item];
+            if (item.quantity <= 0) return acc; // remove if still 0
+            return [...acc, item];
         }, []));
     };
 
@@ -182,10 +209,43 @@ export default function POSIndex({ products }: POSPageProps) {
         >
             <Head title="POS" />
 
-            <div className="flex gap-4 h-[calc(100vh-11rem)]">
+            {/* Mobile tab bar */}
+            <div className="flex md:hidden border-b border-gray-200 dark:border-gray-700 mb-3">
+                <button
+                    type="button"
+                    onClick={() => setMobileTab('products')}
+                    className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
+                        mobileTab === 'products'
+                            ? 'border-b-2 border-indigo-600 text-indigo-600'
+                            : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                >
+                    Products
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMobileTab('cart')}
+                    className={`flex-1 py-2.5 text-sm font-semibold transition-colors relative ${
+                        mobileTab === 'cart'
+                            ? 'border-b-2 border-indigo-600 text-indigo-600'
+                            : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                >
+                    Cart
+                    {cart.length > 0 && (
+                        <span className="ml-1.5 inline-flex items-center justify-center text-[10px] bg-indigo-600 text-white font-bold w-4 h-4 rounded-full">
+                            {cart.reduce((s, i) => s + i.quantity, 0)}
+                        </span>
+                    )}
+                </button>
+            </div>
+
+            <div className="flex gap-4 md:h-[calc(100vh-11rem)]">
 
                 {/* ── Left: Product browser ──────────────────────────────── */}
-                <div className="flex-1 flex flex-col gap-3 min-w-0">
+                <div className={`flex-1 flex-col gap-3 min-w-0 ${
+                    mobileTab === 'products' ? 'flex' : 'hidden md:flex'
+                }`}>
 
                     {/* Search */}
                     <div className="relative">
@@ -220,7 +280,7 @@ export default function POSIndex({ products }: POSPageProps) {
                                 {searchQuery && <p className="text-sm mt-1">Try a different search term</p>}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
                                 {filteredProducts.map(product => {
                                     const totalStock = product.variants.reduce((s, v) => s + v.total_stock, 0);
                                     return (
@@ -273,7 +333,9 @@ export default function POSIndex({ products }: POSPageProps) {
                 </div>
 
                 {/* ── Right: Cart ────────────────────────────────────────── */}
-                <div className="w-80 flex-shrink-0 flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className={`md:w-80 flex-shrink-0 flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
+                    mobileTab === 'cart' ? 'flex w-full' : 'hidden md:flex'
+                }`}>
 
                     {/* Cart Header */}
                     <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
@@ -333,7 +395,15 @@ export default function POSIndex({ products }: POSPageProps) {
                                                 <button onClick={() => updateQty(item.variant.id, -1)} className="h-5 w-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
                                                     <Minus className="h-3 w-3" />
                                                 </button>
-                                                <span className="text-xs font-bold min-w-[1.5rem] text-center text-gray-900 dark:text-white">{item.quantity}</span>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    max={item.variant.total_stock}
+                                                    value={item.quantity === 0 ? '' : item.quantity}
+                                                    onChange={e => setQty(item.variant.id, e.target.value)}
+                                                    onBlur={() => commitQty(item.variant.id)}
+                                                    className="w-10 text-xs font-bold text-center text-gray-900 dark:text-white bg-transparent border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                />
                                                 <button onClick={() => updateQty(item.variant.id, 1)} className="h-5 w-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
                                                     <Plus className="h-3 w-3" />
                                                 </button>

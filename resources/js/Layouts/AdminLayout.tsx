@@ -122,7 +122,8 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
         },
         {
             name: 'Analytics',
-            href: '#',
+            href: '/admin/analytics',
+            routename: 'admin.analytics',
             icon: ChartIcon,
         },
         {

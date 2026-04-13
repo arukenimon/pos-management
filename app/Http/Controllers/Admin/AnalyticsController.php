@@ -35,8 +35,25 @@ class AnalyticsController extends Controller
         $totalUnitsSold = (int) OrderItem::whereHas(
             'order', fn ($q) => $q->where('created_at', '>=', $from)
         )->sum('quantity');
+        $totalProfit = (float) DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.created_at', '>=', $from)
+            ->whereNotNull('order_items.cost_price')
+            ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity'));
 
         // ── Revenue trend (per day) ───────────────────────────────────────────
+        $profitByDate = DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.created_at', '>=', $from)
+            ->whereNotNull('order_items.cost_price')
+            ->select(
+                DB::raw('DATE(orders.created_at) as date'),
+                DB::raw('SUM(order_items.subtotal - order_items.cost_price * order_items.quantity) as profit')
+            )
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
         $revenueTrend = Order::where('created_at', '>=', $from)
             ->select(
                 DB::raw('DATE(created_at) as date'),
@@ -50,6 +67,7 @@ class AnalyticsController extends Controller
                 'date'    => $r->date,
                 'revenue' => (float) $r->revenue,
                 'orders'  => (int) $r->orders,
+                'profit'  => isset($profitByDate[$r->date]) ? (float) $profitByDate[$r->date]->profit : null,
             ]);
 
         // ── Top products by quantity sold ─────────────────────────────────────
@@ -124,7 +142,7 @@ class AnalyticsController extends Controller
 
         return Inertia::render('Auth/Admin/Analytics/Index', [
             'period'       => $period,
-            'summary'      => compact('totalRevenue', 'totalOrders', 'avgOrderValue', 'totalUnitsSold'),
+            'summary'      => compact('totalRevenue', 'totalOrders', 'avgOrderValue', 'totalUnitsSold', 'totalProfit'),
             'revenueTrend' => $revenueTrend,
             'topProducts'  => $topProducts,
             'paymentSplit' => $paymentSplit,

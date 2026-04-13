@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
-import { ArrowLeft, Banknote, CreditCard, User, Calendar, Hash } from 'lucide-react';
+import { ArrowLeft, Banknote, CreditCard, User, Calendar, Hash, TrendingUp } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,6 +10,7 @@ interface OrderItem {
     quantity: number;
     unit_price: string;
     subtotal: string;
+    cost_price: string | null;
     variant: {
         sku: string;
         price: string;
@@ -55,6 +56,12 @@ const variantLabel = (item: OrderItem) => {
 
 export default function SalesShow({ order }: ShowPageProps) {
     const isCash = order.payment_method === 'cash';
+
+    const totalProfit = order.items.reduce((sum, item) => {
+        if (item.cost_price === null) return sum;
+        return sum + (Number(item.unit_price) - Number(item.cost_price)) * item.quantity;
+    }, 0);
+    const hasCostData = order.items.some(i => i.cost_price !== null);
 
     return (
         <AdminLayout
@@ -104,49 +111,141 @@ export default function SalesShow({ order }: ShowPageProps) {
                     <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-700">
                         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Items</h2>
                     </div>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
-                                <th className="text-left px-5 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Product</th>
-                                <th className="text-center px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Qty</th>
-                                <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Unit Price</th>
-                                <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Subtotal</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                            {order.items.map(item => (
-                                <tr key={item.id}>
-                                    <td className="px-5 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-                                                {item.variant?.product?.images?.[0] ? (
-                                                    <img
-                                                        src={resolveImageSrc(item.variant.product.images[0])}
-                                                        className="w-full h-full object-cover"
-                                                        alt={item.variant.product.name}
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">
-                                                        {item.variant?.product?.name?.[0] ?? '?'}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-gray-900 dark:text-white">
-                                                    {item.variant?.product?.name ?? '—'}
-                                                </p>
-                                                <p className="text-xs text-gray-400">{variantLabel(item)}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{item.quantity}</td>
-                                    <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300">P{Number(item.unit_price).toFixed(2)}</td>
-                                    <td className="px-5 py-3 text-right font-medium text-gray-900 dark:text-white">P{Number(item.subtotal).toFixed(2)}</td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700">
+                                    <th className="text-left px-5 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Product</th>
+                                    <th className="text-center px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Qty</th>
+                                    <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Cost/Unit</th>
+                                    <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Sell Price</th>
+                                    <th className="text-right px-4 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Revenue</th>
+                                    <th className="text-right px-5 py-2.5 text-xs font-medium text-gray-500 dark:text-gray-400">Profit</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                {order.items.map(item => {
+                                    const sellPrice = Number(item.unit_price);
+                                    const revenue   = Number(item.subtotal);
+                                    const costUnit  = item.cost_price !== null ? Number(item.cost_price) : null;
+                                    const profit    = costUnit !== null ? (sellPrice - costUnit) * item.quantity : null;
+                                    const margin    = profit !== null && revenue > 0 ? (profit / revenue) * 100 : null;
+
+                                    return (
+                                        <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors">
+                                            <td className="px-5 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="h-10 w-10 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                                                        {item.variant?.product?.images?.[0] ? (
+                                                            <img
+                                                                src={resolveImageSrc(item.variant.product.images[0])}
+                                                                className="w-full h-full object-cover"
+                                                                alt={item.variant.product.name}
+                                                            />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">
+                                                                {item.variant?.product?.name?.[0] ?? '?'}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900 dark:text-white">
+                                                            {item.variant?.product?.name ?? '—'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">{variantLabel(item)}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-center text-gray-700 dark:text-gray-300">{item.quantity}</td>
+                                            <td className="px-4 py-3 text-right text-gray-500 dark:text-gray-400">
+                                                {costUnit !== null ? `P${costUnit.toFixed(2)}` : <span className="text-gray-300 dark:text-gray-600">—</span>}
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-gray-700 dark:text-gray-300">P{sellPrice.toFixed(2)}</td>
+                                            <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-white">P{revenue.toFixed(2)}</td>
+                                            <td className="px-5 py-3 text-right">
+                                                {profit !== null ? (
+                                                    <div>
+                                                        <p className="font-semibold text-emerald-600 dark:text-emerald-400">P{profit.toFixed(2)}</p>
+                                                        <p className="text-xs text-gray-400 mt-0.5">{margin!.toFixed(1)}% margin</p>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400">—</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
+                {/* Profit Breakdown */}
+                {hasCostData && (() => {
+                    const totalRevenue = Number(order.total);
+                    const totalCost    = order.items.reduce((s, i) => s + (i.cost_price !== null ? Number(i.cost_price) * i.quantity : 0), 0);
+                    const profit       = totalProfit;
+                    const margin       = totalRevenue > 0 ? (profit / totalRevenue) * 100 : 0;
+                    const costPct      = totalRevenue > 0 ? (totalCost / totalRevenue) * 100 : 0;
+
+                    return (
+                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
+                            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Profit Breakdown</h2>
+
+                            <div className="space-y-4">
+                                {/* Stacked bar */}
+                                <div>
+                                    <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1.5">
+                                        <span>Cost ({costPct.toFixed(1)}%)</span>
+                                        <span>Profit ({margin.toFixed(1)}%)</span>
+                                    </div>
+                                    <div className="h-7 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex">
+                                        <div
+                                            className="h-full bg-gray-400 dark:bg-gray-500 flex items-center justify-center text-xs font-semibold text-white"
+                                            style={{ width: `${costPct}%` }}
+                                        >
+                                            {costPct > 12 ? `P${totalCost.toFixed(0)}` : ''}
+                                        </div>
+                                        <div
+                                            className="h-full bg-emerald-500 flex items-center justify-center text-xs font-semibold text-white"
+                                            style={{ width: `${margin}%` }}
+                                        >
+                                            {margin > 12 ? `P${profit.toFixed(0)}` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Numbers */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                        <div className="flex items-center justify-center gap-1.5 mb-1">
+                                            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-gray-400 dark:bg-gray-500 flex-shrink-0" />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Total Cost</p>
+                                        </div>
+                                        <p className="font-semibold text-gray-900 dark:text-white">P{totalCost.toFixed(2)}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{costPct.toFixed(1)}% of revenue</p>
+                                    </div>
+                                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                        <div className="flex items-center justify-center gap-1.5 mb-1">
+                                            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-emerald-500 flex-shrink-0" />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Gross Profit</p>
+                                        </div>
+                                        <p className="font-semibold text-emerald-600 dark:text-emerald-400">P{profit.toFixed(2)}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">{margin.toFixed(1)}% margin</p>
+                                    </div>
+                                    <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                                        <div className="flex items-center justify-center gap-1.5 mb-1">
+                                            <span className="inline-block w-2.5 h-2.5 rounded-sm bg-indigo-500 flex-shrink-0" />
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Revenue</p>
+                                        </div>
+                                        <p className="font-semibold text-gray-900 dark:text-white">P{totalRevenue.toFixed(2)}</p>
+                                        <p className="text-xs text-gray-400 mt-0.5">100%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })()}
 
                 {/* Payment summary */}
                 <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5">
@@ -160,6 +259,15 @@ export default function SalesShow({ order }: ShowPageProps) {
                             <span>Total</span>
                             <span>P{Number(order.total).toFixed(2)}</span>
                         </div>
+                        {hasCostData && (
+                            <div className="flex justify-between font-semibold text-emerald-600 dark:text-emerald-400 border-t border-gray-200 dark:border-gray-700 pt-2 mt-1">
+                                <span className="flex items-center gap-1.5">
+                                    <TrendingUp className="h-4 w-4" />
+                                    Profit
+                                </span>
+                                <span>P{totalProfit.toFixed(2)}</span>
+                            </div>
+                        )}
                         {isCash && order.cash_received && (
                             <>
                                 <div className="flex justify-between text-gray-600 dark:text-gray-400">

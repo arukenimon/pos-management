@@ -29,15 +29,28 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $currentShop = app()->bound('current_shop') ? app('current_shop') : null;
+        $shopRole    = null;
+
+        if ($currentShop && $request->user()) {
+            $shopRole = $currentShop->roleOf($request->user());
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user'      => $request->user(),
+                'shopRole'  => $shopRole,
             ],
+            'currentShop' => $currentShop ? [
+                'id'   => $currentShop->id,
+                'name' => $currentShop->name,
+                'slug' => $currentShop->slug,
+            ] : null,
             'flash' => [
                 'success' => session('success'),
-                'error' => session('error'),
-            ]
+                'error'   => session('error'),
+            ],
         ];
     }
 }

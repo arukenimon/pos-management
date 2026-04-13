@@ -30,10 +30,22 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard', absolute: false));
+        $user  = Auth::user();
+        $shops = $user->shops;
+
+        if ($shops->count() === 0) {
+            // No shop yet — shouldn't happen for normal users, send to register
+            return redirect()->route('register');
+        }
+
+        if ($shops->count() === 1) {
+            return redirect()->route('admin.dashboard', ['shop' => $shops->first()->slug]);
+        }
+
+        // Multiple shops: let the user pick
+        return redirect()->route('shop.select');
     }
 
     /**

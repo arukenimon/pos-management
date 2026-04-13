@@ -1,7 +1,7 @@
 import { useEffect, useState, PropsWithChildren } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import AdminSidebar, { SidebarNavItem } from '@/Components/Admin/AdminSidebar';
-import { User } from '@/types';
+import { PageProps, Shop } from '@/types';
 
 import { ToastContainer } from 'react-toastify';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -52,10 +52,22 @@ interface AdminLayoutProps extends PropsWithChildren {
 
 const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     useToasts();
-    const { auth, url } = usePage().props;
+    const { auth, url, currentShop } = usePage<PageProps>().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+    // Inject the current shop slug as a Ziggy default so all route() calls
+    // automatically resolve to the correct /{shop}/... URLs without any changes
+    // in individual page components.
+    useEffect(() => {
+        if (currentShop?.slug && (window as any).Ziggy) {
+            (window as any).Ziggy.defaults = {
+                ...(window as any).Ziggy.defaults,
+                shop: currentShop.slug,
+            };
+        }
+    }, [currentShop?.slug]);
 
     useEffect(() => {
         const saved = localStorage.getItem('theme');
@@ -76,53 +88,39 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     const navigation: SidebarNavItem[] = [
         {
             name: 'Dashboard',
-            href: '/admin',
+            href: route('admin.dashboard'),
             icon: HomeIcon,
             routename: 'admin.dashboard',
         },
         {
-            name: 'Users',
-            href: '#',
-            icon: UsersIcon,
-            badge: '12',
-        },
-        {
             name: 'Products',
-            // routename: '',
-            href: '/admin/products/',
+            href: route('admin.products.inventory'),
             isParent: true,
             icon: ProductsIcon,
             children: [
-
                 {
                     name: 'Inventory',
-                    href: '/admin/products/inventory',
+                    href: route('admin.products.inventory'),
                     routename: 'admin.products.inventory',
                     icon: ProductsIcon,
                 },
-                // {
-                //     name: 'Categories',
-                //     href: '#',
-                //     icon: ProductsIcon,
-                // },
             ],
         },
         {
             name: 'Sales',
-            href: '/admin/sales',
+            href: route('admin.sales.index'),
             routename: 'admin.sales.index',
             icon: ShoppingCartIcon,
         },
         {
             name: 'POS',
-            href: '/admin/pos',
+            href: route('admin.pos.index'),
             routename: 'admin.pos.index',
             icon: Computer,
-            badge: '3',
         },
         {
             name: 'Analytics',
-            href: '/admin/analytics',
+            href: route('admin.analytics'),
             routename: 'admin.analytics',
             icon: ChartIcon,
         },
@@ -130,6 +128,15 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             name: 'Settings',
             href: '#',
             icon: SettingsIcon,
+            isParent: true,
+            children: [
+                {
+                    name: 'Team',
+                    href: route('admin.settings.team'),
+                    routename: 'admin.settings.team',
+                    icon: UsersIcon,
+                },
+            ],
         },
     ];
 
@@ -162,8 +169,16 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                         </button>
 
                         {/* Search Bar */}
-                        <div className="flex-1 max-w-2xl px-4">
-                            <div className="relative">
+                        <div className="flex-1 max-w-2xl px-4 flex items-center gap-3">
+                            {currentShop && (
+                                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200 dark:border-indigo-700 flex-shrink-0">
+                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                    {currentShop.name}
+                                </span>
+                            )}
+                            <div className="relative flex-1">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

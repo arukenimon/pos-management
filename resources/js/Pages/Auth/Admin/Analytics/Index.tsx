@@ -166,7 +166,7 @@ export default function AnalyticsIndex({
                                     contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
-                                    formatter={(v: number, name: string) => name === 'orders' ? [v, 'Orders'] : [fmt(v), name === 'revenue' ? 'Revenue' : 'Profit']}
+                                    formatter={(v: number, name: string) => name === 'Orders' ? [v, 'Orders'] : [fmt(v), name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
                                 <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" fill="url(#revGrad)"    strokeWidth={2} dot={false} />
@@ -205,7 +205,7 @@ export default function AnalyticsIndex({
                                             contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
                                             labelStyle={{ color: '#e5e7eb' }}
                                             itemStyle={{ color: '#d1d5db' }}
-                                            formatter={(v: number, name: string) => [name === 'revenue' ? fmt(v) : v, name === 'revenue' ? 'Revenue' : 'Units']}
+                                            formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                         />
                                         <Legend wrapperStyle={{ fontSize: 12 }} />
                                         <Bar dataKey="units_sold" name="Units" fill="#6366f1" radius={[0, 4, 4, 0]} />
@@ -297,7 +297,7 @@ export default function AnalyticsIndex({
                                     contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
-                                    formatter={(v: number, name: string) => [name === 'revenue' ? fmt(v) : v, name === 'revenue' ? 'Revenue' : 'Orders']}
+                                    formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
                                 <Bar dataKey="orders"  name="Orders"  fill="#6366f1" radius={[4, 4, 0, 0]} />

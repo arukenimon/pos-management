@@ -21,7 +21,7 @@ class DashboardController extends Controller
             'today_revenue'       => (float) Order::whereDate('created_at', $today)->sum('total'),
             'today_orders'        => Order::whereDate('created_at', $today)->count(),
             'avg_order_value'     => (float) (Order::count() > 0 ? Order::avg('total') : 0),
-            'total_customers'     => User::where('role', 'customer')->count(),
+            'total_members'       => app('current_shop')->members()->count(),
         ];
 
         $recentMovements = StockMovement::with([

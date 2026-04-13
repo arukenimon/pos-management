@@ -9,6 +9,7 @@ import { FormEventHandler } from 'react';
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
+        shop_name: '',
         email: '',
         password: '',
         password_confirmation: '',
@@ -28,7 +29,7 @@ export default function Register() {
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Your Name" />
 
                     <TextInput
                         id="name"
@@ -42,6 +43,23 @@ export default function Register() {
                     />
 
                     <InputError message={errors.name} className="mt-2" />
+                </div>
+
+                <div className="mt-4">
+                    <InputLabel htmlFor="shop_name" value="Shop Name" />
+                    <p className="text-xs text-gray-500 mb-1">This will be your shop's unique URL identifier.</p>
+
+                    <TextInput
+                        id="shop_name"
+                        name="shop_name"
+                        value={data.shop_name}
+                        className="mt-1 block w-full"
+                        autoComplete="off"
+                        onChange={(e) => setData('shop_name', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={(errors as any).shop_name} className="mt-2" />
                 </div>
 
                 <div className="mt-4">

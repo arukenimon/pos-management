@@ -7,7 +7,7 @@ import {
     PieChart, Pie, Cell, Tooltip as PieTooltip, Legend as PieLegend,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { TrendingUp, ShoppingCart, Package, BarChart2 } from 'lucide-react';
+import { TrendingUp, ShoppingCart, Package, BarChart2, DollarSign } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,9 +16,10 @@ interface Summary {
     totalOrders: number;
     avgOrderValue: number;
     totalUnitsSold: number;
+    totalProfit: number;
 }
 
-interface RevenueTrendPoint { date: string; revenue: number; orders: number; }
+interface RevenueTrendPoint { date: string; revenue: number; orders: number; profit: number | null; }
 interface TopProduct       { name: string; variant: string; units_sold: number; revenue: number; }
 interface PaymentEntry     { method: string; count: number; revenue: number; }
 interface StockTrendPoint  { date: string; stock_in: number; stock_out: number; }
@@ -130,15 +131,16 @@ export default function AnalyticsIndex({
             <div className="space-y-6">
 
                 {/* KPI cards */}
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    <KpiCard title="Revenue"        value={fmt(summary.totalRevenue)}   sub="Total for period"    icon={<TrendingUp className="h-5 w-5" />}  color="bg-indigo-500" />
-                    <KpiCard title="Orders"         value={summary.totalOrders.toLocaleString()} sub="Completed sales" icon={<ShoppingCart className="h-5 w-5" />} color="bg-emerald-500" />
-                    <KpiCard title="Avg Order"      value={fmt(summary.avgOrderValue)}  sub="Per transaction"     icon={<BarChart2 className="h-5 w-5" />}   color="bg-blue-500" />
-                    <KpiCard title="Units Sold"     value={summary.totalUnitsSold.toLocaleString()} sub="Items sold"  icon={<Package className="h-5 w-5" />}    color="bg-orange-500" />
+                <div className="grid grid-cols-2 gap-5 lg:grid-cols-5">
+                    <KpiCard title="Revenue"    value={fmt(summary.totalRevenue)}              sub="Total for period"    icon={<TrendingUp className="h-5 w-5" />}   color="bg-indigo-500" />
+                    <KpiCard title="Profit"     value={fmt(summary.totalProfit)}               sub="Gross profit"        icon={<DollarSign className="h-5 w-5" />}   color="bg-emerald-500" />
+                    <KpiCard title="Orders"     value={summary.totalOrders.toLocaleString()}   sub="Completed sales"     icon={<ShoppingCart className="h-5 w-5" />} color="bg-blue-500" />
+                    <KpiCard title="Avg Order"  value={fmt(summary.avgOrderValue)}             sub="Per transaction"     icon={<BarChart2 className="h-5 w-5" />}    color="bg-violet-500" />
+                    <KpiCard title="Units Sold" value={summary.totalUnitsSold.toLocaleString()} sub="Items sold"         icon={<Package className="h-5 w-5" />}      color="bg-orange-500" />
                 </div>
 
                 {/* Revenue + Orders trend */}
-                <ChartCard title="Revenue & Orders Over Time">
+                <ChartCard title="Revenue, Profit & Orders Over Time">
                     {noData(revenueTrend) ? <EmptyState /> : (
                         <ResponsiveContainer width="100%" height={260}>
                             <AreaChart data={revenueTrend} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
@@ -147,9 +149,13 @@ export default function AnalyticsIndex({
                                         <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.3} />
                                         <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                                     </linearGradient>
-                                    <linearGradient id="ordGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#10b981" stopOpacity={0.25} />
+                                    <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
                                         <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                    </linearGradient>
+                                    <linearGradient id="ordGrad" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%"  stopColor="#f59e0b" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
@@ -160,11 +166,12 @@ export default function AnalyticsIndex({
                                     contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
-                                    formatter={(v: number, name: string) => name === 'revenue' ? fmt(v) : v}
+                                    formatter={(v: number, name: string) => name === 'orders' ? [v, 'Orders'] : [fmt(v), name === 'revenue' ? 'Revenue' : 'Profit']}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" fill="url(#revGrad)" strokeWidth={2} dot={false} />
-                                <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke="#10b981" fill="url(#ordGrad)" strokeWidth={2} dot={false} />
+                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" fill="url(#revGrad)"    strokeWidth={2} dot={false} />
+                                <Area yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke="#10b981" fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                                <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke="#f59e0b" fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     )}

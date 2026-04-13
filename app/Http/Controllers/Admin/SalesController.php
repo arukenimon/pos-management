@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class SalesController extends Controller
@@ -33,6 +34,14 @@ class SalesController extends Controller
             'total_revenue' => (float) Order::sum('total'),
             'today_sales'   => Order::whereDate('created_at', today())->count(),
             'today_revenue' => (float) Order::whereDate('created_at', today())->sum('total'),
+            'total_profit'  => (float) DB::table('order_items')
+                ->whereNotNull('cost_price')
+                ->sum(DB::raw('subtotal - cost_price * quantity')),
+            'today_profit'  => (float) DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->whereNotNull('order_items.cost_price')
+                ->whereDate('orders.created_at', today())
+                ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity')),
         ];
 
         return Inertia::render('Auth/Admin/Sales/Index', [

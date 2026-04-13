@@ -30,7 +30,7 @@ class DashboardController extends Controller
             'performedBy:id,name',
         ])
         ->orderByDesc('created_at')
-        ->limit(10)
+        ->limit(5)
         ->get()
         ->map(fn ($m) => [
             'id'           => $m->id,

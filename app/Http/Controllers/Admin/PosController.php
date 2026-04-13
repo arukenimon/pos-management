@@ -77,20 +77,26 @@ class PosController extends Controller
                 'change_given'   => $cashReceived !== null ? $cashReceived - $total : null,
             ]);
 
-            // Deduct stock FIFO and create order items
+            // Deduct stock FIFO, capture weighted-average cost, and create order items
             foreach ($lines as $line) {
-                OrderItem::create([
-                    'order_id'           => $order->id,
-                    'product_variant_id' => $line['variant']->id,
-                    'quantity'           => $line['quantity'],
-                    'unit_price'         => $line['unitPrice'],
-                    'subtotal'           => $line['subtotal'],
-                ]);
+                $inventories = $line['variant']->inventories()
+                    ->where('quantity', '>', 0)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
 
-                $remaining = $line['quantity'];
-                foreach ($line['variant']->inventories()->where('quantity', '>', 0)->orderBy('created_at', 'asc')->get() as $inv) {
+                $remaining   = $line['quantity'];
+                $totalCost   = 0.0;
+                $hasCostData = true;
+
+                foreach ($inventories as $inv) {
                     if ($remaining <= 0) break;
-                    $deduct = min($remaining, $inv->quantity);
+                    $deduct = min($remaining, (int) $inv->quantity);
+
+                    if ($inv->cost_price === null) {
+                        $hasCostData = false;
+                    }
+                    $totalCost += $deduct * (float) ($inv->cost_price ?? 0);
+
                     $inv->decrement('quantity', $deduct);
 
                     StockMovement::create([
@@ -105,6 +111,19 @@ class PosController extends Controller
 
                     $remaining -= $deduct;
                 }
+
+                $avgCostPrice = ($hasCostData && $line['quantity'] > 0)
+                    ? round($totalCost / $line['quantity'], 2)
+                    : null;
+
+                OrderItem::create([
+                    'order_id'           => $order->id,
+                    'product_variant_id' => $line['variant']->id,
+                    'quantity'           => $line['quantity'],
+                    'unit_price'         => $line['unitPrice'],
+                    'subtotal'           => $line['subtotal'],
+                    'cost_price'         => $avgCostPrice,
+                ]);
             }
 
             DB::commit();

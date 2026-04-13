@@ -2,7 +2,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useCallback } from 'react';
-import { Banknote, CreditCard, Receipt, TrendingUp, ShoppingBag, Calendar } from 'lucide-react';
+import { Banknote, CreditCard, Receipt, TrendingUp, ShoppingBag, Calendar, DollarSign } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,6 +53,8 @@ interface SalesPageProps extends PageProps {
         total_revenue: number;
         today_sales: number;
         today_revenue: number;
+        total_profit: number;
+        today_profit: number;
     };
 }
 
@@ -123,12 +125,14 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
             <div className="space-y-6">
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                     {[
-                        { label: 'Total Sales',     value: analytics.total_sales,                  icon: Receipt,     color: 'bg-indigo-500',  fmt: 'count' },
-                        { label: 'Total Revenue',   value: analytics.total_revenue,                icon: TrendingUp,  color: 'bg-emerald-500', fmt: 'money' },
-                        { label: "Today's Sales",   value: analytics.today_sales,                  icon: Calendar,    color: 'bg-blue-500',    fmt: 'count' },
-                        { label: "Today's Revenue", value: analytics.today_revenue,                icon: Banknote,    color: 'bg-amber-500',   fmt: 'money' },
+                        { label: 'Total Sales',     value: analytics.total_sales,    icon: Receipt,      color: 'bg-indigo-500',  fmt: 'count' },
+                        { label: 'Total Revenue',   value: analytics.total_revenue,  icon: TrendingUp,   color: 'bg-emerald-500', fmt: 'money' },
+                        { label: 'Total Profit',    value: analytics.total_profit,   icon: DollarSign,   color: 'bg-violet-500',  fmt: 'money' },
+                        { label: "Today's Sales",   value: analytics.today_sales,    icon: Calendar,     color: 'bg-blue-500',    fmt: 'count' },
+                        { label: "Today's Revenue", value: analytics.today_revenue,  icon: Banknote,     color: 'bg-amber-500',   fmt: 'money' },
+                        { label: "Today's Profit",  value: analytics.today_profit,   icon: DollarSign,   color: 'bg-teal-500',    fmt: 'money' },
                     ].map(s => (
                         <div key={s.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between">
                             <div>

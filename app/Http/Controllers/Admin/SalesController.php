@@ -35,10 +35,13 @@ class SalesController extends Controller
             'today_sales'   => Order::whereDate('created_at', today())->count(),
             'today_revenue' => (float) Order::whereDate('created_at', today())->sum('total'),
             'total_profit'  => (float) DB::table('order_items')
-                ->whereNotNull('cost_price')
-                ->sum(DB::raw('subtotal - cost_price * quantity')),
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('orders.shop_id', app('current_shop')->id)
+                ->whereNotNull('order_items.cost_price')
+                ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity')),
             'today_profit'  => (float) DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->where('orders.shop_id', app('current_shop')->id)
                 ->whereNotNull('order_items.cost_price')
                 ->whereDate('orders.created_at', today())
                 ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity')),

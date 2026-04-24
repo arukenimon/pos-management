@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { ArrowLeft, Banknote, CreditCard, User, Calendar, Hash, TrendingUp } from 'lucide-react';
@@ -55,6 +55,8 @@ const variantLabel = (item: OrderItem) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SalesShow({ order }: ShowPageProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
     const isCash = order.payment_method === 'cash';
 
     const totalProfit = order.items.reduce((sum, item) => {
@@ -68,7 +70,7 @@ export default function SalesShow({ order }: ShowPageProps) {
             header={
                 <div className="flex items-center gap-3">
                     <Link
-                        href={route('admin.sales.index')}
+                        href={`/${shop}/sales`}
                         className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                     >
                         <ArrowLeft className="h-5 w-5" />
@@ -292,7 +294,7 @@ export default function SalesShow({ order }: ShowPageProps) {
                 {/* Actions */}
                 <div className="flex gap-3">
                     <Link
-                        href={route('admin.sales.index')}
+                        href={`/${shop}/sales`}
                         className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                         ← Back to Sales

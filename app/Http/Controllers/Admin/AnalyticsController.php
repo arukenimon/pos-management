@@ -37,6 +37,7 @@ class AnalyticsController extends Controller
         )->sum('quantity');
         $totalProfit = (float) DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.shop_id', app('current_shop')->id)
             ->where('orders.created_at', '>=', $from)
             ->whereNotNull('order_items.cost_price')
             ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity'));
@@ -44,6 +45,7 @@ class AnalyticsController extends Controller
         // ── Revenue trend (per day) ───────────────────────────────────────────
         $profitByDate = DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.shop_id', app('current_shop')->id)
             ->where('orders.created_at', '>=', $from)
             ->whereNotNull('order_items.cost_price')
             ->select(

@@ -1,4 +1,4 @@
-﻿import { Head, router } from '@inertiajs/react';
+﻿import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
@@ -64,6 +64,8 @@ const priceRange = (product: POSProduct): string => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function POSIndex({ products }: POSPageProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
     const [cart, setCart] = useState<CartItem[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash');
@@ -175,7 +177,7 @@ export default function POSIndex({ products }: POSPageProps) {
         }
 
         setProcessing(true);
-        router.post(route('admin.pos.checkout'), {
+        router.post(`/${shop}/pos/checkout`, {
             items: cart.map(i => ({ variant_id: i.variant.id, quantity: i.quantity })),
             payment_method: paymentMethod,
             cash_received: paymentMethod === 'cash' ? parseFloat(cashReceived) : null,

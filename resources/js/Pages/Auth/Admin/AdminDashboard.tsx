@@ -11,7 +11,7 @@ interface Stats {
     today_revenue: number;
     today_orders: number;
     avg_order_value: number;
-    total_customers: number;
+    total_members: number;
 }
 
 interface Movement {
@@ -54,7 +54,8 @@ const movementColor = (type: Movement['type']) => ({
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function AdminDashboard({ auth, stats, recentMovements }: DashboardProps) {
+export default function AdminDashboard({ auth, stats, recentMovements, currentShop }: DashboardProps) {
+    const shop = currentShop?.slug ?? '';
     const statsCards = [
         {
             title: 'Total Revenue',
@@ -71,9 +72,9 @@ export default function AdminDashboard({ auth, stats, recentMovements }: Dashboa
             bg: 'bg-green-500',
         },
         {
-            title: 'Customers',
-            value: stats.total_customers.toLocaleString(),
-            sub: 'Registered',
+            title: 'Team Members',
+            value: stats.total_members.toLocaleString(),
+            sub: 'In this shop',
             icon: <Users className="h-6 w-6" />,
             bg: 'bg-purple-500',
         },
@@ -122,7 +123,7 @@ export default function AdminDashboard({ auth, stats, recentMovements }: Dashboa
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
                         <h3 className="font-semibold text-gray-900 dark:text-white">Recent Stock Activity</h3>
                         <Link
-                            href={route('admin.inventory.movements')}
+                            href={`/${shop}/inventory/movements`}
                             className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
                         >
                             View all →
@@ -178,10 +179,10 @@ export default function AdminDashboard({ auth, stats, recentMovements }: Dashboa
                 {/* Quick Actions */}
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                     {[
-                        { title: 'Add Product',      emoji: '📦', href: route('admin.products.create') },
-                        { title: 'Point of Sale',    emoji: '🛒', href: route('admin.pos.index') },
-                        { title: 'Sales History',    emoji: '📋', href: route('admin.sales.index') },
-                        { title: 'Stock Movements',  emoji: '📊', href: route('admin.inventory.movements') },
+                        { title: 'Add Product',      emoji: '📦', href: `/${shop}/products/create` },
+                        { title: 'Point of Sale',    emoji: '🛒', href: `/${shop}/pos` },
+                        { title: 'Sales History',    emoji: '📋', href: `/${shop}/sales` },
+                        { title: 'Stock Movements',  emoji: '📊', href: `/${shop}/inventory/movements` },
                     ].map((a, i) => (
                         <Link
                             key={i}

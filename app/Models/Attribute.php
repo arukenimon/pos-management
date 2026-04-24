@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToShop;
 use Illuminate\Database\Eloquent\Model;
 
 class Attribute extends Model
 {
-    protected $fillable = ['name'];
+    use BelongsToShop;
+
+    protected $fillable = ['shop_id', 'name'];
 
     public function values()
     {

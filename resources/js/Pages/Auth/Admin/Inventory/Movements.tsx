@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { ArrowUpCircle, ArrowDownCircle, Package, Search, X } from 'lucide-react';
@@ -66,18 +66,20 @@ const typeStyle: Record<Movement['type'], string> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Movements({ movements, filters, summary }: MovementsProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
     const [search, setSearch] = useState(filters.search ?? '');
     const [type,   setType]   = useState(filters.type   ?? '');
     const [from,   setFrom]   = useState(filters.from   ?? '');
     const [to,     setTo]     = useState(filters.to     ?? '');
 
     const apply = () => {
-        router.get(route('admin.inventory.movements'), { search, type, from, to }, { preserveScroll: true });
+        router.get(`/${shop}/inventory/movements`, { search, type, from, to }, { preserveScroll: true });
     };
 
     const clear = () => {
         setSearch(''); setType(''); setFrom(''); setTo('');
-        router.get(route('admin.inventory.movements'), {});
+        router.get(`/${shop}/inventory/movements`, {});
     };
 
     const hasFilters = !!(filters.search || filters.type || filters.from || filters.to);

@@ -26,7 +26,7 @@ class RootRedirectController extends Controller
 
         switch(Auth::user()->role){ // For Route . ->name()
              case "admin":
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('dashboard');
             default:
                 return redirect()->intended('/'); // Default redirect
         }

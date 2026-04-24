@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useCallback } from 'react';
@@ -81,16 +81,18 @@ const variantLabel = (item: OrderItem) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SalesIndex({ orders, filters, analytics }: SalesPageProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
     const [search, setSearch] = useState(filters.search ?? '');
     const [paymentFilter, setPaymentFilter] = useState(filters.payment_method ?? '');
 
     const applyFilters = useCallback((overrides: Record<string, string>) => {
-        router.get(route('admin.sales.index'), {
+        router.get(`/${shop}/sales`, {
             search,
             payment_method: paymentFilter,
             ...overrides,
         }, { preserveScroll: true, preserveState: true, replace: true });
-    }, [search, paymentFilter]);
+    }, [search, paymentFilter, shop]);
 
     const handleSearch = (value: string) => {
         setSearch(value);
@@ -111,7 +113,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All completed transactions</p>
                     </div>
                     <Link
-                        href={route('admin.pos.index')}
+                        href={`/${shop}/pos`}
                         className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
                     >
                         <ShoppingBag className="h-4 w-4" />
@@ -246,7 +248,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                             </td>
                                             <td className="px-4 py-3 text-right">
                                                 <Link
-                                                    href={route('admin.sales.show', order.id)}
+                                                    href={`/${shop}/sales/${order.id}`}
                                                     className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
                                                 >
                                                     View

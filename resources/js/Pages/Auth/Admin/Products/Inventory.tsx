@@ -1,4 +1,4 @@
-﻿import { Head, Link, router, useForm } from '@inertiajs/react';
+﻿import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
@@ -33,6 +33,8 @@ export interface Product {
     })[];
 }
 
+export type InventoryVariant = NonNullable<Product['variants']>[number];
+
 export interface ProductsPageProps extends PageProps {
     products: Product[];
     filters: {
@@ -64,6 +66,8 @@ const totalStock = (product: Product): number =>
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function Products({ auth, products, filters, analytics }: ProductsPageProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
 
     const [searchQuery, setSearchQuery] = useState(filters.search ?? '');
     const [selectedStatus, setSelectedStatus] = useState<string>(filters.status ?? '');
@@ -95,7 +99,7 @@ export default function Products({ auth, products, filters, analytics }: Product
 
     const handleSearch = (value: string) => {
         setSearchQuery(value);
-        router.get(route('admin.products.inventory'), { search: value, status: filters.status }, {
+        router.get(`/${shop}/products/inventory`, { search: value, status: filters.status }, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -107,7 +111,7 @@ export default function Products({ auth, products, filters, analytics }: Product
     }, [filters.status]);
 
     const handleSelectedStatusChange = useCallback((value: string) => {
-        router.get(route('admin.products.inventory'), { search: filters.search, status: value }, {
+        router.get(`/${shop}/products/inventory`, { search: filters.search, status: value }, {
             preserveScroll: true,
             preserveState: true,
             replace: true,
@@ -155,7 +159,7 @@ export default function Products({ auth, products, filters, analytics }: Product
             toast.error('Please select a variant.');
             return;
         }
-        post(route('admin.products.add-stock', selectedVariantId), {
+        post(`/${shop}/products/add-stock/${selectedVariantId}`, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => {
@@ -168,7 +172,7 @@ export default function Products({ auth, products, filters, analytics }: Product
 
     const handleDeleteStock = (inventoryId: number) => {
         if (!window.confirm('Delete this stock batch?')) return;
-        deletestock(route('admin.products.stocks.delete', inventoryId), {
+        deletestock(`/${shop}/products/stocks/delete/${inventoryId}`, {
             preserveScroll: true,
             preserveState: true,
             onSuccess: () => toast.success('Stock batch deleted'),
@@ -192,7 +196,7 @@ export default function Products({ auth, products, filters, analytics }: Product
         return 'text-green-600 dark:text-green-400';
     };
 
-    const variantLabel = (variant: Product['variants'][0]) => {
+    const variantLabel = (variant: InventoryVariant) => {
         if (!variant.attribute_values?.length) return variant.sku;
         return variant.attribute_values.map(av => `${av.attribute?.name}: ${av.value}`).join(' / ');
     };
@@ -375,7 +379,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                                         <div className="flex flex-col gap-2">
                                             <div className="grid grid-cols-2 gap-2">
                                                 <Link
-                                                    href={route('admin.products.edit', product.id)}
+                                                    href={`/${shop}/products/edit/${product.id}`}
                                                     className="inline-flex items-center justify-center px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-md transition-colors"
                                                 >
                                                     <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -18,9 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'Guest' => \App\Http\Middleware\GuestMiddleware::class,
-            'customer' => \App\Http\Middleware\CustomerMiddleware::class,
+            'admin'       => \App\Http\Middleware\AdminMiddleware::class,
+            'Guest'       => \App\Http\Middleware\GuestMiddleware::class,
+            'customer'    => \App\Http\Middleware\CustomerMiddleware::class,
+            'shop'        => \App\Http\Middleware\ResolveShop::class,
+            'shop.member' => \App\Http\Middleware\EnsureShopMember::class,
+            'shop.role'   => \App\Http\Middleware\RequireShopRole::class,
         ]);
         //
     })

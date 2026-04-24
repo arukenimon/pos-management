@@ -29,9 +29,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $currentShop = app()->bound('current_shop') ? app('current_shop') : null;
-        $shopRole    = null;
+        // ResolveShop (route middleware) runs after this (web group) middleware,
+        // so app('current_shop') is not yet bound here. Resolve directly instead.
+        $currentShop = null;
+        $slug = $request->route('shop');
+        if ($slug) {
+            $slugStr = is_string($slug) ? $slug : (is_object($slug) ? $slug->slug : null);
+            if ($slugStr) {
+                $currentShop = \App\Models\Shop::where('slug', $slugStr)->first();
+            }
+        }
 
+        $shopRole = null;
         if ($currentShop && $request->user()) {
             $shopRole = $currentShop->roleOf($request->user());
         }

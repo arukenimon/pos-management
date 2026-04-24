@@ -4,14 +4,18 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Package, Load
 import { toast } from "react-toastify";
 import CustomerLayout from "@/Layouts/CustomerLayout";
 import { Cart } from './Index';
-import { Product } from '../Auth/Admin/Products/Inventory';
-import { only } from 'node:test';
-import { set } from 'date-fns';
-import { ca } from 'date-fns/locale';
+import { Product, ProductVariantInventory } from '../Auth/Admin/Products/Inventory';
+import { ProductVariant } from '../Auth/Admin/Products/ModifyProduct';
 import { useMutation } from '@tanstack/react-query';
 
 
-type CartWithProduct = Cart & { product: Product };
+type CartVariant = ProductVariant & {
+    id: number;
+    product?: Product;
+    inventories?: ProductVariantInventory[];
+};
+
+type CartWithProduct = Cart & { variant?: CartVariant };
 
 
 export default function CheckoutPage({ carts }: { carts: CartWithProduct[] }) {
@@ -65,7 +69,7 @@ export default function CheckoutPage({ carts }: { carts: CartWithProduct[] }) {
 
 
     const subtotal = localCarts && localCarts?.reduce((sum, cart) => {
-        const price = cart.product?.stocks?.[0]?.price || 0;
+        const price = Number(cart.variant?.price ?? cart.variant?.inventories?.[0]?.selling_price ?? 0);
         return sum + (price * cart.quantity);
     }, 0);
 
@@ -134,9 +138,9 @@ export default function CheckoutPage({ carts }: { carts: CartWithProduct[] }) {
                                     </h2>
                                     <div className="space-y-4">
                                         {localCarts?.map((cart) => {
-                                            const product = cart.product;
-                                            const stock = product?.stocks?.[0];
-                                            const price = stock ? Number(stock.price) : 0;
+                                            const product = cart.variant?.product;
+                                            const stock = cart.variant?.inventories?.[0];
+                                            const price = Number(cart.variant?.price ?? stock?.selling_price ?? 0);
                                             const itemTotal = price * cart.quantity;
 
 

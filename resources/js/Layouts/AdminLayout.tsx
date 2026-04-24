@@ -60,6 +60,14 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     // Inject the current shop slug as a Ziggy default so all route() calls
     // automatically resolve to the correct /{shop}/... URLs without any changes
     // in individual page components.
+    // Set synchronously so route() calls on first render resolve correctly.
+    if (currentShop?.slug && (window as any).Ziggy) {
+        (window as any).Ziggy.defaults = {
+            ...(window as any).Ziggy.defaults,
+            shop: currentShop.slug,
+        };
+    }
+
     useEffect(() => {
         if (currentShop?.slug && (window as any).Ziggy) {
             (window as any).Ziggy.defaults = {
@@ -84,23 +92,25 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
         document.documentElement.classList.toggle('dark', nextTheme === 'dark');
     };
 
-    // Define navigation items
+    // Define navigation items — build URLs directly from slug to avoid Ziggy dependency
+    const slug = currentShop?.slug ?? '';
+    const base = slug ? `/${slug}` : '';
     const navigation: SidebarNavItem[] = [
         {
             name: 'Dashboard',
-            href: route('admin.dashboard'),
+            href: `${base}/`,
             icon: HomeIcon,
             routename: 'admin.dashboard',
         },
         {
             name: 'Products',
-            href: route('admin.products.inventory'),
+            href: `${base}/products/inventory`,
             isParent: true,
             icon: ProductsIcon,
             children: [
                 {
                     name: 'Inventory',
-                    href: route('admin.products.inventory'),
+                    href: `${base}/products/inventory`,
                     routename: 'admin.products.inventory',
                     icon: ProductsIcon,
                 },
@@ -108,19 +118,19 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
         },
         {
             name: 'Sales',
-            href: route('admin.sales.index'),
+            href: `${base}/sales`,
             routename: 'admin.sales.index',
             icon: ShoppingCartIcon,
         },
         {
             name: 'POS',
-            href: route('admin.pos.index'),
+            href: `${base}/pos`,
             routename: 'admin.pos.index',
             icon: Computer,
         },
         {
             name: 'Analytics',
-            href: route('admin.analytics'),
+            href: `${base}/analytics`,
             routename: 'admin.analytics',
             icon: ChartIcon,
         },
@@ -132,7 +142,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             children: [
                 {
                     name: 'Team',
-                    href: route('admin.settings.team'),
+                    href: `${base}/settings/team`,
                     routename: 'admin.settings.team',
                     icon: UsersIcon,
                 },

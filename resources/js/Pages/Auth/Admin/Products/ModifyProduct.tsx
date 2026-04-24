@@ -1,4 +1,4 @@
-﻿import { Head, Link, useForm } from '@inertiajs/react';
+﻿import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { FormEventHandler, useEffect, useState } from 'react';
@@ -36,6 +36,8 @@ interface ModifyProductProps extends PageProps {
 // â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ModifyProduct({ auth, product, attributes }: ModifyProductProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
 
     const existingVariants: ProductVariant[] = product?.variants?.map(v => ({
         id: v.id,
@@ -169,9 +171,9 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         if (!product) {
-            post(route('admin.products.create.post'));
+            post(`/${shop}/products/create`);
         } else {
-            put(route('admin.products.edit.post', { id: product.id }));
+            put(`/${shop}/products/edit/${product.id}`);
         }
     };
 
@@ -182,7 +184,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                 <div className="flex items-center justify-between">
                     <div>
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-                            <Link href={route('admin.products.inventory')} className="hover:text-indigo-600 dark:hover:text-indigo-400">
+                            <Link href={`/${shop}/products/inventory`} className="hover:text-indigo-600 dark:hover:text-indigo-400">
                                 Inventory
                             </Link>
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +197,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         </h1>
                     </div>
                     <Link
-                        href={route('admin.products.inventory')}
+                        href={`/${shop}/products/inventory`}
                         className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                     >
                         <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -493,7 +495,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                     )}
                                 </button>
                                 <Link
-                                    href={route('admin.products.inventory')}
+                                    href={`/${shop}/products/inventory`}
                                     className="w-full inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                                 >
                                     Cancel

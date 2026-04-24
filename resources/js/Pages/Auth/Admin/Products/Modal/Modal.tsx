@@ -1,17 +1,21 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/Components/ui/dialog';
 import { useState } from 'react';
-import { Product, stocks } from '../Inventory';
+import { Product } from '../Inventory';
 import { toast } from 'react-toastify';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { productQueryOptions } from '@/queryOptions/Products/queryOptions';
 import { Loader2 } from 'lucide-react';
-import { useForm } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
 
 export default function Modal({ open, onOpenChange, selectedProduct }:
     { open: boolean, onOpenChange: (open: boolean) => void, selectedProduct: Product | null }) {
 
 
+
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
 
     //const [products, setProducts] = useState<Product[]>(initialProducts || []);
     // const [searchQuery, setSearchQuery] = useState('');
@@ -21,14 +25,16 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
     const [stockModalOpen, setStockModalOpen] = useState(false);
     const [selectedProductForStock, setSelectedProductForStock] = useState<Product | null>(null);
     const [stockQuantity, setStockQuantity] = useState<number>(0);
+    const effectiveProduct = selectedProductForStock ?? selectedProduct;
+    const firstVariant = effectiveProduct?.variants?.[0] ?? null;
 
     const queryClient = useQueryClient();
 
     const { data, setData, post, delete: deletestock, put, processing, errors, recentlySuccessful, reset, clearErrors } = useForm({
         quantity: 0,
-        price: 0,
+        cost_price: 0,
     })
-    const { data: stocksData, isFetching } = useQuery(productQueryOptions({ selectedProductForStock, reset }))
+    const { data: stocksData, isFetching } = useQuery(productQueryOptions({ selectedProductForStock: effectiveProduct, reset }))
 
 
 
@@ -36,8 +42,12 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
         // if (!selectedProductForStock || data.quantity <= 0) {
         //     return;
         // }
+        if (!firstVariant?.id) {
+            toast.error('Please select a product variant first');
+            return;
+        }
 
-        post(route('admin.products.add-stock', selectedProductForStock?.id), {
+        post(`/${shop}/products/add-stock/${firstVariant.id}`, {
             onSuccess: () => {
                 toast.success('Stock added successfully');
                 queryClient.invalidateQueries({
@@ -53,7 +63,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
 
     const handleDeleteStock = (stockId: number) => {
         if (window.confirm('Are you sure you want to delete this stock batch?')) {
-            deletestock(route('admin.products.stocks.delete', stockId), {
+            deletestock(`/${shop}/products/stocks/delete/${stockId}`, {
                 onSuccess: () => {
                     toast.success('Stock batch deleted successfully');
                     queryClient.invalidateQueries({
@@ -117,7 +127,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                             <div>
                                 <DialogTitle>Add Stock</DialogTitle>
                                 <DialogDescription>
-                                    Add stock quantity for <span className="font-semibold text-foreground">{selectedProductForStock?.name}</span>
+                                    Add stock quantity for <span className="font-semibold text-foreground">{effectiveProduct?.name}</span>
                                 </DialogDescription>
                             </div>
                         </div>
@@ -152,7 +162,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                         </div>
                         <div>
                             <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
-                                Price per Stock
+                                Cost Price
                             </label>
                             <div className="relative">
                                 <input
@@ -161,8 +171,8 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                     id="stock-price"
                                     min="0"
                                     step="0.01"
-                                    value={data.price}
-                                    onChange={(e) => setData('price', parseFloat(e.target.value) || 0)}
+                                    value={data.cost_price}
+                                    onChange={(e) => setData('cost_price', parseFloat(e.target.value) || 0)}
                                     className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
                                     placeholder="0.00"
                                 />
@@ -170,9 +180,9 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                     <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
                                 </div>
                             </div>
-                            {errors.price && (
+                            {errors.cost_price && (
                                 <p className="mt-2 text-sm text-red-600" id="price-error">
-                                    {errors.price}
+                                    {errors.cost_price}
                                 </p>
                             )}
                         </div>
@@ -181,12 +191,12 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                         <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-500 dark:text-gray-400">Product SKU:</span>
-                                <span className="font-medium">{selectedProductForStock?.sku || 'N/A'}</span>
+                                <span className="font-medium">{firstVariant?.sku || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between text-sm mt-1">
                                 <span className="text-gray-500 dark:text-gray-400">Status:</span>
-                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${selectedProductForStock && getStatusBadge(selectedProductForStock.status).bg}`}>
-                                    {selectedProductForStock && getStatusBadge(selectedProductForStock.status).title}
+                                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${effectiveProduct && getStatusBadge(effectiveProduct.status).bg}`}>
+                                    {effectiveProduct && getStatusBadge(effectiveProduct.status).title}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm mt-1">
@@ -216,7 +226,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                                         {/* <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                             </svg> */}
-                                                        ₱{batch?.price || 'N/A'}
+                                                        P{Number(batch?.selling_price ?? 0).toFixed(2)}
                                                     </span>
                                                     <span className="flex items-center gap-1">
                                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

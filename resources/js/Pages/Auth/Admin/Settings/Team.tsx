@@ -1,4 +1,4 @@
-import { Head, useForm, router } from '@inertiajs/react';
+import { Head, useForm, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState } from 'react';
@@ -25,6 +25,8 @@ const ROLE_COLORS = {
 const ROLE_LABELS = { owner: 'Owner', manager: 'Manager', cashier: 'Cashier' };
 
 export default function Team({ shop, members, auth }: TeamProps) {
+    const { currentShop } = usePage<PageProps>().props;
+    const shopSlug = currentShop?.slug ?? '';
     const [showInvite, setShowInvite] = useState(false);
 
     const invite = useForm({ email: '', role: 'cashier' as Member['role'] });
@@ -32,19 +34,19 @@ export default function Team({ shop, members, auth }: TeamProps) {
 
     const handleInvite = (e: React.FormEvent) => {
         e.preventDefault();
-        invite.post(route('admin.settings.team.invite'), {
+        invite.post(`/${shopSlug}/settings/team`, {
             preserveScroll: true,
             onSuccess: () => { invite.reset(); setShowInvite(false); },
         });
     };
 
     const handleRoleChange = (userId: number, newRole: Member['role']) => {
-        router.put(route('admin.settings.team.update', userId), { role: newRole }, { preserveScroll: true });
+        router.put(`/${shopSlug}/settings/team/${userId}`, { role: newRole }, { preserveScroll: true });
     };
 
     const handleRemove = (userId: number, name: string) => {
         if (!confirm(`Remove ${name} from this shop?`)) return;
-        router.delete(route('admin.settings.team.remove', userId), { preserveScroll: true });
+        router.delete(`/${shopSlug}/settings/team/${userId}`, { preserveScroll: true });
     };
 
     const isOwner = auth.shopRole === 'owner';

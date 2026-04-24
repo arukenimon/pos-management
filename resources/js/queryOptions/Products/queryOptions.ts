@@ -1,11 +1,11 @@
-import { Product, stocks } from "@/Pages/Auth/Admin/Products/Inventory";
+import { Product, ProductVariantInventory } from "@/Pages/Auth/Admin/Products/Inventory";
 import { queryOptions } from "@tanstack/react-query"
 
 
 export const productQueryOptions = ({ selectedProductForStock, reset }: { selectedProductForStock: Product | null, reset: () => void }) => queryOptions(
     {
         queryKey: ['stocks', selectedProductForStock?.id],
-        queryFn: async (): Promise<stocks[]> => {
+        queryFn: async (): Promise<ProductVariantInventory[]> => {
             reset();
             if (!selectedProductForStock) return [];
             const response = await fetch(`/api/admin/products/stocks/${selectedProductForStock.id}`, {

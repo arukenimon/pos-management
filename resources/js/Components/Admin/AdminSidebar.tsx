@@ -100,7 +100,7 @@ const AdminSidebar = ({
                     </button>
                 ) : (
                     <Link
-                        href={item.routename ? route(item.routename) : ''}
+                        href={item.href}
                         onClick={onCloseMobileMenu}
                         className={`
                             flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg
@@ -160,7 +160,7 @@ const AdminSidebar = ({
                 <div className="flex h-full flex-col">
                     {/* Logo */}
                     <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
-                        <Link href="/admin/dashboard" className="flex items-center gap-2">
+                        <Link href={navigation[0]?.href ?? '/'} className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                                 <span className="text-white font-bold text-lg">A</span>
                             </div>

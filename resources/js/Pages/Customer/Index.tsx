@@ -9,14 +9,38 @@ import CustomerLayout from "@/Layouts/CustomerLayout";
 export interface Cart {
     id: number;
     customer_id: number;
-    product_id: number;
+    product_id?: number;
+    product_variant_id: number;
     quantity: number;
     created_at: string;
     updated_at: string;
 }
 
+type CustomerStock = {
+    id: number;
+    product_id?: number;
+    product_variant_id?: number;
+    quantity: number;
+    price?: number;
+    selling_price?: number;
+    created_at: string;
+    updated_at: string;
+};
+
+type ProductWithCartVariant = NonNullable<Product['variants']>[number] & {
+    cart_items?: Cart[];
+    inventories?: CustomerStock[];
+};
+
+type ProductWithCart = Omit<Product, 'variants'> & {
+    sku?: string;
+    stocks?: CustomerStock[];
+    cart_items?: Cart[];
+    variants?: ProductWithCartVariant[];
+};
+
 // Mock data for sari-sari store items
-const mockProducts: Product[] = [
+const mockProducts: ProductWithCart[] = [
     {
         id: 1,
         name: "San Miguel Beer Pale Pilsen",
@@ -139,8 +163,6 @@ const mockProducts: Product[] = [
     }
 ];
 
-type ProductWithCart = Product & { cart_items: Cart[] };
-
 export default function CustomerDashboard({
     products
 }: { products: ProductWithCart[] }) {
@@ -159,14 +181,49 @@ export default function CustomerDashboard({
         console?.log(products);
     }, [products])
 
-    const filteredProducts = useMemo(() => products, [products]);
+    const variantQuantity = (variant?: ProductWithCartVariant | null) =>
+        variant?.inventories?.reduce((sum, inventory) => sum + inventory.quantity, 0) ?? 0;
+
+    const primaryVariant = (product: ProductWithCart) =>
+        product.variants?.find(variant => variantQuantity(variant) > 0) ?? product.variants?.[0] ?? null;
+
+    const stockInfo = (product: ProductWithCart) => {
+        const legacyStock = product.stocks?.[0];
+        if (legacyStock) {
+            return {
+                quantity: legacyStock.quantity,
+                price: Number(legacyStock.price ?? legacyStock.selling_price ?? 0),
+                variantId: legacyStock.product_variant_id,
+            };
+        }
+
+        const variant = primaryVariant(product);
+        if (!variant) return null;
+
+        return {
+            quantity: variantQuantity(variant),
+            price: Number(variant.price ?? variant.inventories?.[0]?.selling_price ?? 0),
+            variantId: variant.id,
+        };
+    };
+
+    const filteredProducts = useMemo(() => {
+        const query = searchQuery.trim().toLowerCase();
+        if (!query) return products;
+
+        return products.filter(product =>
+            product.name.toLowerCase().includes(query) ||
+            product.description?.toLowerCase().includes(query) ||
+            product.variants?.some(variant => variant.sku.toLowerCase().includes(query))
+        );
+    }, [products, searchQuery]);
 
 
     const { post, processing, errors, clearErrors, reset, recentlySuccessful } = useForm({
         product_id: '',
     })
 
-    const addToCart = (product: Product) => {
+    const addToCart = (product: ProductWithCart) => {
         // Check if already in cart
         // const existingItem = cart?.find(item => item?.product?.id === product?.id);
         // if (existingItem) {
@@ -177,7 +234,14 @@ export default function CustomerDashboard({
         // Add to cart
         //setCart([...cart, { product, quantity: 1 }]);
 
-        post(route('customer.cart.add', { product_id: product.id }), {
+        const stock = stockInfo(product);
+        if (!stock?.variantId) {
+            toast.error(`"${product.name}" has no available variant to add.`);
+            setAddingToCart(null);
+            return;
+        }
+
+        post(route('customer.cart.add', { variant_id: stock.variantId }), {
             // onSuccess: () => {
             //     toast.success(`Product "${product.name}" added to cart!`);
             // },
@@ -191,8 +255,20 @@ export default function CustomerDashboard({
         }, 600);
     };
 
-    const isInCart = (productId: number) => {
-        return products?.some(item => item?.cart_items?.some(cartItem => cartItem.product_id === productId));
+    const isInCart = (product: ProductWithCart) => {
+        const variantIds = product.variants
+            ?.map(variant => variant.id)
+            .filter((id): id is number => typeof id === 'number') ?? [];
+
+        return (
+            product.cart_items?.some(cartItem => cartItem.product_id === product.id) ||
+            product.variants?.some(variant =>
+                variant.cart_items?.some(cartItem => cartItem.product_variant_id === variant.id)
+            ) ||
+            products?.some(item =>
+                item.cart_items?.some(cartItem => variantIds.includes(cartItem.product_variant_id))
+            )
+        ) ?? false;
     };
 
     // const totalCartItems = cart?.reduce((sum, item) => sum + item?.quantity, 0);
@@ -249,7 +325,8 @@ export default function CustomerDashboard({
             {/* Products Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                 {filteredProducts?.map((product) => {
-                    const stock = product?.stocks ? product.stocks[0] : null;
+                    const stock = stockInfo(product);
+                    const productIsInCart = isInCart(product);
                     const isLowStock = stock && stock.quantity < 30;
 
                     return (
@@ -294,8 +371,8 @@ export default function CustomerDashboard({
 
                                 <button
                                     onClick={() => addToCart(product)}
-                                    disabled={isInCart(product?.id) || !stock || stock?.quantity === 0 || processing}
-                                    className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 ${isInCart(product?.id)
+                                    disabled={productIsInCart || !stock || stock?.quantity === 0 || processing}
+                                    className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 ${productIsInCart
                                         ? 'bg-green-500 text-white cursor-not-allowed'
                                         : !stock || stock?.quantity === 0
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -305,7 +382,7 @@ export default function CustomerDashboard({
                                 >
                                     {!stock || stock?.quantity === 0
                                         ? "Out of Stock"
-                                        : isInCart(product?.id)
+                                        : productIsInCart
                                             ? "✓ Added"
                                             : "Add to order"
                                     }
@@ -325,5 +402,3 @@ export default function CustomerDashboard({
         </CustomerLayout>
     );
 }
-
-

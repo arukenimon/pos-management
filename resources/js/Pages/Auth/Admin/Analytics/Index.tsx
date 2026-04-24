@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import {
@@ -86,8 +86,11 @@ export default function AnalyticsIndex({
     period, summary, revenueTrend, topProducts, paymentSplit, stockTrend, hourlySales,
 }: AnalyticsProps) {
 
+    const { currentShop } = usePage<PageProps>().props;
+    const shop = currentShop?.slug ?? '';
+
     const changePeriod = (p: string) => {
-        router.get(route('admin.analytics'), { period: p }, { preserveScroll: true });
+        router.get(`/${shop}/analytics`, { period: p }, { preserveScroll: true });
     };
 
     const noData = (arr: unknown[]) => arr.length === 0;

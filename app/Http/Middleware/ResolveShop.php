@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Shop;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class ResolveShop
@@ -21,6 +22,7 @@ class ResolveShop
 
         // Bind the current shop into the service container so models/controllers can access it
         app()->instance('current_shop', $shop);
+        URL::defaults(['shop' => $shop->slug]);
 
         // Also make it available on the request for convenience
         $request->attributes->set('current_shop', $shop);

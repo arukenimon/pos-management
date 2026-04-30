@@ -47,6 +47,7 @@ const PERIODS = [
     { value: '7',     label: '7 days' },
     { value: '30',    label: '30 days' },
     { value: '90',    label: '90 days' },
+    { value: 'year',  label: 'Year' },
 ];
 
 // Shared chart theme
@@ -81,6 +82,14 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
+
+const PERIOD_LABELS: Record<string, string> = {
+    today: 'Today',
+    '7':   'Last 7 Days',
+    '30':  'Last 30 Days',
+    '90':  'Last 90 Days',
+    year:  `${new Date().getFullYear()} — by month`,
+};
 
 export default function AnalyticsIndex({
     period, summary, revenueTrend, topProducts, paymentSplit, stockTrend, hourlySales,
@@ -142,8 +151,8 @@ export default function AnalyticsIndex({
                     <KpiCard title="Units Sold" value={summary.totalUnitsSold.toLocaleString()} sub="Items sold"         icon={<Package className="h-5 w-5" />}      color="bg-orange-500" />
                 </div>
 
-                {/* Revenue + Orders trend */}
-                <ChartCard title="Revenue, Profit & Orders Over Time">
+                {/* Revenue + Orders trend — follows selected period */}
+                <ChartCard title={`Revenue, Profit & Orders — ${PERIOD_LABELS[period] ?? period}`}>
                     {noData(revenueTrend) ? <EmptyState /> : (
                         <ResponsiveContainer width="100%" height={260}>
                             <AreaChart data={revenueTrend} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>

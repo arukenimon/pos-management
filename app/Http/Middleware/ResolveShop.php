@@ -18,13 +18,11 @@ class ResolveShop
             abort(404);
         }
 
-        $shop = Shop::where('slug', is_string($slug) ? $slug : $slug->slug)->firstOrFail();
+        $slugStr = is_string($slug) ? $slug : $slug->slug;
+        $shop = Shop::where('slug', $slugStr)->firstOrFail();
 
-        // Bind the current shop into the service container so models/controllers can access it
         app()->instance('current_shop', $shop);
         URL::defaults(['shop' => $shop->slug]);
-
-        // Also make it available on the request for convenience
         $request->attributes->set('current_shop', $shop);
 
         return $next($request);

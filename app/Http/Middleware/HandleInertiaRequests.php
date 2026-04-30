@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use Symfony\Component\HttpFoundation\Response;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -16,10 +17,31 @@ class HandleInertiaRequests extends Middleware
 
     /**
      * Determine the current asset version.
+     *
+     * Returns null in local dev (Vite dev server running) so Inertia never
+     * triggers a 409 version-mismatch redirect during development.
      */
     public function version(Request $request): ?string
     {
+        if (app()->environment('local') && file_exists(public_path('hot'))) {
+            return null;
+        }
+
         return parent::version($request);
+    }
+
+    /**
+     * In local dev, skip the 409 redirect and return the real response instead.
+     * This prevents the broken full-page-reload cycle when the manifest and the
+     * Vite dev server are out of sync.
+     */
+    public function onVersionChange(Request $request, Response $response): Response
+    {
+        if (app()->environment('local') && file_exists(public_path('hot'))) {
+            return $response;
+        }
+
+        return parent::onVersionChange($request, $response);
     }
 
     /**

@@ -54,7 +54,7 @@ class SalesController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($shop, $id)
     {
         $order = Order::with([
             'cashier:id,name',

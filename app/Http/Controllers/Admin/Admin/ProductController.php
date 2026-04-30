@@ -66,7 +66,7 @@ class ProductController extends Controller
         ]);
     }
 
-    function DeleteProductStock($id)
+    function DeleteProductStock($shop, $id)
     {
         $inventory = Inventory::findOrFail($id);
 
@@ -84,7 +84,7 @@ class ProductController extends Controller
         return redirect()->route('admin.products.inventory');
     }
 
-    function AddStock(Request $request, $variant_id)
+    function AddStock($shop, Request $request, $variant_id)
     {
         $request->validate([
             'quantity'   => 'required|integer|min:1',
@@ -120,7 +120,7 @@ class ProductController extends Controller
         ]);
     }
 
-    function EditProductPage($id)
+    function EditProductPage($shop, $id)
     {
         $product = Product::with([
             'variants.inventories',
@@ -179,7 +179,7 @@ class ProductController extends Controller
         return redirect()->route('admin.products.inventory')->with('success', 'Product added successfully');
     }
 
-    function UpdateProduct(Request $request, $id)
+    function UpdateProduct($shop, Request $request, $id)
     {
         $request->validate([
             'name'                              => 'required|string|max:255',

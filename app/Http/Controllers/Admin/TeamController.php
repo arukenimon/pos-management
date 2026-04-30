@@ -60,7 +60,7 @@ class TeamController extends Controller
         return back()->with('success', "{$user->name} has been added to the team as {$request->role}.");
     }
 
-    public function updateRole(Request $request, int $userId)
+    public function updateRole($shop, Request $request, int $userId)
     {
         $request->validate(['role' => 'required|in:owner,manager,cashier']);
 
@@ -70,7 +70,7 @@ class TeamController extends Controller
         return back()->with('success', 'Role updated.');
     }
 
-    public function remove(int $userId)
+    public function remove($shop, int $userId)
     {
         $shop    = app('current_shop');
         $current = request()->user();

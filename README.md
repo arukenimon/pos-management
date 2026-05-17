@@ -153,7 +153,6 @@ pos/
 │   │   │   ├── SalesController.php           # Orders list & detail
 │   │   │   ├── StockMovementController.php   # Movements log page
 │   │   │   └── Admin/ProductController.php   # Product & inventory CRUD
-│   │   └── CustomerController.php
 │   └── Models/
 │       ├── Product.php
 │       ├── ProductVariant.php
@@ -161,7 +160,6 @@ pos/
 │       ├── StockMovement.php      # Movement log entries
 │       ├── Order.php
 │       ├── OrderItem.php
-│       ├── Cart.php
 │       └── User.php
 ├── database/
 │   └── migrations/                # Includes stock_movements migration

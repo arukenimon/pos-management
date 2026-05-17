@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\TeamInvitationNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -27,10 +28,6 @@ class TeamController extends Controller
         ]);
     }
 
-    /**
-     * Add an existing user to the shop, or create a new account for them.
-     * Either way, an email invitation system can replace this later.
-     */
     public function invite(Request $request)
     {
         $request->validate([
@@ -38,26 +35,35 @@ class TeamController extends Controller
             'role'  => 'required|in:owner,manager,cashier',
         ]);
 
-        $shop = app('current_shop');
+        $shop     = app('current_shop');
+        $inviter  = $request->user();
 
-        // Find or create the user
-        $user = User::firstOrCreate(
-            ['email' => $request->email],
-            [
-                'name'     => Str::before($request->email, '@'),
-                'password' => Hash::make(Str::random(16)),
-                'role'     => 'cashier',
-            ]
-        );
+        $existingUser = User::where('email', $request->email)->first();
+        $isNewUser    = $existingUser === null;
 
-        // Attach or update the pivot role
+        $user = $existingUser ?? User::create([
+            'name'     => Str::before($request->email, '@'),
+            'email'    => $request->email,
+            'password' => Hash::make(Str::random(32)),
+            'role'     => 'cashier',
+        ]);
+
         if ($shop->hasMember($user)) {
             $shop->members()->updateExistingPivot($user->id, ['role' => $request->role]);
         } else {
             $shop->members()->attach($user->id, ['role' => $request->role]);
         }
 
-        return back()->with('success', "{$user->name} has been added to the team as {$request->role}.");
+        $user->notify(new TeamInvitationNotification(
+            shop:        $shop,
+            role:        $request->role,
+            inviterName: $inviter->name,
+            isNewUser:   $isNewUser,
+        ));
+
+        $verb = $isNewUser ? 'invited' : 'added';
+
+        return back()->with('success', "{$user->name} has been {$verb} to the team as {$request->role}. An invitation email has been sent.");
     }
 
     public function updateRole($shop, Request $request, int $userId)

@@ -7,15 +7,19 @@ use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\StockMovementController;
 use App\Http\Controllers\Admin\TeamController;
-use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopSelectorController;
 use Illuminate\Support\Facades\Route;
 
+// Public marketing / SEO landing page.
+Route::view('/', 'welcome')->name('home');
+
 // Shop selection for users belonging to multiple shops.
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/select-shop', [ShopSelectorController::class, 'index'])->name('shop.select');
     Route::post('/select-shop', [ShopSelectorController::class, 'store'])->name('shop.select.store');
+
+    Route::view('/onboarding', 'onboarding')->name('onboarding');
 
     Route::get('/dashboard', function () {
         $shops = request()->user()?->shops;
@@ -28,22 +32,12 @@ Route::middleware(['auth'])->group(function () {
             return redirect()->route('shop.select');
         }
 
-        return redirect()->route('admin.customers.index');
+        return redirect()->route('onboarding');
     })->name('dashboard');
 });
 
-// Customer-facing routes.
-Route::get('/', [CustomerController::class, 'index'])->name('admin.customers.index');
-
-Route::middleware(['customer'])->group(function () {
-    Route::post('/cart/add/{variant_id}', [CustomerController::class, 'addToCart'])->name('customer.cart.add');
-    Route::delete('/cart/remove/{cart_id}', [CustomerController::class, 'removeFromCart'])->name('customer.cart.remove');
-    Route::get('/checkout', [CustomerController::class, 'checkout'])->name('customer.checkout');
-    Route::put('/cart/quantity/update/{cart_id}', [CustomerController::class, 'updateCartQuantity'])->name('customer.cart.update_quantity');
-});
-
 // Profile.
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -53,7 +47,7 @@ require __DIR__.'/auth.php';
 
 // Per-shop admin routes. Keep this catch-all group after fixed routes like /login and /profile.
 Route::prefix('{shop:slug}')
-    ->middleware(['shop', 'shop.member'])
+    ->middleware(['verified', 'shop', 'shop.member'])
     ->group(function () {
         // Full access: owner + manager
         Route::middleware(['shop.role:owner,manager'])->group(function () {

@@ -70,7 +70,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user'      => $request->user(),
+                'user'      => $request->user()?->hasVerifiedEmail() ? $request->user() : null,
                 'shopRole'  => $shopRole,
             ],
             'currentShop' => $currentShop ? [

@@ -43,12 +43,12 @@ export default function Login({
                         className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 translate-x-1/4 translate-y-1/4 rounded-full bg-purple-400/30 blur-3xl"
                     />
 
-                    <Link href="/" className="relative z-10 flex items-center gap-3">
+                    <a href="/" className="relative z-10 flex items-center gap-3">
                         <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 backdrop-blur">
                             <Store className="h-5 w-5" />
                         </div>
                         <span className="text-lg font-semibold tracking-tight">POS</span>
-                    </Link>
+                    </a>
 
                     <div className="relative z-10 max-w-md space-y-6">
                         <h1 className="text-4xl font-bold leading-tight tracking-tight">
@@ -70,7 +70,7 @@ export default function Login({
                 {/* Form panel */}
                 <div className="flex items-center justify-center px-6 py-12 sm:px-12">
                     <div className="w-full max-w-md">
-                        <Link
+                        <a
                             href="/"
                             className="mb-8 inline-flex items-center gap-2 lg:hidden"
                         >
@@ -80,7 +80,7 @@ export default function Login({
                             <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
                                 POS
                             </span>
-                        </Link>
+                        </a>
 
                         <div className="mb-8">
                             <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">

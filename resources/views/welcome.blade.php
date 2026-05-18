@@ -67,7 +67,7 @@
                 Point of sale, built for the way you actually run your shop.
             </h1>
             <p class="mt-6 text-lg md:text-xl text-neutral-600 max-w-2xl mx-auto">
-                {{ $appName }} gives single-location retailers and multi-shop brands one place to ring up sales,
+                {{ $appName }} gives single-location retailers and XXmulti-shop brands one place to ring up sales,
                 track inventory, and understand what's working — without the spreadsheets.
             </p>
             <div class="mt-10 flex items-center justify-center gap-3">

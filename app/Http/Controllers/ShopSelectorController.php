@@ -24,8 +24,11 @@ class ShopSelectorController extends Controller
     {
         $request->validate(['slug' => 'required|string|exists:shops,slug']);
 
-        $shop = Auth::user()->shops()->where('slug', $request->slug)->firstOrFail();
+        $user = Auth::user();
+        $shop = $user->shops()->where('slug', $request->slug)->firstOrFail();
 
-        return redirect()->route('admin.dashboard', ['shop' => $shop->slug]);
+        $route = $shop->roleOf($user) === 'cashier' ? 'admin.pos.index' : 'admin.dashboard';
+
+        return redirect()->route($route, ['shop' => $shop->slug]);
     }
 }

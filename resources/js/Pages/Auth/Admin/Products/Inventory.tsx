@@ -211,7 +211,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Manage your product inventory</p>
                     </div>
                     <Link
-                        href="/admin/products/create"
+                        href={`/${shop}/products/create`}
                         className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                     >
                         <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

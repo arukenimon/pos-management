@@ -1,6 +1,6 @@
 import { useEffect, useState, PropsWithChildren } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import AdminSidebar, { SidebarNavItem } from '@/Components/Admin/AdminSidebar';
+import AdminSidebar, { SidebarNavItem, ShopRole } from '@/Components/Admin/AdminSidebar';
 import { PageProps, Shop } from '@/types';
 
 import { ToastContainer } from 'react-toastify';
@@ -95,24 +95,27 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     // Define navigation items — build URLs directly from slug to avoid Ziggy dependency
     const slug = currentShop?.slug ?? '';
     const base = slug ? `/${slug}` : '';
-    const navigation: SidebarNavItem[] = [
+    const allNavigation: SidebarNavItem[] = [
         {
             name: 'Dashboard',
             href: `${base}/`,
             icon: HomeIcon,
             routename: 'admin.dashboard',
+            roles: ['owner', 'manager'],
         },
         {
             name: 'Products',
             href: `${base}/products/inventory`,
             isParent: true,
             icon: ProductsIcon,
+            roles: ['owner', 'manager'],
             children: [
                 {
                     name: 'Inventory',
                     href: `${base}/products/inventory`,
                     routename: 'admin.products.inventory',
                     icon: ProductsIcon,
+                    roles: ['owner', 'manager'],
                 },
             ],
         },
@@ -121,34 +124,56 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             href: `${base}/sales`,
             routename: 'admin.sales.index',
             icon: ShoppingCartIcon,
+            roles: ['owner', 'manager'],
         },
         {
             name: 'POS',
             href: `${base}/pos`,
             routename: 'admin.pos.index',
             icon: Computer,
+            roles: ['owner', 'manager', 'cashier'],
         },
         {
             name: 'Analytics',
             href: `${base}/analytics`,
             routename: 'admin.analytics',
             icon: ChartIcon,
+            roles: ['owner', 'manager'],
         },
         {
             name: 'Settings',
             href: '#',
             icon: SettingsIcon,
             isParent: true,
+            roles: ['owner'],
             children: [
                 {
                     name: 'Team',
                     href: `${base}/settings/team`,
                     routename: 'admin.settings.team',
                     icon: UsersIcon,
+                    roles: ['owner'],
                 },
             ],
         },
     ];
+
+    const shopRole: ShopRole | null = auth?.shopRole ?? null;
+    const isAllowed = (item: SidebarNavItem): boolean =>
+        !item.roles || (shopRole !== null && item.roles.includes(shopRole));
+
+    const filterNav = (items: SidebarNavItem[]): SidebarNavItem[] =>
+        items
+            .filter(isAllowed)
+            .map(item => {
+                if (!item.children) return item;
+                const children = filterNav(item.children);
+                if (children.length === 0) return null;
+                return { ...item, children };
+            })
+            .filter((item): item is SidebarNavItem => item !== null);
+
+    const navigation = filterNav(allNavigation);
 
     const queryClient = new QueryClient();
     return (

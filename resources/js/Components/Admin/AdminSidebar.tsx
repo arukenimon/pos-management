@@ -1,6 +1,9 @@
 import { Link, usePage } from '@inertiajs/react';
 import { Route } from 'lucide-react';
 import { PropsWithChildren, useEffect, useState } from 'react';
+import { PageProps } from '@/types';
+
+export type ShopRole = 'owner' | 'manager' | 'cashier';
 
 export interface SidebarNavItem {
     name: string;
@@ -10,6 +13,7 @@ export interface SidebarNavItem {
     children?: SidebarNavItem[];
     isParent?: boolean | false;
     routename?: string;
+    roles?: ShopRole[];
 }
 
 interface AdminSidebarProps {
@@ -25,7 +29,10 @@ const AdminSidebar = ({
     isMobileMenuOpen = false,
     onCloseMobileMenu
 }: AdminSidebarProps) => {
-    const url = usePage().url;
+    const { url, props } = usePage<PageProps>();
+    const shopRole = props.auth?.shopRole ?? null;
+    const roleLabel = shopRole ? shopRole.charAt(0).toUpperCase() + shopRole.slice(1) : 'Admin';
+    const roleInitial = roleLabel.charAt(0);
 
     // Initialize expandedItems with parent items whose children are active
     const [expandedItems, setExpandedItems] = useState<Set<string>>(() => {
@@ -162,10 +169,10 @@ const AdminSidebar = ({
                     <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
                         <Link href={navigation[0]?.href ?? '/'} className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">A</span>
+                                <span className="text-white font-bold text-lg">{roleInitial}</span>
                             </div>
                             <span className="text-xl font-bold text-gray-900 dark:text-white">
-                                Admin
+                                {roleLabel}
                             </span>
                         </Link>
 

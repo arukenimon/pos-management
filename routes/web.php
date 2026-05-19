@@ -22,10 +22,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('/onboarding', 'onboarding')->name('onboarding');
 
     Route::get('/dashboard', function () {
-        $shops = request()->user()?->shops;
+        $user = request()->user();
+        $shops = $user?->shops;
 
         if ($shops?->count() === 1) {
-            return redirect()->route('admin.dashboard', ['shop' => $shops->first()->slug]);
+            $shop = $shops->first();
+            $route = $shop->roleOf($user) === 'cashier' ? 'admin.pos.index' : 'admin.dashboard';
+            return redirect()->route($route, ['shop' => $shop->slug]);
         }
 
         if ($shops?->count() > 1) {

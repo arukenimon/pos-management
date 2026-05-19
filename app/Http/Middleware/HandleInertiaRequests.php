@@ -62,6 +62,12 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // Fallback so shop-agnostic pages (e.g. /profile) can still render the
+        // admin sidebar with working links. Defaults to the user's first shop.
+        if (! $currentShop && $request->user()) {
+            $currentShop = $request->user()->shops()->first();
+        }
+
         $shopRole = null;
         if ($currentShop && $request->user()) {
             $shopRole = $currentShop->roleOf($request->user());

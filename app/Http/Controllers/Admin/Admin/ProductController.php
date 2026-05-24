@@ -91,13 +91,12 @@ class ProductController extends Controller
             'cost_price' => 'required|numeric|min:0',
         ]);
 
-        $variant = \App\Models\ProductVariant::findOrFail($variant_id);
+        \App\Models\ProductVariant::findOrFail($variant_id);
 
         $inventory = Inventory::create([
             'product_variant_id' => $variant_id,
             'quantity'           => $request->quantity,
             'cost_price'         => $request->cost_price,
-            'selling_price'      => $variant->price ?? 0,
         ]);
 
         StockMovement::create([

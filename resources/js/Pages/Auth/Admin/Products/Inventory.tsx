@@ -15,7 +15,6 @@ export interface ProductVariantInventory {
     product_variant_id: number;
     quantity: number;
     cost_price: number;
-    selling_price: number;
     created_at: string;
     updated_at: string;
 }
@@ -517,7 +516,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                                                             {inv.quantity} units
                                                         </span>
                                                         <span className="ml-2 text-xs text-gray-500">
-                                                            Cost P{Number(inv.cost_price).toFixed(2)} / Sell P{Number(inv.selling_price).toFixed(2)}
+                                                            Cost P{Number(inv.cost_price).toFixed(2)} / Sell P{Number(selectedVariant?.price ?? 0).toFixed(2)}
                                                         </span>
                                                     </div>
                                                     <button

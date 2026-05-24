@@ -14,7 +14,6 @@ class Inventory extends Model
         'product_variant_id',
         'quantity',
         'cost_price',
-        'selling_price',
     ];
 
     public function variant()

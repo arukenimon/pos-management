@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\SalesController;
 use App\Http\Controllers\Admin\StockMovementController;
 use App\Http\Controllers\Admin\TeamController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopSelectorController;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notification bell — per-user, shop-agnostic.
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
 
 require __DIR__.'/auth.php';

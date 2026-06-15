@@ -73,6 +73,21 @@ class HandleInertiaRequests extends Middleware
             $shopRole = $currentShop->roleOf($request->user());
         }
 
+        $notifications = [];
+        $unreadCount = 0;
+        if ($user = $request->user()) {
+            $notifications = $user->notifications()->latest()->take(20)->get()
+                ->map(fn ($n) => [
+                    'id'         => $n->id,
+                    'kind'       => $n->data['kind'] ?? 'info',
+                    'title'      => $n->data['title'] ?? '',
+                    'message'    => $n->data['message'] ?? '',
+                    'read'       => $n->read_at !== null,
+                    'created_at' => $n->created_at->diffForHumans(),
+                ]);
+            $unreadCount = $user->unreadNotifications()->count();
+        }
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -84,6 +99,8 @@ class HandleInertiaRequests extends Middleware
                 'name' => $currentShop->name,
                 'slug' => $currentShop->slug,
             ] : null,
+            'notifications' => $notifications,
+            'unreadCount'   => $unreadCount,
             'flash' => [
                 'success' => session('success'),
                 'error'   => session('error'),

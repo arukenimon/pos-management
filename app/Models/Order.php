@@ -9,6 +9,21 @@ class Order extends Model
 {
     use BelongsToShop;
 
+    protected static function booted(): void
+    {
+        // Announce each completed sale to the shop's members (skip the cashier
+        // who rang it up). Fires once per order, not per line item.
+        static::created(function (Order $order): void {
+            $order->notifyShopMembers(
+                kind: 'sale',
+                title: 'New sale',
+                message: '₱' . number_format((float) $order->total, 2) . ' • ' . $order->payment_method,
+                exceptUserId: $order->cashier_id,
+                meta: ['order_id' => $order->id],
+            );
+        });
+    }
+
     protected $fillable = [
         'shop_id',
         'cashier_id',

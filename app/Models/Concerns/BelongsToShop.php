@@ -2,7 +2,10 @@
 
 namespace App\Models\Concerns;
 
+use App\Models\Shop;
+use App\Notifications\ShopActivity;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Automatically scopes all Eloquent queries to the currently resolved shop.
@@ -35,5 +38,29 @@ trait BelongsToShop
     public function shop()
     {
         return $this->belongsTo(\App\Models\Shop::class);
+    }
+
+    /**
+     * Send a ShopActivity notification to every member of this model's shop,
+     * optionally skipping the user who triggered the action.
+     */
+    public function notifyShopMembers(string $kind, string $title, string $message, ?int $exceptUserId = null, array $meta = []): void
+    {
+        if (! $this->shop_id) {
+            return;
+        }
+
+        $shop = Shop::find($this->shop_id);
+        if (! $shop) {
+            return;
+        }
+
+        $members = $shop->members()
+            ->when($exceptUserId, fn ($q) => $q->where('users.id', '!=', $exceptUserId))
+            ->get();
+
+        if ($members->isNotEmpty()) {
+            Notification::send($members, new ShopActivity($kind, $title, $message, $meta));
+        }
     }
 }

@@ -241,22 +241,66 @@ php artisan test
 
 ---
 
-## 🚢 Production Deployment
+## 🚢 Docker VPS deployment
+
+The included Compose stack is intended for a single Linux VPS. It builds the
+Laravel app and Vite assets in containers, runs MariaDB, a queue worker and the
+Laravel scheduler, and uses Caddy to issue and renew HTTPS certificates.
+
+### First deployment
+
+1. Install Docker Engine with the Docker Compose plugin on the VPS, clone this
+   repository, and point the domain's DNS A/AAAA record at the VPS.
+2. Create the production environment file and set its secrets and domain:
+
+   ```bash
+   cp .env.docker.example .env
+   nano .env
+   docker compose run --rm app php artisan key:generate --show
+   ```
+
+   Copy the command's output into `APP_KEY=` in `.env`. Set `DOMAIN` and
+   `APP_URL` to the real domain, and replace both database passwords with unique
+   long values. Do not commit this file.
+
+3. Build the images, initialise the database, then start the services:
+
+   ```bash
+   docker compose build
+   docker compose up -d db
+   docker compose run --rm app php artisan migrate --force
+   docker compose up -d
+   ```
+
+4. Verify the running services:
+
+   ```bash
+   docker compose ps
+   docker compose logs -f web app queue
+   ```
+
+Only ports 80 and 443 are exposed. MariaDB is private to the Docker network,
+and its data plus uploaded product images are stored in named Docker volumes.
+Caddy automatically provisions TLS after DNS resolves to the VPS; ensure the
+VPS firewall permits inbound TCP 80 and 443.
+
+### Updates and backups
+
+For each deployment, use the included script. It refuses to overwrite local Git
+changes, fast-forwards `master`, rebuilds the images, waits for MariaDB, runs
+migrations, and recreates the app, queue, scheduler, and web containers from
+the new images:
 
 ```bash
-composer install --optimize-autoloader --no-dev
-npm install
-npm run build
-php artisan migrate --force
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+bash deploy.sh
 ```
 
-```env
-APP_ENV=production
-APP_DEBUG=false
-```
+By default it deploys `master`. To deploy a different existing branch for a
+one-off release, run `DEPLOY_BRANCH=branch-name bash deploy.sh`.
+
+Back up the `pos_database` and `pos_storage` Docker volumes before upgrades.
+`docker compose down` is safe for normal maintenance; do **not** add `-v` unless
+you intentionally want to delete the database, uploads, and Caddy certificates.
 
 ---
 
@@ -274,5 +318,3 @@ MIT License
 - [Radix UI](https://www.radix-ui.com) — accessible component primitives
 - [Tailwind CSS](https://tailwindcss.com) — utility-first styling
 - [Lucide](https://lucide.dev) — icon library
-
-

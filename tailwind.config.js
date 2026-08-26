@@ -24,8 +24,15 @@ export default {
     			md: 'calc(var(--radius) - 2px)',
     			sm: 'calc(var(--radius) - 4px)'
     		},
-    		colors: {
-    			background: 'hsl(var(--background))',
+			colors: {
+				// Retain existing utility names while giving the product a single,
+				// consistent POS accent instead of the starter indigo palette.
+				indigo: {
+					'50': '#eefaf7', '100': '#d7f3ed', '200': '#b5e6dc',
+					'300': '#83d3c5', '400': '#48b7a7', '500': '#168b80',
+					'600': '#0f766e', '700': '#0b625c', '800': '#0d4f4b', '900': '#103f3c',
+				},
+				background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',
     			card: {
     				DEFAULT: 'hsl(var(--card))',

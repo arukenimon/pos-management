@@ -33,6 +33,10 @@ export default function ResetPassword({
             <Head title="Reset Password" />
 
             <form onSubmit={submit}>
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Choose a new password</h1>
+                    <p className="mt-2 text-sm text-[#54706d]">Use a long, unique password to keep your account secure.</p>
+                </div>
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 
@@ -89,8 +93,8 @@ export default function ResetPassword({
                     />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                <div className="mt-6 flex items-center justify-end">
+                    <PrimaryButton className="ms-4 normal-case tracking-normal" disabled={processing}>
                         Reset Password
                     </PrimaryButton>
                 </div>

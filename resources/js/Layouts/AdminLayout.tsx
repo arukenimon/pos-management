@@ -149,7 +149,14 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             roles: ['owner'],
             children: [
                 {
-                    name: 'Team',
+                    name: 'Admin Settings',
+                    href: `${base}/settings`,
+                    routename: 'admin.settings.index',
+                    icon: SettingsIcon,
+                    roles: ['owner'],
+                },
+                {
+                    name: 'Team & Access',
                     href: `${base}/settings/team`,
                     routename: 'admin.settings.team',
                     icon: UsersIcon,
@@ -181,7 +188,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-[#f8fbf8] dark:bg-gray-900">
             <ToastContainer />
             {/* Sidebar */}
             <AdminSidebar
@@ -195,7 +202,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             {/* Main Content */}
             <div className="lg:pl-64">
                 {/* Top Header */}
-                <header className="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <header className="sticky top-0 z-30 border-b border-[#d9e8e5] bg-white/95 shadow-[0_1px_0_rgba(15,118,110,0.03)] backdrop-blur dark:border-gray-700 dark:bg-gray-800">
                     <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                         {/* Mobile menu button */}
                         <button
@@ -226,7 +233,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                                 <input
                                     type="search"
                                     placeholder="Search..."
-                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    className="block w-full rounded-lg border border-[#d9e8e5] bg-[#f8fbf8] py-2 pl-10 pr-3 text-gray-900 placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
                         </div>
@@ -260,14 +267,14 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
-                                    <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
                                         <span className="text-white font-medium text-sm">
-                                            {/* {auth.user.name.charAt(0).toUpperCase()} */}
+                                            {auth.user?.name?.charAt(0).toUpperCase()}
                                         </span>
                                     </div>
                                     <div className="hidden md:block text-left">
                                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                            {/* {auth.user.name} */}
+                                            {auth.user?.name}
                                         </p>
                                         <p className="text-xs text-gray-500 dark:text-gray-400">
                                             {auth?.shopRole ? auth.shopRole.charAt(0).toUpperCase() + auth.shopRole.slice(1) : 'No Role'}
@@ -292,12 +299,14 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                                             >
                                                 Profile Settings
                                             </Link>
-                                            <Link
-                                                href="/admin/settings"
-                                                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Admin Settings
-                                            </Link>
+                                            {auth?.shopRole === 'owner' && currentShop && (
+                                                <Link
+                                                    href={`/${currentShop.slug}/settings`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                >
+                                                    Admin Settings
+                                                </Link>
+                                            )}
                                             <hr className="my-1 border-gray-200 dark:border-gray-700" />
                                             <Link
                                                 href="/logout"
@@ -317,7 +326,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
 
                 {/* Page Header */}
                 {header && (
-                    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                    <div className="border-b border-[#d9e8e5] bg-white dark:border-gray-700 dark:bg-gray-800">
                         <div className="px-4 sm:px-6 lg:px-8 py-6">
                             {header}
                         </div>

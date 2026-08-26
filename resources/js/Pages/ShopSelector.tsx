@@ -23,7 +23,7 @@ const ROLE_LABELS = { owner: 'Owner', manager: 'Manager', cashier: 'Cashier' };
 
 export default function ShopSelector({ shops, auth }: ShopSelectorProps) {
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 px-4">
+        <div className="min-h-screen bg-[#f8fbf8] dark:bg-gray-900 flex flex-col justify-center py-12 px-4">
             <Head title="Select Shop" />
 
             <div className="mx-auto w-full max-w-md">
@@ -45,7 +45,7 @@ export default function ShopSelector({ shops, auth }: ShopSelectorProps) {
                         <a
                             key={shop.id}
                             href={route('admin.dashboard', { shop: shop.slug })}
-                            className="flex items-center justify-between px-5 py-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:shadow-sm transition-all group"
+                            className="group flex items-center justify-between rounded-xl border border-[#d9e8e5] bg-white px-5 py-4 shadow-sm transition-all hover:border-indigo-400 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
                         >
                             <div className="flex items-center gap-4">
                                 <div className="h-10 w-10 flex-shrink-0 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">

@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 class PosController extends Controller
 {
@@ -42,18 +43,32 @@ class PosController extends Controller
             'items.*.variant_id' => 'required|integer|exists:product_variants,id',
             'items.*.quantity'   => 'required|integer|min:1',
             'payment_method'     => 'required|in:cash,card',
-            'cash_received'      => 'nullable|numeric|min:0',
+            'cash_received'      => 'required_if:payment_method,cash|nullable|numeric|min:0',
         ]);
 
-        DB::beginTransaction();
         try {
-            $total = 0;
+            DB::beginTransaction();
+
+            $variantIds = collect($request->items)->pluck('variant_id')->unique()->values();
+            $variants = ProductVariant::query()
+                ->whereIn('id', $variantIds)
+                ->with(['inventories' => fn ($query) => $query->where('quantity', '>', 0)->lockForUpdate()])
+                ->get()
+                ->keyBy('id');
+
+            // ProductVariant is shop-scoped through its product. Never allow a
+            // sale in the selected shop to reference another shop's variant.
+            if ($variants->count() !== $variantIds->count()) {
+                abort(404);
+            }
+
+            $total = 0.0;
 
             // Pre-calculate totals and validate stock before touching anything
             $lines = [];
             foreach ($request->items as $item) {
-                $variant    = ProductVariant::findOrFail($item['variant_id']);
-                $totalStock = $variant->inventories()->sum('quantity');
+                $variant    = $variants->get($item['variant_id']);
+                $totalStock = $variant->inventories->sum('quantity');
 
                 if ($totalStock < $item['quantity']) {
                     DB::rollBack();
@@ -67,8 +82,19 @@ class PosController extends Controller
                 $lines[] = compact('variant', 'unitPrice', 'subtotal') + ['quantity' => $item['quantity']];
             }
 
+            $cashReceived = $request->payment_method === 'cash'
+                ? (float) $request->cash_received
+                : null;
+
+            if ($cashReceived !== null && $cashReceived < $total) {
+                DB::rollBack();
+
+                return back()->withErrors([
+                    'cash_received' => 'Cash received must cover the total sale amount.',
+                ]);
+            }
+
             // Create the order record
-            $cashReceived = $request->payment_method === 'cash' ? (float) $request->cash_received : null;
             $order = Order::create([
                 'cashier_id'     => Auth::id(),
                 'total'          => $total,
@@ -79,10 +105,7 @@ class PosController extends Controller
 
             // Deduct stock FIFO, capture weighted-average cost, and create order items
             foreach ($lines as $line) {
-                $inventories = $line['variant']->inventories()
-                    ->where('quantity', '>', 0)
-                    ->orderBy('created_at', 'asc')
-                    ->get();
+                $inventories = $line['variant']->inventories->sortBy('created_at');
 
                 $remaining   = $line['quantity'];
                 $totalCost   = 0.0;
@@ -129,10 +152,14 @@ class PosController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
+
+            if ($e instanceof HttpExceptionInterface) {
+                throw $e;
+            }
+
             return back()->withErrors(['error' => 'Checkout failed: ' . $e->getMessage()]);
         }
 
         return back()->with('success', 'Sale completed successfully!');
     }
 }
-

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\SalesController;
+use App\Http\Controllers\Admin\ShopSettingsController;
 use App\Http\Controllers\Admin\StockMovementController;
 use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\NotificationController;
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 // Public marketing / SEO landing page.
 Route::view('/', 'welcome')->name('home');
+
+Route::get('/sitemap.xml', function () {
+    return response()->view('sitemap', ['homeUrl' => route('home')], 200, [
+        'Content-Type' => 'application/xml',
+    ]);
+})->name('sitemap');
 
 // Shop selection for users belonging to multiple shops.
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -74,6 +81,9 @@ Route::prefix('{shop:slug}')
 
             Route::get('/sales', [SalesController::class, 'index'])->name('admin.sales.index');
             Route::get('/sales/{id}', [SalesController::class, 'show'])->name('admin.sales.show');
+            Route::get('/sales/{id}/receipt', [SalesController::class, 'receipt'])->name('admin.sales.receipt');
+            Route::post('/sales/{id}/void', [SalesController::class, 'void'])->name('admin.sales.void');
+            Route::post('/sales/{id}/refund', [SalesController::class, 'refund'])->name('admin.sales.refund');
         });
 
         // POS: all shop members (owner, manager, cashier)
@@ -82,6 +92,8 @@ Route::prefix('{shop:slug}')
 
         // Team management: owner only
         Route::middleware(['shop.role:owner'])->group(function () {
+            Route::get('/settings', [ShopSettingsController::class, 'index'])->name('admin.settings.index');
+            Route::put('/settings', [ShopSettingsController::class, 'update'])->name('admin.settings.update');
             Route::get('/settings/team', [TeamController::class, 'index'])->name('admin.settings.team');
             Route::post('/settings/team', [TeamController::class, 'invite'])->name('admin.settings.team.invite');
             Route::put('/settings/team/{userId}', [TeamController::class, 'updateRole'])->name('admin.settings.team.update');

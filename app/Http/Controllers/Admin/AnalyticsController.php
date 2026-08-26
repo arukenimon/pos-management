@@ -31,16 +31,17 @@ class AnalyticsController extends Controller
             : ($isYear ? now()->startOfYear() : now()->subDays($days - 1)->startOfDay());
 
         // ── Summary KPIs ─────────────────────────────────────────────────────
-        $periodOrders  = Order::where('created_at', '>=', $from);
+        $periodOrders  = Order::where('status', 'completed')->where('created_at', '>=', $from);
         $totalRevenue  = (float) (clone $periodOrders)->sum('total');
         $totalOrders   = (clone $periodOrders)->count();
         $avgOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
         $totalUnitsSold = (int) OrderItem::whereHas(
-            'order', fn ($q) => $q->where('created_at', '>=', $from)
+            'order', fn ($q) => $q->where('status', 'completed')->where('created_at', '>=', $from)
         )->sum('quantity');
         $totalProfit = (float) DB::table('order_items')
             ->join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.shop_id', app('current_shop')->id)
+            ->where('orders.status', 'completed')
             ->where('orders.created_at', '>=', $from)
             ->whereNotNull('order_items.cost_price')
             ->sum(DB::raw('order_items.subtotal - order_items.cost_price * order_items.quantity'));
@@ -51,6 +52,7 @@ class AnalyticsController extends Controller
             $profitBySlot = DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->where('orders.shop_id', app('current_shop')->id)
+                ->where('orders.status', 'completed')
                 ->where('orders.created_at', '>=', $from)
                 ->whereNotNull('order_items.cost_price')
                 ->select(
@@ -59,7 +61,7 @@ class AnalyticsController extends Controller
                 )
                 ->groupBy('slot')->get()->keyBy('slot');
 
-            $rowsBySlot = Order::where('created_at', '>=', $from)
+            $rowsBySlot = Order::where('status', 'completed')->where('created_at', '>=', $from)
                 ->select(
                     DB::raw("DATE_FORMAT(created_at, '%Y-%m') as slot"),
                     DB::raw('SUM(total) as revenue'),
@@ -84,6 +86,7 @@ class AnalyticsController extends Controller
             $profitBySlot = DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->where('orders.shop_id', app('current_shop')->id)
+                ->where('orders.status', 'completed')
                 ->where('orders.created_at', '>=', $from)
                 ->whereNotNull('order_items.cost_price')
                 ->select(
@@ -92,7 +95,7 @@ class AnalyticsController extends Controller
                 )
                 ->groupBy('slot')->get()->keyBy('slot');
 
-            $rowsBySlot = Order::where('created_at', '>=', $from)
+            $rowsBySlot = Order::where('status', 'completed')->where('created_at', '>=', $from)
                 ->select(
                     DB::raw('HOUR(created_at) as slot'),
                     DB::raw('SUM(total) as revenue'),
@@ -115,6 +118,7 @@ class AnalyticsController extends Controller
             $profitBySlot = DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->where('orders.shop_id', app('current_shop')->id)
+                ->where('orders.status', 'completed')
                 ->where('orders.created_at', '>=', $from)
                 ->whereNotNull('order_items.cost_price')
                 ->select(
@@ -123,7 +127,7 @@ class AnalyticsController extends Controller
                 )
                 ->groupBy('slot')->get()->keyBy('slot');
 
-            $rowsBySlot = Order::where('created_at', '>=', $from)
+            $rowsBySlot = Order::where('status', 'completed')->where('created_at', '>=', $from)
                 ->select(
                     DB::raw('DATE(created_at) as slot'),
                     DB::raw('SUM(total) as revenue'),
@@ -146,7 +150,7 @@ class AnalyticsController extends Controller
 
         // ── Top products by quantity sold ─────────────────────────────────────
         $topProducts = OrderItem::whereHas(
-            'order', fn ($q) => $q->where('created_at', '>=', $from)
+            'order', fn ($q) => $q->where('status', 'completed')->where('created_at', '>=', $from)
         )
         ->select(
             'product_variant_id',
@@ -168,7 +172,7 @@ class AnalyticsController extends Controller
         ]);
 
         // ── Payment method split ──────────────────────────────────────────────
-        $paymentSplit = Order::where('created_at', '>=', $from)
+        $paymentSplit = Order::where('status', 'completed')->where('created_at', '>=', $from)
             ->select(
                 'payment_method',
                 DB::raw('COUNT(*) as count'),
@@ -199,7 +203,7 @@ class AnalyticsController extends Controller
             ]);
 
         // ── Hourly sales distribution ─────────────────────────────────────────
-        $hourlySales = Order::where('created_at', '>=', $from)
+        $hourlySales = Order::where('status', 'completed')->where('created_at', '>=', $from)
             ->select(
                 DB::raw('HOUR(created_at) as hour'),
                 DB::raw('COUNT(*) as orders'),

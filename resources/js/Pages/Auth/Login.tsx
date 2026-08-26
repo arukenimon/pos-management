@@ -31,16 +31,16 @@ export default function Login({
         <>
             <Head title="Log in" />
 
-            <div className="grid min-h-screen bg-white dark:bg-gray-950 lg:grid-cols-2">
+            <div className="grid min-h-screen bg-[#f8fbf8] dark:bg-gray-950 lg:grid-cols-2">
                 {/* Brand panel */}
-                <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 p-12 text-white lg:flex">
+                <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#103f3c] via-indigo-700 to-[#0f766e] p-12 text-white lg:flex">
                     <div
                         aria-hidden
                         className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"
                     />
                     <div
                         aria-hidden
-                        className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 translate-x-1/4 translate-y-1/4 rounded-full bg-purple-400/30 blur-3xl"
+                        className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 translate-x-1/4 translate-y-1/4 rounded-full bg-indigo-400/30 blur-3xl"
                     />
 
                     <a href="/" className="relative z-10 flex items-center gap-3">
@@ -51,7 +51,7 @@ export default function Login({
                     </a>
 
                     <div className="relative z-10 max-w-md space-y-6">
-                        <h1 className="text-4xl font-bold leading-tight tracking-tight">
+                        <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight">
                             Welcome back.
                             <br />
                             Run your shop smarter.
@@ -83,7 +83,7 @@ export default function Login({
                         </a>
 
                         <div className="mb-8">
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            <h2 className="text-3xl font-bold tracking-tight text-[#102a2a] dark:text-white">
                                 Sign in
                             </h2>
                             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">

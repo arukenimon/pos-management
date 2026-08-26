@@ -31,12 +31,16 @@ class Order extends Model
         'payment_method',
         'cash_received',
         'change_given',
+        'status',
+        'corrected_at',
+        'correction_reason',
     ];
 
     protected $casts = [
         'total'         => 'decimal:2',
         'cash_received' => 'decimal:2',
         'change_given'  => 'decimal:2',
+        'corrected_at'  => 'datetime',
     ];
 
     public function cashier()

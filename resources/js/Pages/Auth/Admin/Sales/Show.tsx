@@ -1,7 +1,7 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
-import { ArrowLeft, Banknote, CreditCard, User, Calendar, Hash, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Banknote, CreditCard, User, Calendar, Hash, TrendingUp, Printer, RotateCcw, Ban } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -25,6 +25,9 @@ interface Order {
     payment_method: 'cash' | 'card';
     cash_received: string | null;
     change_given: string | null;
+    status: 'completed' | 'voided' | 'refunded';
+    corrected_at: string | null;
+    correction_reason: string | null;
     created_at: string;
     cashier: { id: number; name: string };
     items: OrderItem[];
@@ -64,6 +67,12 @@ export default function SalesShow({ order }: ShowPageProps) {
         return sum + (Number(item.unit_price) - Number(item.cost_price)) * item.quantity;
     }, 0);
     const hasCostData = order.items.some(i => i.cost_price !== null);
+    const correctOrder = (action: 'void' | 'refund') => {
+        const label = action === 'void' ? 'void' : 'refund';
+        if (!confirm(`This will ${label} the sale and restore its stock. Continue?`)) return;
+        const reason = prompt(`Reason for ${label}ing this sale (optional):`) ?? '';
+        router.post(`/${shop}/sales/${order.id}/${action}`, { reason }, { preserveScroll: true });
+    };
 
     return (
         <AdminLayout
@@ -80,6 +89,7 @@ export default function SalesShow({ order }: ShowPageProps) {
                             Order #{String(order.id).padStart(5, '0')}
                         </h1>
                         <p className="text-sm text-gray-500 dark:text-gray-400">Transaction details</p>
+                        {order.status !== 'completed' && <span className="mt-2 inline-flex rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold capitalize text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">{order.status}</span>}
                     </div>
                 </div>
             }
@@ -299,6 +309,13 @@ export default function SalesShow({ order }: ShowPageProps) {
                     >
                         ← Back to Sales
                     </Link>
+                    <a href={`/${shop}/sales/${order.id}/receipt`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#0f766e] border border-[#0f766e] rounded-lg hover:bg-[#d7f3ed] transition-colors"><Printer className="h-4 w-4" />Reprint receipt</a>
+                    {order.status === 'completed' && (
+                        <>
+                            <button onClick={() => correctOrder('void')} className="inline-flex items-center gap-2 px-4 py-2 text-sm text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors"><Ban className="h-4 w-4" />Void sale</button>
+                            <button onClick={() => correctOrder('refund')} className="inline-flex items-center gap-2 px-4 py-2 text-sm text-red-700 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"><RotateCcw className="h-4 w-4" />Refund</button>
+                        </>
+                    )}
                 </div>
 
             </div>

@@ -16,11 +16,14 @@ export default function VerifyEmail({ status }: { status?: string }) {
         <GuestLayout>
             <Head title="Email Verification" />
 
-            <div className="mb-4 text-sm text-gray-600">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Check your inbox</h1>
+                <p className="mt-2 text-sm leading-6 text-[#54706d]">
                 Thanks for signing up! Before getting started, could you verify
                 your email address by clicking on the link we just emailed to
                 you? If you didn't receive the email, we will gladly send you
                 another.
+                </p>
             </div>
 
             {status === 'verification-link-sent' && (
@@ -32,7 +35,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             <form onSubmit={submit}>
                 <div className="mt-4 flex items-center justify-between">
-                    <PrimaryButton disabled={processing}>
+                    <PrimaryButton className="normal-case tracking-normal" disabled={processing}>
                         Resend Verification Email
                     </PrimaryButton>
 

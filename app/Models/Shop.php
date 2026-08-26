@@ -9,7 +9,26 @@ use Illuminate\Support\Str;
 
 class Shop extends Model
 {
-    protected $fillable = ['name', 'slug', 'description'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'currency',
+        'tax_rate',
+        'receipt_footer',
+        'payment_methods',
+        'barcode_scanning_enabled',
+        'low_stock_threshold',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'tax_rate' => 'decimal:2',
+            'payment_methods' => 'array',
+            'barcode_scanning_enabled' => 'boolean',
+        ];
+    }
 
     protected static function booted(): void
     {

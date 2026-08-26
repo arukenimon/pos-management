@@ -87,8 +87,8 @@ const AdminSidebar = ({
                             transition-all duration-200 group
                             ${level > 0 ? 'ml-4' : ''}
                             ${active
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                ? 'bg-indigo-600 text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-700'
                             }
                         `}
                     >
@@ -114,8 +114,8 @@ const AdminSidebar = ({
                             transition-all duration-200 group
                             ${level > 0 ? 'ml-4' : ''}
                             ${active
-                                ? 'bg-indigo-600 text-white shadow-md'
-                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                ? 'bg-indigo-600 text-white shadow-sm'
+                                : 'text-gray-700 hover:bg-indigo-50 dark:text-gray-300 dark:hover:bg-gray-700'
                             }
                         `}
                     >
@@ -158,7 +158,7 @@ const AdminSidebar = ({
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed top-0 left-0 z-50 h-screen w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+                    fixed top-0 left-0 z-50 h-screen w-64 border-r border-[#d9e8e5] bg-white dark:border-gray-700 dark:bg-gray-800
                     transition-transform duration-300 ease-in-out
                     lg:translate-x-0
                     ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -166,9 +166,9 @@ const AdminSidebar = ({
             >
                 <div className="flex h-full flex-col">
                     {/* Logo */}
-                    <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex h-16 items-center justify-between border-b border-[#d9e8e5] px-4 dark:border-gray-700">
                         <Link href={navigation[0]?.href ?? '/'} className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
                                 <span className="text-white font-bold text-lg">{roleInitial}</span>
                             </div>
                             <span className="text-xl font-bold text-gray-900 dark:text-white">

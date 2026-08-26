@@ -2,7 +2,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useCallback } from 'react';
-import { Banknote, CreditCard, Receipt, TrendingUp, ShoppingBag, Calendar, DollarSign } from 'lucide-react';
+import { Banknote, CreditCard, Receipt, TrendingUp, ShoppingBag, Calendar, DollarSign, RotateCcw } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +24,7 @@ interface Order {
     payment_method: 'cash' | 'card';
     cash_received: string | null;
     change_given: string | null;
+    status: 'completed' | 'voided' | 'refunded';
     created_at: string;
     cashier: { id: number; name: string };
     items: OrderItem[];
@@ -47,7 +48,7 @@ interface PaginatedOrders {
 
 interface SalesPageProps extends PageProps {
     orders: PaginatedOrders;
-    filters: { search?: string; payment_method?: string };
+    filters: { search?: string; payment_method?: string; status?: string };
     analytics: {
         total_sales: number;
         total_revenue: number;
@@ -55,6 +56,8 @@ interface SalesPageProps extends PageProps {
         today_revenue: number;
         total_profit: number;
         today_profit: number;
+        corrections_count: number;
+        corrections_total: number;
     };
 }
 
@@ -85,14 +88,16 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
     const shop = currentShop?.slug ?? '';
     const [search, setSearch] = useState(filters.search ?? '');
     const [paymentFilter, setPaymentFilter] = useState(filters.payment_method ?? '');
+    const [statusFilter, setStatusFilter] = useState(filters.status ?? '');
 
     const applyFilters = useCallback((overrides: Record<string, string>) => {
         router.get(`/${shop}/sales`, {
             search,
             payment_method: paymentFilter,
+            status: statusFilter,
             ...overrides,
         }, { preserveScroll: true, preserveState: true, replace: true });
-    }, [search, paymentFilter, shop]);
+    }, [search, paymentFilter, statusFilter, shop]);
 
     const handleSearch = (value: string) => {
         setSearch(value);
@@ -104,13 +109,18 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
         applyFilters({ payment_method: value });
     };
 
+    const handleStatusFilter = (value: string) => {
+        setStatusFilter(value);
+        applyFilters({ status: value });
+    };
+
     return (
         <AdminLayout
             header={
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">All completed transactions</p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completed sales and their correction history</p>
                     </div>
                     <Link
                         href={`/${shop}/pos`}
@@ -127,14 +137,15 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
             <div className="space-y-6">
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {[
-                        { label: 'Total Sales',     value: analytics.total_sales,    icon: Receipt,      color: 'bg-indigo-500',  fmt: 'count' },
-                        { label: 'Total Revenue',   value: analytics.total_revenue,  icon: TrendingUp,   color: 'bg-emerald-500', fmt: 'money' },
-                        { label: 'Total Profit',    value: analytics.total_profit,   icon: DollarSign,   color: 'bg-violet-500',  fmt: 'money' },
-                        { label: "Today's Sales",   value: analytics.today_sales,    icon: Calendar,     color: 'bg-blue-500',    fmt: 'count' },
-                        { label: "Today's Revenue", value: analytics.today_revenue,  icon: Banknote,     color: 'bg-amber-500',   fmt: 'money' },
-                        { label: "Today's Profit",  value: analytics.today_profit,   icon: DollarSign,   color: 'bg-teal-500',    fmt: 'money' },
+                        { label: 'Net Sales',        value: analytics.total_sales,       icon: Receipt,      color: 'bg-indigo-500',  fmt: 'count' },
+                        { label: 'Net Revenue',      value: analytics.total_revenue,     icon: TrendingUp,   color: 'bg-emerald-500', fmt: 'money' },
+                        { label: 'Net Profit',       value: analytics.total_profit,      icon: DollarSign,   color: 'bg-violet-500',  fmt: 'money' },
+                        { label: 'Refunds & Voids',  value: analytics.corrections_total, icon: RotateCcw,    color: 'bg-amber-500',   fmt: 'money', sub: `${analytics.corrections_count} corrected` },
+                        { label: "Today's Net Sales", value: analytics.today_sales,      icon: Calendar,     color: 'bg-blue-500',    fmt: 'count' },
+                        { label: "Today's Revenue", value: analytics.today_revenue,     icon: Banknote,     color: 'bg-amber-500',   fmt: 'money' },
+                        { label: "Today's Profit",  value: analytics.today_profit,      icon: DollarSign,   color: 'bg-teal-500',    fmt: 'money' },
                     ].map(s => (
                         <div key={s.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between">
                             <div>
@@ -142,6 +153,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                 <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                                     {s.fmt === 'money' ? `P${Number(s.value).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` : s.value}
                                 </p>
+                                {s.sub && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.sub}</p>}
                             </div>
                             <div className={`p-2.5 ${s.color} rounded-lg`}>
                                 <s.icon className="h-5 w-5 text-white" />
@@ -173,6 +185,12 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
                     </select>
+                    <select value={statusFilter} onChange={e => handleStatusFilter(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">All Statuses</option>
+                        <option value="completed">Completed</option>
+                        <option value="voided">Voided</option>
+                        <option value="refunded">Refunded</option>
+                    </select>
                 </div>
 
                 {/* Table */}
@@ -192,6 +210,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Items</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cashier</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                         <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
                                         <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
                                         <th className="px-4 py-3" />
@@ -239,6 +258,13 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                                     }
                                                     {order.payment_method === 'cash' ? 'Cash' : 'Card'}
                                                 </span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${
+                                                    order.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' :
+                                                    order.status === 'voided' ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' :
+                                                    'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                                                }`}>{order.status}</span>
                                             </td>
                                             <td className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">
                                                 P{Number(order.total).toFixed(2)}

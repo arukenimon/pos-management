@@ -40,7 +40,7 @@ interface AnalyticsProps extends PageProps {
 const fmt  = (n: number) => 'P' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtK = (n: number) => n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
 
-const PIE_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6'];
+const PIE_COLORS = ['#0f766e', '#48b7a7', '#d39c37', '#e06c62', '#2c8c95'];
 
 const PERIODS = [
     { value: 'today', label: 'Today' },
@@ -52,7 +52,7 @@ const PERIODS = [
 
 // Shared chart theme
 const AXIS_STYLE  = { fontSize: 11, fill: '#9ca3af' };
-const GRID_STROKE = '#374151';
+const GRID_STROKE = '#d9e8e5';
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -158,8 +158,8 @@ export default function AnalyticsIndex({
                             <AreaChart data={revenueTrend} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#6366f1" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                                        <stop offset="5%"  stopColor="#0f766e" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#0f766e" stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
@@ -175,13 +175,13 @@ export default function AnalyticsIndex({
                                 <YAxis yAxisId="rev" tick={AXIS_STYLE} tickLine={false} axisLine={false} tickFormatter={fmtK} />
                                 <YAxis yAxisId="ord" orientation="right" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
+                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
                                     formatter={(v: number, name: string) => name === 'Orders' ? [v, 'Orders'] : [fmt(v), name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#6366f1" fill="url(#revGrad)"    strokeWidth={2} dot={false} />
+                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#0f766e" fill="url(#revGrad)"    strokeWidth={2} dot={false} />
                                 <Area yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke="#10b981" fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
                                 <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke="#f59e0b" fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
                             </AreaChart>
@@ -214,13 +214,13 @@ export default function AnalyticsIndex({
                                             tickFormatter={(v: string) => v.length > 12 ? v.slice(0, 12) + '…' : v}
                                         />
                                         <Tooltip
-                                            contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
+                                            contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
                                             labelStyle={{ color: '#e5e7eb' }}
                                             itemStyle={{ color: '#d1d5db' }}
                                             formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                         />
                                         <Legend wrapperStyle={{ fontSize: 12 }} />
-                                        <Bar dataKey="units_sold" name="Units" fill="#6366f1" radius={[0, 4, 4, 0]} />
+                                        <Bar dataKey="units_sold" name="Units" fill="#0f766e" radius={[0, 4, 4, 0]} />
                                         <Bar dataKey="revenue"    name="Revenue" fill="#10b981" radius={[0, 4, 4, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
@@ -250,7 +250,7 @@ export default function AnalyticsIndex({
                                                 ))}
                                             </Pie>
                                             <PieTooltip
-                                                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
+                                                contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
                                                 itemStyle={{ color: '#d1d5db' }}
                                             />
                                             <PieLegend wrapperStyle={{ fontSize: 12 }} />
@@ -285,7 +285,7 @@ export default function AnalyticsIndex({
                                 <XAxis dataKey="date" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <YAxis tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
+                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
                                 />
@@ -306,13 +306,13 @@ export default function AnalyticsIndex({
                                 <XAxis dataKey="hour" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <YAxis tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: 8, fontSize: 12 }}
+                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
                                     labelStyle={{ color: '#e5e7eb' }}
                                     itemStyle={{ color: '#d1d5db' }}
                                     formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="orders"  name="Orders"  fill="#6366f1" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="orders"  name="Orders"  fill="#0f766e" radius={[4, 4, 0, 0]} />
                                 <Bar dataKey="revenue" name="Revenue" fill="#f59e0b" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>

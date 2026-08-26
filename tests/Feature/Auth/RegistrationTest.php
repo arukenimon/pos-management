@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Shop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -27,6 +28,8 @@ class RegistrationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(route('dashboard', absolute: false));
+        $response->assertRedirect(route('verification.notice', absolute: false));
+        $this->assertDatabaseHas('shops', ['name' => 'Test Shop']);
+        $this->assertTrue(Shop::where('name', 'Test Shop')->firstOrFail()->hasMember(auth()->user()));
     }
 }

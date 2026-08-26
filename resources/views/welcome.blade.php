@@ -1,199 +1,45 @@
-@php
-    $appName        = config('app.name', 'POS');
-    $appUrl         = rtrim(config('app.url', url('/')), '/');
-    $title          = $appName . ' — Modern Point of Sale for Multi-Shop Retail';
-    $description    = 'Run your retail business with confidence. ' . $appName . ' is a modern point-of-sale platform for single-shop operators and multi-location brands — manage inventory, ring up sales, and track performance from anywhere.';
-    $canonical      = $appUrl . '/';
-    $ogImage        = $appUrl . '/og-image.png';
-    $structuredData = json_encode([
-        '@context'            => 'https://schema.org',
-        '@type'               => 'SoftwareApplication',
-        'name'                => $appName,
-        'applicationCategory' => 'BusinessApplication',
-        'operatingSystem'     => 'Web',
-        'url'                 => $canonical,
-        'description'         => $description,
-        'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
-    ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#4f46e5">
-
-    <title>{{ $title }}</title>
-    <meta name="description" content="{{ $description }}">
-    <link rel="canonical" href="{{ $canonical }}">
-
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="{{ $appName }}">
-    <meta property="og:title" content="{{ $title }}">
-    <meta property="og:description" content="{{ $description }}">
-    <meta property="og:url" content="{{ $canonical }}">
-    <meta property="og:image" content="{{ $ogImage }}">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $title }}">
-    <meta name="twitter:description" content="{{ $description }}">
-    <meta name="twitter:image" content="{{ $ogImage }}">
-
+    <meta name="description" content="POS helps small businesses manage sales, inventory, products, and teams from one simple point-of-sale system.">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="canonical" href="{{ url('/') }}">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-
-    <script type="application/ld+json">{!! $structuredData !!}</script>
-
-    @vite(['resources/css/app.css'])
+    <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700&family=fraunces:600,700&display=swap" rel="stylesheet">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('app.name', 'POS') }}">
+    <meta property="og:title" content="{{ config('app.name', 'POS') }} | Simple point of sale and inventory management">
+    <meta property="og:description" content="Run sales, stock, products, and teams from one straightforward POS system.">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ config('app.name', 'POS') }} | Simple point of sale and inventory management">
+    <meta name="twitter:description" content="Run sales, stock, products, and teams from one straightforward POS system.">
+    <title>{{ config('app.name', 'POS') }} | Simple point of sale and inventory management</title>
+    <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@type' => 'SoftwareApplication', 'name' => config('app.name', 'POS'), 'applicationCategory' => 'BusinessApplication', 'operatingSystem' => 'Web', 'description' => 'A point-of-sale and inventory management system for small businesses.', 'url' => url('/')], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
+    <style>
+        :root { --ink:#102a2a; --muted:#54706d; --line:#d9e8e5; --teal:#0f766e; --mint:#d7f3ed; --cream:#f8fbf8; }
+        * { box-sizing:border-box; } html { scroll-behavior:smooth; } body { margin:0; color:var(--ink); background:var(--cream); font-family:'DM Sans',system-ui,sans-serif; } a { color:inherit; text-decoration:none; } .shell { width:min(1120px, calc(100% - 40px)); margin:auto; }
+        .nav { display:flex; align-items:center; justify-content:space-between; padding:23px 0; } .brand { display:flex; gap:10px; align-items:center; font-size:1.15rem; font-weight:700; letter-spacing:-.03em; } .mark { display:grid; place-items:center; width:32px; height:32px; background:var(--teal); color:#fff; border-radius:10px; font-size:18px; } .nav-links { display:flex; align-items:center; gap:26px; color:var(--muted); font-size:.92rem; font-weight:600; }
+        .button { display:inline-flex; align-items:center; justify-content:center; border-radius:9px; padding:12px 18px; font-weight:700; font-size:.94rem; transition:.18s ease; } .button:hover { transform:translateY(-2px); } .button-primary { color:#fff; background:var(--teal); box-shadow:0 8px 20px #0f766e33; } .button-secondary { color:var(--teal); border:1px solid #a9d5cf; background:#fff; }
+        .hero { display:grid; grid-template-columns:1.04fr .96fr; align-items:center; gap:68px; padding:75px 0 100px; } .eyebrow { display:inline-flex; align-items:center; gap:8px; border:1px solid #b5ded8; background:#ebfaf7; border-radius:999px; padding:7px 11px; color:#12635e; font-size:.78rem; font-weight:700; } .eyebrow i { width:7px; height:7px; border-radius:50%; background:#16a34a; }
+        h1 { max-width:650px; margin:20px 0; font-family:Fraunces,Georgia,serif; font-size:clamp(2.7rem, 5.2vw, 4.7rem); line-height:1.02; letter-spacing:-.055em; } .lead { max-width:550px; margin:0; color:var(--muted); line-height:1.65; font-size:1.12rem; } .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:30px; } .proof { display:flex; gap:22px; margin-top:28px; color:#52716d; font-size:.84rem; font-weight:600; } .proof span::before { content:'✓'; margin-right:7px; color:#148176; font-weight:800; }
+        .dashboard { position:relative; padding:17px; background:#fff; border:1px solid #d2e7e3; border-radius:20px; box-shadow:0 28px 60px #1b4d4820; transform:rotate(2deg); } .dashboard::before { content:''; position:absolute; z-index:-1; inset:20px -15px -15px 20px; border-radius:20px; background:#bde9df; } .screen { overflow:hidden; border:1px solid #e1ecea; border-radius:12px; } .screen-bar { display:flex; align-items:center; gap:5px; height:40px; padding:0 13px; background:#f8fbfa; border-bottom:1px solid #e4efec; } .dot { width:7px; height:7px; border-radius:50%; background:#b8ceca; }.dot:first-child{background:#ef8b84}.dot:nth-child(2){background:#edc266}.dot:nth-child(3){background:#65b99b}
+        .screen-body { display:grid; grid-template-columns:74px 1fr; min-height:315px; background:#fff; } .side { padding:18px 13px; background:#fbfdfc; border-right:1px solid #edf3f1; }.side b { display:block; height:8px; margin-bottom:17px; border-radius:5px; background:#dcebe8; }.side b:first-child{background:#52a99d} .workspace { padding:22px; }.screen-title { width:112px; height:14px; background:#16413d; border-radius:4px; }.screen-sub { width:75px; height:7px; margin-top:9px; background:#d2e5e1; border-radius:4px; }
+        .stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:9px; margin-top:23px; }.stat { padding:11px; border:1px solid #e7f0ee; border-radius:8px; }.stat small { display:block; color:#7b9792; font-size:8px; }.stat strong { display:block; margin-top:7px; font-size:13px; }.up { color:#0b8d62; font-size:8px; } .bars { display:flex; align-items:end; gap:8px; height:95px; margin-top:18px; padding:13px; background:#f7fbfa; border-radius:9px; }.bars i { display:block; flex:1; border-radius:4px 4px 0 0; background:#8ed4c8; }.bars i:nth-child(2), .bars i:nth-child(5){background:#148176}.bars i:nth-child(1){height:38%}.bars i:nth-child(2){height:71%}.bars i:nth-child(3){height:50%}.bars i:nth-child(4){height:82%}.bars i:nth-child(5){height:93%}.bars i:nth-child(6){height:64%}
+        .features { padding:82px 0; background:#fff; border-top:1px solid var(--line); }.section-intro { max-width:610px; }.kicker { color:#08776e; font-size:.8rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }.features h2,.cta h2 { margin:11px 0; font-family:Fraunces,Georgia,serif; font-size:clamp(2rem,3.4vw,3rem); letter-spacing:-.04em; }.section-intro p { color:var(--muted); line-height:1.6; } .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:35px; }.feature { padding:25px; border:1px solid var(--line); border-radius:14px; background:#fcfefd; }.feature-icon { display:grid; place-items:center; width:38px; height:38px; border-radius:10px; background:var(--mint); color:#076f66; font-weight:800; }.feature h3 { margin:17px 0 8px; font-size:1.05rem; }.feature p { margin:0; color:var(--muted); font-size:.92rem; line-height:1.58; }
+        .cta { padding:82px 0; text-align:center; }.cta p { max-width:500px; margin:0 auto 23px; color:var(--muted); line-height:1.6; }.footer { padding:25px 0 35px; border-top:1px solid var(--line); color:#66807c; font-size:.86rem; }.footer .shell { display:flex; justify-content:space-between; } @media (max-width:760px) { .nav-links a:not(.button){display:none}.hero{grid-template-columns:1fr;gap:45px;padding:52px 0 70px}.dashboard{max-width:500px;margin:auto}.grid{grid-template-columns:1fr}.proof{gap:12px;flex-direction:column}.footer .shell{gap:9px;flex-direction:column}.screen-body{min-height:265px} }
+    </style>
 </head>
-<body class="font-sans antialiased bg-white text-slate-900 selection:bg-indigo-500/20 selection:text-indigo-900">
-    <header class="sticky top-0 z-30 backdrop-blur-md bg-white/80 border-b border-slate-200/70">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5 font-semibold text-lg tracking-tight text-slate-900">
-                <span class="grid place-items-center w-8 h-8 rounded-lg bg-indigo-600 text-white text-sm">●</span>
-                <span>{{ $appName }}</span>
-            </a>
-            <nav class="flex items-center gap-2 sm:gap-3 text-sm">
-                @auth
-                    <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition">Open dashboard</a>
-                @else
-                    <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">Log in</a>
-                    <a href="{{ route('register') }}" class="px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition">Get started</a>
-                @endauth
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        {{-- Hero --}}
-        <section class="relative overflow-hidden bg-slate-50/60">
-            {{-- One quiet wash + faint grid, no bright color blobs --}}
-            <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10">
-                <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[48rem] h-[32rem] rounded-full bg-indigo-200/30 blur-3xl"></div>
-                <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:42px_42px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]"></div>
-            </div>
-
-            <div class="max-w-6xl mx-auto px-6 py-24 md:py-32 text-center">
-                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide text-slate-600 bg-white ring-1 ring-inset ring-slate-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                    Built for single shops &amp; multi-location brands
-                </span>
-                <h1 class="mt-6 text-4xl md:text-6xl font-semibold tracking-tight leading-[1.1] text-slate-900">
-                    Point of sale, built for the<br class="hidden md:block">
-                    way you <span class="text-indigo-600">actually run your shop.</span>
-                </h1>
-                <p class="mt-6 text-lg md:text-xl text-slate-500 max-w-2xl mx-auto">
-                    {{ $appName }} gives single-location retailers and multi-shop brands one place to ring up sales,
-                    track inventory, and understand what's working — without the spreadsheets.
-                </p>
-                <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
-                    @guest
-                        <a href="{{ route('register') }}" class="px-6 py-3 rounded-xl bg-indigo-600 text-white font-medium shadow-sm hover:bg-indigo-700 hover:-translate-y-0.5 transition">Start free</a>
-                        <a href="{{ route('login') }}" class="px-6 py-3 rounded-xl font-medium text-slate-700 bg-white ring-1 ring-inset ring-slate-300 hover:ring-slate-400 transition">Sign in</a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="px-6 py-3 rounded-xl bg-indigo-600 text-white font-medium shadow-sm hover:bg-indigo-700 hover:-translate-y-0.5 transition">Go to dashboard</a>
-                    @endguest
-                </div>
-                <p class="mt-5 text-sm text-slate-400">No credit card required · Set up in minutes</p>
-            </div>
-        </section>
-
-        {{-- Features --}}
-        <section class="max-w-6xl mx-auto px-6 py-24">
-            <div class="text-center max-w-2xl mx-auto">
-                <p class="text-sm font-semibold tracking-wide text-indigo-600 uppercase">Features</p>
-                <h2 class="mt-3 text-3xl md:text-4xl font-semibold tracking-tight text-slate-900">Everything you need behind the counter</h2>
-                <p class="mt-4 text-slate-500">From the first sale to a fleet of locations — one calm, fast workspace.</p>
-            </div>
-
-            <div class="mt-16 grid gap-x-10 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                @php
-                    // Muted, tinted accents — soft background + colored icon, not bright fills.
-                    $features = [
-                        ['Fast checkout', 'A keyboard-friendly POS that handles cash, card, and variant pricing in seconds.', 'bg-indigo-50 text-indigo-600 ring-indigo-100', '⚡'],
-                        ['Live inventory', "Stock moves are recorded as they happen. Know what's in the back room without counting it.", 'bg-emerald-50 text-emerald-600 ring-emerald-100', '📦'],
-                        ['Sales analytics', 'See revenue, top sellers, and slow movers in one view — filter by day, shop, or category.', 'bg-violet-50 text-violet-600 ring-violet-100', '📈'],
-                        ['Multi-shop ready', 'Run several locations from one account. Switch between shops in a click.', 'bg-sky-50 text-sky-600 ring-sky-100', '🏬'],
-                        ['Team roles', 'Invite owners, managers, and cashiers with the right access for each role.', 'bg-amber-50 text-amber-600 ring-amber-100', '👥'],
-                        ['Works on any browser', 'No installs. Open it on a tablet at the counter or a laptop in the back office.', 'bg-rose-50 text-rose-600 ring-rose-100', '🌐'],
-                    ];
-                @endphp
-                @foreach ($features as [$heading, $copy, $tint, $glyph])
-                    <div class="group">
-                        <div class="inline-grid place-items-center w-11 h-11 rounded-xl text-lg ring-1 ring-inset {{ $tint }} transition group-hover:scale-105">
-                            {{ $glyph }}
-                        </div>
-                        <h3 class="mt-5 font-semibold text-lg tracking-tight text-slate-900">{{ $heading }}</h3>
-                        <p class="mt-2 text-slate-500 leading-relaxed">{{ $copy }}</p>
-                    </div>
-                @endforeach
-            </div>
-        </section>
-
-        {{-- How it works --}}
-        <section class="relative bg-slate-50/70 border-y border-slate-200/70">
-            <div class="max-w-6xl mx-auto px-6 py-24">
-                <div class="text-center max-w-2xl mx-auto">
-                    <p class="text-sm font-semibold tracking-wide text-indigo-600 uppercase">How it works</p>
-                    <h2 class="mt-3 text-3xl md:text-4xl font-semibold tracking-tight text-slate-900">From sign-up to your first sale in four steps</h2>
-                    <p class="mt-4 text-slate-500">No installs, no setup calls. Create an account and the workspace walks you through the rest.</p>
-                </div>
-
-                <div class="mt-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4">
-                    @php
-                        $steps = [
-                            ['Create your shop', 'Sign up and name your shop. Adding a second or third location later is a single click.'],
-                            ['Add your products', 'Enter items, prices, and variants — or import them. Stock levels start tracking right away.'],
-                            ['Invite your team', 'Add owners, managers, and cashiers. Everyone gets exactly the access their role needs.'],
-                            ['Start selling', 'Open the POS on any browser, ring up sales, and watch inventory and analytics update live.'],
-                        ];
-                    @endphp
-                    @foreach ($steps as $i => [$heading, $copy])
-                        <div class="relative">
-                            <div class="flex items-center gap-3">
-                                <span class="grid place-items-center w-9 h-9 rounded-full bg-white text-indigo-600 font-semibold ring-1 ring-inset ring-indigo-100">{{ $i + 1 }}</span>
-                                @unless ($loop->last)
-                                    <span aria-hidden="true" class="hidden lg:block flex-1 h-px bg-slate-200"></span>
-                                @endunless
-                            </div>
-                            <h3 class="mt-5 font-semibold text-lg tracking-tight text-slate-900">{{ $heading }}</h3>
-                            <p class="mt-2 text-slate-500 leading-relaxed">{{ $copy }}</p>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-
-        {{-- CTA --}}
-        <section class="px-6 py-24">
-            <div class="relative max-w-5xl mx-auto overflow-hidden rounded-3xl px-8 py-16 md:py-20 text-center bg-slate-900">
-                <div aria-hidden="true" class="absolute inset-0 -z-0 opacity-60 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.35),transparent_60%)]"></div>
-                <div class="relative">
-                    <h2 class="text-3xl md:text-4xl font-semibold tracking-tight text-white">Ready to set up your shop?</h2>
-                    <p class="mt-4 text-slate-300 max-w-xl mx-auto">Create an account and you'll be ringing up your first sale in minutes.</p>
-                    <div class="mt-8">
-                        @guest
-                            <a href="{{ route('register') }}" class="inline-block px-7 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:-translate-y-0.5 transition">Create your shop</a>
-                        @else
-                            <a href="{{ route('dashboard') }}" class="inline-block px-7 py-3 rounded-xl bg-white text-slate-900 font-semibold hover:-translate-y-0.5 transition">Go to dashboard</a>
-                        @endguest
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="border-t border-slate-200/70">
-        <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-500">
-            <p class="flex items-center gap-2">
-                <span class="grid place-items-center w-5 h-5 rounded-md bg-indigo-600 text-white text-[10px]">●</span>
-                &copy; {{ date('Y') }} {{ $appName }}. All rights reserved.
-            </p>
-            <!-- <nav class="flex items-center gap-5">
-                <a href="{{ route('login') }}" class="hover:text-indigo-600 transition">Log in</a>
-                <a href="{{ route('register') }}" class="hover:text-indigo-600 transition">Get started</a>
-            </nav> -->
-        </div>
-    </footer>
+<body>
+    <header class="shell nav"><a class="brand" href="{{ route('home') }}" aria-label="{{ config('app.name', 'POS') }} home"><span class="mark">▣</span>{{ config('app.name', 'POS') }}</a><nav class="nav-links" aria-label="Main navigation"><a href="#features">Features</a>@auth <a href="{{ route('dashboard') }}" class="button button-primary">Open dashboard</a> @else <a href="{{ route('login') }}">Log in</a><a href="{{ route('register') }}" class="button button-primary">Get started</a> @endauth</nav></header>
+    <main><section class="shell hero" aria-labelledby="hero-heading"><div><span class="eyebrow"><i></i> Built for growing local businesses</span><h1 id="hero-heading">Run your shop with clarity, not clutter.</h1><p class="lead">{{ config('app.name', 'POS') }} brings your sales, inventory, products, and team together in one straightforward point-of-sale system.</p><div class="actions">@auth <a class="button button-primary" href="{{ route('dashboard') }}">Open your dashboard →</a> @else <a class="button button-primary" href="{{ route('register') }}">Create your account →</a><a class="button button-secondary" href="#features">Explore features</a> @endauth</div><div class="proof"><span>Fast checkout</span><span>Live inventory</span><span>Team-ready</span></div></div>
+    <div class="dashboard" aria-label="An illustration of the {{ config('app.name', 'POS') }} sales dashboard"><div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body"><aside class="side"><b></b><b></b><b></b><b></b></aside><div class="workspace"><div class="screen-title"></div><div class="screen-sub"></div><div class="stats"><div class="stat"><small>Today's sales</small><strong>₱12,480</strong><span class="up">↑ 12%</span></div><div class="stat"><small>Orders</small><strong>48</strong><span class="up">↑ 8%</span></div><div class="stat"><small>Low stock</small><strong>6</strong><span class="up">View items</span></div></div><div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></div></div></section>
+    <section id="features" class="features" aria-labelledby="features-heading"><div class="shell"><div class="section-intro"><span class="kicker">Everything in one place</span><h2 id="features-heading">The essentials your counter needs.</h2><p>Keep daily operations moving with practical tools designed around the way small retail teams actually work.</p></div><div class="grid"><article class="feature"><div class="feature-icon">↗</div><h3>Quick checkout</h3><p>Build orders and complete sales without slowing down the queue.</p></article><article class="feature"><div class="feature-icon">▤</div><h3>Inventory control</h3><p>Track stock movements and spot items that need attention before they run out.</p></article><article class="feature"><div class="feature-icon">◌</div><h3>Clear reporting</h3><p>See sales performance and product activity in a dashboard your team can understand.</p></article></div></div></section>
+    <section class="cta"><div class="shell"><span class="kicker">Start simply</span><h2>Spend less time managing the shop.</h2><p>Set up your products, invite your team, and keep every sale and stock update in view.</p>@guest <a class="button button-primary" href="{{ route('register') }}">Get started with {{ config('app.name', 'POS') }} →</a> @endguest</div></section></main>
+    <footer class="footer"><div class="shell"><span>© {{ now()->year }} {{ config('app.name', 'POS') }}. All rights reserved.</span><a href="{{ route('login') }}">Log in</a></div></footer>
 </body>
 </html>

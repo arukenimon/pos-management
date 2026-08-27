@@ -17,12 +17,6 @@ use Illuminate\Support\Facades\Route;
 // Public marketing / SEO landing page.
 Route::view('/', 'welcome')->name('home');
 
-Route::get('/sitemap.xml', function () {
-    return response()->view('sitemap', ['homeUrl' => route('home')], 200, [
-        'Content-Type' => 'application/xml',
-    ]);
-})->name('sitemap');
-
 // Shop selection for users belonging to multiple shops.
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/select-shop', [ShopSelectorController::class, 'index'])->name('shop.select');

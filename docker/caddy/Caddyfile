@@ -1,7 +1,13 @@
 :80 {
     root * /var/www/html/public
     encode zstd gzip
-    php_fastcgi app:9000
+    php_fastcgi app:9000 {
+        # The host-level proxy terminates TLS before forwarding to this
+        # localhost-only container. Preserve the public scheme for Laravel's
+        # secure URLs, signed-link validation, and session cookies.
+        header_up X-Forwarded-Proto https
+        header_up X-Forwarded-Port 443
+    }
     file_server
 
     log {

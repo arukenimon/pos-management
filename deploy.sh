@@ -43,7 +43,7 @@ log "Validating Docker Compose configuration"
 docker compose config --quiet
 
 log "Building images from the latest code"
-docker compose build --pull
+docker compose build --pull app web
 
 log "Starting and waiting for MariaDB"
 docker compose up -d --wait db

@@ -56,8 +56,7 @@ services:
     depends_on:
       - app
     ports:
-      - "80:80"
-      - "443:443"
+      - "127.0.0.1:8081:80"
     volumes:
       - pos_storage:/var/www/html/storage:ro
       - caddy_data:/data

@@ -8,8 +8,8 @@ import { PageProps as AppPageProps } from './';
 declare global {
     interface Window {
         axios: AxiosInstance;
-        Pusher: typeof Pusher;
-        Echo: Echo<'pusher'>;
+        Pusher?: typeof Pusher;
+        Echo?: Echo<'pusher'>;
     }
 
     /* eslint-disable no-var */

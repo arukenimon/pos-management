@@ -284,6 +284,25 @@ and its data plus uploaded product images are stored in named Docker volumes.
 Caddy automatically provisions TLS after DNS resolves to the VPS; ensure the
 VPS firewall permits inbound TCP 80 and 443.
 
+### Optional: real-time Pusher notifications
+
+When using Pusher Channels, add the server credentials to `.env`, then
+duplicate only the public app key and cluster for Vite:
+
+```env
+PUSHER_APP_ID=your-app-id
+PUSHER_APP_KEY=your-public-app-key
+PUSHER_APP_SECRET=your-private-app-secret
+PUSHER_APP_CLUSTER=ap1
+
+VITE_PUSHER_APP_KEY=your-public-app-key
+VITE_PUSHER_APP_CLUSTER=ap1
+```
+
+`deploy.sh` passes the two `VITE_` values to the Docker build, where they are
+embedded in the browser bundle. Never expose `PUSHER_APP_SECRET` as a `VITE_`
+variable or Docker build argument. Redeploy after changing either Vite value.
+
 ### Updates and backups
 
 For each deployment, use the included script. It refuses to overwrite local Git

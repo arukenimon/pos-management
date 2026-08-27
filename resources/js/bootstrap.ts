@@ -7,24 +7,31 @@ import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 import type { ChannelAuthorizationCallback } from 'pusher-js';
 
-window.Pusher = Pusher;
+const pusherKey = import.meta.env.VITE_PUSHER_APP_KEY;
 
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    forceTLS: true,
-    // Authorize private channels through axios so the Sanctum/Inertia session
-    // cookie and X-XSRF-TOKEN header are sent the same way as every other request.
-    authorizer: (channel: { name: string }) => ({
-        authorize: (socketId: string, callback: ChannelAuthorizationCallback) => {
-            window.axios
-                .post('/broadcasting/auth', {
-                    socket_id: socketId,
-                    channel_name: channel.name,
-                })
-                .then((response) => callback(null, response.data))
-                .catch((error) => callback(error, null));
-        },
-    }),
-});
+// Real-time notifications are optional. Do not initialise Pusher in deployments
+// that intentionally have no Pusher credentials, otherwise its constructor
+// throws before React has a chance to render the page.
+if (pusherKey) {
+    window.Pusher = Pusher;
+
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: pusherKey,
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+        forceTLS: true,
+        // Authorize private channels through axios so the Sanctum/Inertia session
+        // cookie and X-XSRF-TOKEN header are sent the same way as every other request.
+        authorizer: (channel: { name: string }) => ({
+            authorize: (socketId: string, callback: ChannelAuthorizationCallback) => {
+                window.axios
+                    .post('/broadcasting/auth', {
+                        socket_id: socketId,
+                        channel_name: channel.name,
+                    })
+                    .then((response) => callback(null, response.data))
+                    .catch((error) => callback(error, null));
+            },
+        }),
+    });
+}

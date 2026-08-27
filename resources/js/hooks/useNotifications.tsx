@@ -23,10 +23,12 @@ export default function useNotifications() {
     // Live updates over the authenticated user's private channel.
     const userId = auth?.user?.id;
     useEffect(() => {
-        if (!userId || !window.Echo) return;
+        const echo = window.Echo;
+
+        if (!userId || !echo) return;
 
         const channelName = `App.Models.User.${userId}`;
-        window.Echo.private(channelName).notification((n: Record<string, unknown>) => {
+        echo.private(channelName).notification((n: Record<string, unknown>) => {
             const item: AppNotification = {
                 id: String(n.id ?? crypto.randomUUID()),
                 kind: (n.kind as string) ?? 'info',
@@ -40,7 +42,7 @@ export default function useNotifications() {
             toast.info(`${item.title}: ${item.message}`);
         });
 
-        return () => window.Echo.leave(channelName);
+        return () => echo.leave(channelName);
     }, [userId]);
 
     const markAllRead = useCallback(() => {

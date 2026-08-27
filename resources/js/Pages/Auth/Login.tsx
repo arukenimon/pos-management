@@ -44,9 +44,12 @@ export default function Login({
                     />
 
                     <a href="/" className="relative z-10 flex items-center gap-3">
-                        <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 backdrop-blur">
-                            <Store className="h-5 w-5" />
-                        </div>
+                        <img
+                            src="/favicon.svg"
+                            alt=""
+                            aria-hidden="true"
+                            className="h-10 w-10 rounded-xl"
+                        />
                         <span className="text-lg font-semibold tracking-tight">TindaHub</span>
                     </a>
 
@@ -63,7 +66,7 @@ export default function Login({
                     </div>
 
                     <div className="relative z-10 text-sm text-indigo-100/70">
-                        &copy; {new Date().getFullYear()} POS. All rights reserved.
+                        &copy; {new Date().getFullYear()} TindaHub. All rights reserved.
                     </div>
                 </div>
 
@@ -74,11 +77,14 @@ export default function Login({
                             href="/"
                             className="mb-8 inline-flex items-center gap-2 lg:hidden"
                         >
-                            <div className="grid h-10 w-10 place-items-center rounded-xl bg-indigo-600 text-white">
-                                <Store className="h-5 w-5" />
-                            </div>
+                            <img
+                                src="/favicon.svg"
+                                alt=""
+                                aria-hidden="true"
+                                className="h-10 w-10 rounded-xl"
+                            />
                             <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
-                                POS
+                                TindaHub
                             </span>
                         </a>
 

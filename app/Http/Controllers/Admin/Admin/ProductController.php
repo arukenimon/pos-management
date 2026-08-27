@@ -14,9 +14,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductController extends Controller
 {
+    public function export()
+    {
+        $filename = 'inventory-' . app('current_shop')->slug . '-' . now()->format('Y-m-d') . '.csv';
+        return response()->streamDownload(function () {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Product', 'SKU', 'Status', 'Stock Batch ID', 'Quantity', 'Cost Price', 'Received At']);
+            Product::with('variants.inventories')->orderBy('name')->chunk(100, function ($products) use ($out) {
+                foreach ($products as $product) foreach ($product->variants as $variant) foreach ($variant->inventories as $inventory) {
+                    fputcsv($out, [$product->name, $variant->sku, $product->status, $inventory->id, $inventory->quantity, $inventory->cost_price, $inventory->created_at->toDateTimeString()]);
+                }
+            });
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function reportPdf()
+    {
+        $products = Product::with('variants.inventories')->orderBy('name')->get();
+        return Pdf::loadView('reports.inventory', ['shop' => app('current_shop'), 'products' => $products])
+            ->setPaper('a4', 'landscape')->download('inventory-report-' . now()->format('Y-m-d') . '.pdf');
+    }
     function Inventory(Request $request)
     {
         $search = $request->query('search');

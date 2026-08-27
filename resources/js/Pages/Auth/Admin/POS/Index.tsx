@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { Package, ShoppingCart, Trash2, Plus, Minus, Banknote, CreditCard, Search, X } from 'lucide-react';
+import { Package, ShoppingCart, Trash2, Plus, Minus, Banknote, CreditCard, Search, X, CircleDollarSign } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/Components/ui/dialog';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -184,7 +184,6 @@ export default function POSIndex({ products }: POSPageProps) {
         }, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Sale completed!');
                 clearCart();
                 router.reload({ only: ['products'] });
             },
@@ -206,6 +205,7 @@ export default function POSIndex({ products }: POSPageProps) {
                             {products.length} products available
                         </p>
                     </div>
+                    <a href={`/${shop}/pos/shifts`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-3 py-2 text-sm font-medium text-[#0f766e]"><CircleDollarSign className="h-4 w-4" />Cash shifts</a>
                 </div>
             }
         >

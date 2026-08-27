@@ -9,6 +9,7 @@ use App\Models\StockMovement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SalesController extends Controller
 {
@@ -84,6 +85,54 @@ class SalesController extends Controller
             ->findOrFail($id);
 
         return view('receipts.order', ['order' => $order, 'shop' => app('current_shop')]);
+    }
+
+    public function receiptPdf($shop, $id)
+    {
+        $order = Order::with(['cashier:id,name', 'items.variant.product:id,name', 'items.variant.attributeValues.attribute'])->findOrFail($id);
+        return Pdf::loadView('receipts.order-pdf', ['order' => $order, 'shop' => app('current_shop')])
+            ->setPaper([0, 0, 226.77, 600], 'portrait')
+            ->download('receipt-' . str_pad($order->id, 5, '0', STR_PAD_LEFT) . '.pdf');
+    }
+
+    public function reportPdf()
+    {
+        // Dompdf holds the whole document layout in memory. Keep the printable
+        // transaction list bounded while calculating the business totals from
+        // every sale in this shop. CSV remains the full line-by-line export.
+        $orders = Order::query();
+        $completed = (clone $orders)->where('status', 'completed');
+        $totalOrders = (clone $orders)->count();
+        $listedOrders = (clone $orders)
+            ->with('cashier:id,name')
+            ->orderByDesc('created_at')
+            ->limit(200)
+            ->get();
+
+        return Pdf::loadView('reports.sales', [
+            'shop' => app('current_shop'),
+            'orders' => $listedOrders,
+            'netRevenue' => (float) (clone $completed)->sum('total'),
+            'netSales' => (clone $completed)->count(),
+            'totalOrders' => $totalOrders,
+        ])
+            ->setPaper('a4', 'landscape')->download('sales-report-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    public function export(Request $request)
+    {
+        $filename = 'sales-' . app('current_shop')->slug . '-' . now()->format('Y-m-d') . '.csv';
+        return response()->streamDownload(function () {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Order ID', 'Date', 'Status', 'Cashier', 'Payment', 'Product', 'SKU', 'Quantity', 'Unit Price', 'Line Total', 'Order Total', 'Correction Reason']);
+            Order::with(['cashier:id,name', 'items.variant.product:id,name'])
+                ->orderByDesc('created_at')->chunk(200, function ($orders) use ($out) {
+                    foreach ($orders as $order) foreach ($order->items as $item) {
+                        fputcsv($out, [$order->id, $order->created_at->toDateTimeString(), $order->status, $order->cashier?->name, $order->payment_method, $item->variant?->product?->name, $item->variant?->sku, $item->quantity, $item->unit_price, $item->subtotal, $order->total, $order->correction_reason]);
+                    }
+                });
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function void(Request $request, $shop, $id)

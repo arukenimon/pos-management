@@ -1,7 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
-import { TrendingUp, ShoppingCart, Users, BarChart2, ArrowUpCircle, ArrowDownCircle, Package } from 'lucide-react';
+import { TrendingUp, ShoppingCart, Users, BarChart2, ArrowUpCircle, ArrowDownCircle, Package, TriangleAlert, Settings } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,9 +27,25 @@ interface Movement {
     variant_label: string | null;
 }
 
+interface LowStockItem {
+    id: number;
+    product_name: string;
+    product_image: string | null;
+    sku: string;
+    variant_label: string | null;
+    quantity: number;
+}
+
+interface LowStock {
+    count: number;
+    threshold: number;
+    items: LowStockItem[];
+}
+
 interface DashboardProps extends PageProps {
     stats: Stats;
     recentMovements: Movement[];
+    lowStock: LowStock;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -54,7 +70,7 @@ const movementColor = (type: Movement['type']) => ({
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function AdminDashboard({ auth, stats, recentMovements, currentShop }: DashboardProps) {
+export default function AdminDashboard({ auth, stats, recentMovements, lowStock, currentShop }: DashboardProps) {
     const shop = currentShop?.slug ?? '';
     const statsCards = [
         {
@@ -116,6 +132,48 @@ export default function AdminDashboard({ auth, stats, recentMovements, currentSh
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Low-stock alert */}
+                <div className="overflow-hidden rounded-xl border border-amber-200 bg-white shadow-sm dark:border-amber-900/60 dark:bg-gray-800">
+                    <div className="flex flex-col gap-3 border-b border-amber-100 bg-amber-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-amber-900/50 dark:bg-amber-950/20">
+                        <div className="flex items-start gap-3">
+                            <div className="rounded-lg bg-amber-100 p-2 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"><TriangleAlert className="h-5 w-5" /></div>
+                            <div>
+                                <h2 className="font-semibold text-[#102a2a] dark:text-white">Stock alert</h2>
+                                <p className="mt-0.5 text-sm text-[#54706d] dark:text-gray-400">
+                                    {lowStock.count === 0
+                                        ? `All active variants are above your ${lowStock.threshold}-unit threshold.`
+                                        : `${lowStock.count} active ${lowStock.count === 1 ? 'variant needs' : 'variants need'} attention at ${lowStock.threshold} units or fewer.`}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            {auth.shopRole === 'owner' && <Link href={`/${shop}/settings`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#0f766e] hover:text-teal-800 dark:text-teal-300"><Settings className="h-3.5 w-3.5" />Change threshold</Link>}
+                            {lowStock.count > 0 && <Link href={`/${shop}/products/inventory`} className="text-xs font-semibold text-[#0f766e] hover:text-teal-800 dark:text-teal-300">View inventory →</Link>}
+                        </div>
+                    </div>
+
+                    {lowStock.count > 0 && (
+                        <div className="divide-y divide-[#d9e8e5] dark:divide-gray-700">
+                            {lowStock.items.map(item => {
+                                const img = resolveImage(item.product_image);
+                                return <div key={item.id} className="flex items-center gap-3 px-5 py-3">
+                                    <div className="h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-[#d7f3ed] dark:bg-teal-900/30">
+                                        {img ? <img src={img} alt={item.product_name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center"><Package className="h-4 w-4 text-[#0f766e] dark:text-teal-300" /></div>}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-semibold text-[#102a2a] dark:text-white">{item.product_name}</p>
+                                        <p className="truncate text-xs text-[#54706d] dark:text-gray-400">{item.variant_label ?? item.sku}</p>
+                                    </div>
+                                    <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${item.quantity === 0 ? 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'}`}>
+                                        {item.quantity === 0 ? 'Out of stock' : `${item.quantity} left`}
+                                    </span>
+                                </div>;
+                            })}
+                            {lowStock.count > lowStock.items.length && <p className="px-5 py-3 text-xs text-[#54706d] dark:text-gray-400">Showing the 5 most urgent items. View inventory to see all {lowStock.count} alerts.</p>}
+                        </div>
+                    )}
                 </div>
 
                 {/* Recent Stock Movements */}

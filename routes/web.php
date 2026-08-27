@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Admin\ProductController;
 use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\CashShiftController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PosController;
 use App\Http\Controllers\Admin\SalesController;
@@ -80,8 +81,11 @@ Route::prefix('{shop:slug}')
             Route::delete('/products/stocks/delete/{id}', [ProductController::class, 'DeleteProductStock'])->name('admin.products.stocks.delete');
 
             Route::get('/sales', [SalesController::class, 'index'])->name('admin.sales.index');
+            Route::get('/sales/export', [SalesController::class, 'export'])->middleware('shop.role:owner')->name('admin.sales.export');
+            Route::get('/sales/report.pdf', [SalesController::class, 'reportPdf'])->middleware('shop.role:owner')->name('admin.sales.report-pdf');
             Route::get('/sales/{id}', [SalesController::class, 'show'])->name('admin.sales.show');
             Route::get('/sales/{id}/receipt', [SalesController::class, 'receipt'])->name('admin.sales.receipt');
+            Route::get('/sales/{id}/receipt.pdf', [SalesController::class, 'receiptPdf'])->name('admin.sales.receipt-pdf');
             Route::post('/sales/{id}/void', [SalesController::class, 'void'])->name('admin.sales.void');
             Route::post('/sales/{id}/refund', [SalesController::class, 'refund'])->name('admin.sales.refund');
         });
@@ -89,9 +93,14 @@ Route::prefix('{shop:slug}')
         // POS: all shop members (owner, manager, cashier)
         Route::get('/pos', [PosController::class, 'index'])->name('admin.pos.index');
         Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('admin.pos.checkout');
+        Route::get('/pos/shifts', [CashShiftController::class, 'index'])->name('admin.pos.shifts');
+        Route::post('/pos/shifts/open', [CashShiftController::class, 'open'])->name('admin.pos.shifts.open');
+        Route::post('/pos/shifts/close', [CashShiftController::class, 'close'])->name('admin.pos.shifts.close');
 
         // Team management: owner only
         Route::middleware(['shop.role:owner'])->group(function () {
+            Route::get('/products/inventory/export', [ProductController::class, 'export'])->name('admin.products.inventory.export');
+            Route::get('/products/inventory/report.pdf', [ProductController::class, 'reportPdf'])->name('admin.products.inventory.report-pdf');
             Route::get('/settings', [ShopSettingsController::class, 'index'])->name('admin.settings.index');
             Route::put('/settings', [ShopSettingsController::class, 'update'])->name('admin.settings.update');
             Route::get('/settings/team', [TeamController::class, 'index'])->name('admin.settings.team');

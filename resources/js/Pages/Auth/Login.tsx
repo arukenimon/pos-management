@@ -47,7 +47,7 @@ export default function Login({
                         <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 backdrop-blur">
                             <Store className="h-5 w-5" />
                         </div>
-                        <span className="text-lg font-semibold tracking-tight">POS</span>
+                        <span className="text-lg font-semibold tracking-tight">TindaHub</span>
                     </a>
 
                     <div className="relative z-10 max-w-md space-y-6">

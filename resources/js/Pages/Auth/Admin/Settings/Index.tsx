@@ -1,7 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
-import { Barcode, Building2, Clock3, CreditCard, ReceiptText, Save, Users } from 'lucide-react';
+import { Barcode, Building2, Clock3, CreditCard, PackageCheck, ReceiptText, Save, Users } from 'lucide-react';
 
 interface SettingsProps extends PageProps {
     shop: {
@@ -103,16 +103,14 @@ export default function Settings({ shop }: SettingsProps) {
                 </section>
 
                 <section className="rounded-xl border border-[#d9e8e5] bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div className="flex items-start gap-3">
-                        <div className="rounded-lg bg-[#d7f3ed] p-2 text-[#0f766e] dark:bg-teal-900/40 dark:text-teal-300"><CreditCard className="h-5 w-5" /></div>
-                        <div className="flex-1">
-                            <h2 className="font-semibold text-[#102a2a] dark:text-white">POS & inventory</h2>
-                            <p className="mt-1 text-sm text-[#54706d] dark:text-gray-400">These preferences will be available once they are connected to the POS and stock alerts.</p>
+                        <div className="flex items-start gap-3">
+                            <div className="rounded-lg bg-[#d7f3ed] p-2 text-[#0f766e] dark:bg-teal-900/40 dark:text-teal-300"><CreditCard className="h-5 w-5" /></div>
+                            <div className="flex-1">
+                                <h2 className="font-semibold text-[#102a2a] dark:text-white">POS & inventory</h2>
+                                <p className="mt-1 text-sm text-[#54706d] dark:text-gray-400">Set the stock level that needs attention on your dashboard.</p>
+                            </div>
                         </div>
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#d7f3ed] px-2.5 py-1 text-xs font-semibold text-[#0f766e] dark:bg-teal-900/40 dark:text-teal-300"><Clock3 className="h-3.5 w-3.5" />Coming soon</span>
-                    </div>
-                    <p id="pos-settings-status" className="mt-4 rounded-lg border border-[#d9e8e5] bg-[#f7fdfb] px-3 py-2 text-xs leading-5 text-[#54706d] dark:border-gray-600 dark:bg-gray-900/30 dark:text-gray-400">The POS currently supports Cash and Card, barcode entry is always available through search, and low-stock alerts are not yet generated. These controls will activate with those features.</p>
-                    <fieldset disabled aria-describedby="pos-settings-status" className="mt-5 opacity-60">
+                    <fieldset disabled className="mt-5 opacity-60">
                         <div>
                             <p className="text-sm font-medium text-[#102a2a] dark:text-gray-200">Accepted payment methods</p>
                             <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -124,18 +122,23 @@ export default function Settings({ shop }: SettingsProps) {
                                 ))}
                             </div>
                         </div>
-                        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                        <div className="mt-5">
                             <label className="flex items-start gap-3 rounded-lg border border-[#d9e8e5] p-4 dark:border-gray-600">
                                 <input type="checkbox" checked={form.data.barcodeScanningEnabled} readOnly className="mt-0.5 rounded border-gray-300 text-[#0f766e] focus:ring-[#0f766e]" />
                                 <span><span className="flex items-center gap-2 text-sm font-medium text-[#102a2a] dark:text-gray-200"><Barcode className="h-4 w-4" />Enable barcode scanning</span><span className="mt-1 block text-xs text-[#54706d] dark:text-gray-400">Allow barcode input on the POS screen.</span></span>
                             </label>
-                            <label className="block text-sm font-medium text-[#102a2a] dark:text-gray-200">
-                                Low-stock threshold
-                                <input className={inputClass} type="number" min="0" max="10000" value={form.data.lowStockThreshold} readOnly />
-                                <span className="mt-1 block text-xs font-normal text-[#54706d] dark:text-gray-400">Alert when stock reaches this quantity.</span>
-                            </label>
                         </div>
                     </fieldset>
+                    <div className="mt-5 rounded-lg border border-[#d9e8e5] bg-[#f7fdfb] p-4 dark:border-gray-600 dark:bg-gray-900/30">
+                        <div className="flex items-start gap-3">
+                            <div className="rounded-lg bg-[#d7f3ed] p-2 text-[#0f766e] dark:bg-teal-900/40 dark:text-teal-300"><PackageCheck className="h-4 w-4" /></div>
+                            <label className="block text-sm font-medium text-[#102a2a] dark:text-gray-200">
+                                Low-stock threshold
+                                <input className={inputClass} type="number" min="0" max="10000" value={form.data.lowStockThreshold} onChange={event => form.setData('lowStockThreshold', Number(event.target.value))} required />
+                                <span className="mt-1 block text-xs font-normal text-[#54706d] dark:text-gray-400">Show an alert when an active product variant has this many units or fewer. Use 0 for out-of-stock only.</span>
+                            </label>
+                        </div>
+                    </div>
                 </section>
 
                 <section className="rounded-xl border border-[#d9e8e5] bg-[#f7fdfb] p-5 dark:border-gray-700 dark:bg-gray-800">

@@ -6,6 +6,39 @@ set -Eeuo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BRANCH="${DEPLOY_BRANCH:-master}"
+CREATE_BACKUP=false
+BACKUP_ONLY=false
+
+usage() {
+    cat <<'EOF'
+Usage: bash deploy.sh [--backup | --backup-only]
+
+  --backup       Create a backup, then deploy.
+  --backup-only  Create a backup without deploying.
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --backup)
+            CREATE_BACKUP=true
+            ;;
+        --backup-only)
+            CREATE_BACKUP=true
+            BACKUP_ONLY=true
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage >&2
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 log() {
     printf '\n==> %s\n' "$*"
@@ -26,6 +59,16 @@ fi
 if [[ ! -f .env ]]; then
     echo "Missing .env. Create it from .env.docker.example before deploying." >&2
     exit 1
+fi
+
+if [[ "$CREATE_BACKUP" == true ]]; then
+    log "Creating backup"
+    bash scripts/backup.sh
+fi
+
+if [[ "$BACKUP_ONLY" == true ]]; then
+    log "Backup complete; deployment was not requested"
+    exit 0
 fi
 
 # Protect the VPS configuration from an accidental checkout/pull over local edits.

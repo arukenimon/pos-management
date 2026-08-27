@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\StockMovement;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -14,6 +13,8 @@ class DashboardController extends Controller
     public function index()
     {
         $today = today();
+        $shop = app('current_shop');
+        $lowStockThreshold = (int) ($shop->low_stock_threshold ?? 5);
 
         $completedOrders = Order::where('status', 'completed');
         $stats = [
@@ -48,9 +49,41 @@ class DashboardController extends Controller
                 : $m->variant?->sku,
         ]);
 
+        $lowStockItems = Product::with([
+            'variants.inventories',
+            'variants.attributeValues.attribute',
+        ])
+        ->where('status', 'active')
+        ->get()
+        ->flatMap(function (Product $product) {
+            return $product->variants->map(function ($variant) use ($product) {
+                return [
+                    'id'            => $variant->id,
+                    'product_name'  => $product->name,
+                    'product_image' => $product->images[0] ?? null,
+                    'sku'           => $variant->sku,
+                    'variant_label' => $variant->attributeValues->isNotEmpty()
+                        ? $variant->attributeValues->map(fn ($value) => $value->value)->join(' / ')
+                        : null,
+                    'quantity'      => (int) $variant->inventories->sum('quantity'),
+                ];
+            });
+        })
+        ->filter(fn (array $item) => $item['quantity'] <= $lowStockThreshold)
+        ->sortBy([
+            ['quantity', 'asc'],
+            ['product_name', 'asc'],
+        ])
+        ->values();
+
         return Inertia::render('Auth/Admin/AdminDashboard', [
             'stats'           => $stats,
             'recentMovements' => $recentMovements,
+            'lowStock'        => [
+                'count'     => $lowStockItems->count(),
+                'threshold' => $lowStockThreshold,
+                'items'     => $lowStockItems->take(5)->values(),
+            ],
         ]);
     }
 }

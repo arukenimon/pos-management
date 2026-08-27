@@ -321,6 +321,30 @@ Back up the `pos_database` and `pos_storage` Docker volumes before upgrades.
 `docker compose down` is safe for normal maintenance; do **not** add `-v` unless
 you intentionally want to delete the database, uploads, and Caddy certificates.
 
+Deploy normally without creating a backup:
+
+```bash
+bash deploy.sh
+```
+
+Create a backup first, then deploy:
+
+```bash
+bash deploy.sh --backup
+```
+
+Create only a backup, without deploying:
+
+```bash
+bash deploy.sh --backup-only
+```
+
+The backup command creates a timestamped MariaDB dump and storage archive,
+includes the production environment settings, verifies the archive, and records
+the deployed Git commit. See
+[the deployment and backup runbook](docs/DEPLOYMENT_AND_BACKUPS.md) for the
+full backup, off-server retention, and carefully documented restore procedure.
+
 ---
 
 ## 📝 License

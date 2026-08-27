@@ -310,6 +310,7 @@ export default function SalesShow({ order }: ShowPageProps) {
                         ← Back to Sales
                     </Link>
                     <a href={`/${shop}/sales/${order.id}/receipt`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#0f766e] border border-[#0f766e] rounded-lg hover:bg-[#d7f3ed] transition-colors"><Printer className="h-4 w-4" />Reprint receipt</a>
+                    <a href={`/${shop}/sales/${order.id}/receipt.pdf`} className="inline-flex items-center gap-2 px-4 py-2 text-sm text-[#0f766e] border border-[#0f766e] rounded-lg hover:bg-[#d7f3ed] transition-colors"><Printer className="h-4 w-4" />Download PDF</a>
                     {order.status === 'completed' && (
                         <>
                             <button onClick={() => correctOrder('void')} className="inline-flex items-center gap-2 px-4 py-2 text-sm text-amber-700 border border-amber-300 rounded-lg hover:bg-amber-50 transition-colors"><Ban className="h-4 w-4" />Void sale</button>

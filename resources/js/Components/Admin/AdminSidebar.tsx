@@ -192,24 +192,6 @@ const AdminSidebar = ({
                         {navigation.map(item => renderNavItem(item))}
                     </nav>
 
-                    {/* Footer */}
-                    <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                    Help & Support
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                    Version 1.0.0
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </aside>
         </>

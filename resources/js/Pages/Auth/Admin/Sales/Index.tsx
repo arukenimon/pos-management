@@ -84,7 +84,7 @@ const variantLabel = (item: OrderItem) => {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function SalesIndex({ orders, filters, analytics }: SalesPageProps) {
-    const { currentShop } = usePage<PageProps>().props;
+    const { currentShop, auth } = usePage<PageProps>().props;
     const shop = currentShop?.slug ?? '';
     const [search, setSearch] = useState(filters.search ?? '');
     const [paymentFilter, setPaymentFilter] = useState(filters.payment_method ?? '');
@@ -122,13 +122,10 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales</h1>
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completed sales and their correction history</p>
                     </div>
-                    <Link
-                        href={`/${shop}/pos`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                        <ShoppingBag className="h-4 w-4" />
-                        Go to POS
-                    </Link>
+                    <div className="flex gap-2">
+                        {auth.shopRole === 'owner' && <><a href={`/${shop}/sales/export`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Export CSV</a><a href={`/${shop}/sales/report.pdf`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Sales PDF</a></>}
+                        <Link href={`/${shop}/pos`} className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"><ShoppingBag className="h-4 w-4" />Go to POS</Link>
+                    </div>
                 </div>
             }
         >

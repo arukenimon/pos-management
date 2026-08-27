@@ -209,15 +209,13 @@ export default function Products({ auth, products, filters, analytics }: Product
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Inventory</h1>
                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Manage your product inventory</p>
                     </div>
-                    <Link
-                        href={`/${shop}/products/create`}
-                        className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-                    >
-                        <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add Product
-                    </Link>
+                    <div className="flex gap-2">
+                        {auth.shopRole === 'owner' && <><a href={`/${shop}/products/inventory/export`} className="inline-flex items-center rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Export CSV</a><a href={`/${shop}/products/inventory/report.pdf`} className="inline-flex items-center rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Inventory PDF</a></>}
+                        <Link href={`/${shop}/products/create`} className="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+                            <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                            Add Product
+                        </Link>
+                    </div>
                 </div>
             }
         >

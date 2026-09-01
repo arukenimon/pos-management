@@ -1,7 +1,7 @@
 ﻿import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
-import { FormEventHandler, useEffect, useState } from 'react';
+import { FormEventHandler, useEffect, useRef, useState } from 'react';
 import { Product } from './Inventory';
 
 // â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -100,6 +100,150 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
     const [variantPrice, setVariantPrice] = useState('');
     const [selectedAttrValues, setSelectedAttrValues] = useState<number[]>([]);
     const [editingVariantIndex, setEditingVariantIndex] = useState<number | null>(null);
+    const [barcode, setBarcode] = useState('');
+    const [lookupStatus, setLookupStatus] = useState<'idle' | 'loading' | 'success' | 'not-found' | 'error'>('idle');
+    const [lookupMessage, setLookupMessage] = useState('');
+    const [cameraScannerOpen, setCameraScannerOpen] = useState(false);
+    const [cameraScannerStatus, setCameraScannerStatus] = useState('');
+    const [cameraScannerError, setCameraScannerError] = useState('');
+    const cameraVideoRef = useRef<HTMLVideoElement>(null);
+    const cameraControlsRef = useRef<{ stop: () => void } | null>(null);
+    const cameraSessionRef = useRef(0);
+
+    const lookupBarcode = async (rawBarcode = barcode) => {
+        const normalizedBarcode = rawBarcode.replace(/\s/g, '');
+
+        if (!/^\d{8,14}$/.test(normalizedBarcode)) {
+            setLookupStatus('error');
+            setLookupMessage('Enter a valid 8–14 digit UPC, EAN, or GTIN barcode.');
+            return;
+        }
+
+        setBarcode(normalizedBarcode);
+        setVariantSku(normalizedBarcode);
+        setLookupStatus('loading');
+        setLookupMessage('Looking up product details…');
+
+        try {
+            const response = await fetch(`/${shop}/products/barcode-lookup/${encodeURIComponent(normalizedBarcode)}`, {
+                headers: { Accept: 'application/json' },
+            });
+            const result = await response.json();
+
+            if (!response.ok || !result.found) {
+                setLookupStatus('not-found');
+                setLookupMessage(result.message ?? 'No catalog product was found. You can add the product manually.');
+                return;
+            }
+
+            const catalogProduct = result.product as { name?: string; description?: string; image?: string };
+
+            if (catalogProduct.name) setData('name', catalogProduct.name);
+            if (catalogProduct.description) setData('description', catalogProduct.description);
+            if (catalogProduct.image) {
+                setData('images', [catalogProduct.image]);
+                setImagePreview(catalogProduct.image);
+                setExistingImageRemoved(false);
+            }
+
+            setLookupStatus('success');
+            setLookupMessage('Product details filled from Open Food Facts. Review them and set your selling price before saving.');
+        } catch {
+            setLookupStatus('error');
+            setLookupMessage('The catalog could not be reached. You can add the product manually and try again later.');
+        }
+    };
+
+    const stopCameraScanner = () => {
+        cameraSessionRef.current += 1;
+        cameraControlsRef.current?.stop();
+        cameraControlsRef.current = null;
+
+        const stream = cameraVideoRef.current?.srcObject;
+        if (stream instanceof MediaStream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+        if (cameraVideoRef.current) cameraVideoRef.current.srcObject = null;
+    };
+
+    const closeCameraScanner = () => {
+        stopCameraScanner();
+        setCameraScannerOpen(false);
+        setCameraScannerStatus('');
+        setCameraScannerError('');
+    };
+
+    const startCameraScanner = async () => {
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+            setCameraScannerOpen(true);
+            setCameraScannerStatus('');
+            setCameraScannerError('Camera scanning needs HTTPS on a phone. Open the POS through its secure URL, then try again.');
+            return;
+        }
+
+        setCameraScannerOpen(true);
+        setCameraScannerError('');
+        setCameraScannerStatus('Starting the rear camera…');
+        const cameraSession = cameraSessionRef.current + 1;
+        cameraSessionRef.current = cameraSession;
+
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+
+        try {
+            const { BrowserMultiFormatReader } = await import('@zxing/browser');
+            const video = cameraVideoRef.current;
+            if (!video) return;
+
+            const reader = new BrowserMultiFormatReader();
+            const controls = await reader.decodeFromConstraints(
+                {
+                    video: {
+                        facingMode: { ideal: 'environment' },
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                    },
+                },
+                video,
+                (result) => {
+                    if (!result || cameraSessionRef.current !== cameraSession) return;
+
+                    const scannedBarcode = result.getText().replace(/\s/g, '');
+                    stopCameraScanner();
+                    setCameraScannerOpen(false);
+                    setBarcode(scannedBarcode);
+                    setVariantSku(scannedBarcode);
+                    void lookupBarcode(scannedBarcode);
+                },
+            );
+
+            if (cameraSessionRef.current !== cameraSession) {
+                controls.stop();
+                return;
+            }
+
+            cameraControlsRef.current = controls;
+            setCameraScannerStatus('Point the camera at the barcode. The lookup will start automatically once it is read.');
+        } catch (error) {
+            const name = error instanceof DOMException ? error.name : '';
+            setCameraScannerStatus('');
+            setCameraScannerError(
+                name === 'NotAllowedError'
+                    ? 'Camera permission was denied. Allow camera access in your browser settings, then try again.'
+                    : name === 'NotFoundError'
+                        ? 'No camera was found on this device.'
+                        : 'The camera could not be started. Check the permission and try again.',
+            );
+        }
+    };
+
+    const handleBarcodeKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            void lookupBarcode();
+        }
+    };
+
+    useEffect(() => () => stopCameraScanner(), []);
 
     const toggleAttrValue = (id: number) => {
         setSelectedAttrValues(prev =>
@@ -220,6 +364,61 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h2>
                             <div className="space-y-4">
+                                <div className="rounded-lg border border-[#0f766e]/30 bg-[#d7f3ed]/40 p-4 dark:border-[#0f766e]/60 dark:bg-[#0f766e]/10">
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                                        <div className="flex-1">
+                                            <label htmlFor="barcode" className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                                                Scan or enter barcode
+                                            </label>
+                                            <input
+                                                id="barcode"
+                                                type="text"
+                                                inputMode="numeric"
+                                                value={barcode}
+                                                onChange={event => setBarcode(event.target.value)}
+                                                onKeyDown={handleBarcodeKeyDown}
+                                                className="block w-full px-3 py-2 border border-[#0f766e]/40 dark:border-[#5ab8ad]/50 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent"
+                                                placeholder="UPC, EAN, or GTIN"
+                                                aria-describedby="barcode-help barcode-status"
+                                            />
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => void lookupBarcode()}
+                                                disabled={lookupStatus === 'loading'}
+                                                className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-[#0f766e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0b5f59] disabled:cursor-not-allowed disabled:opacity-60"
+                                            >
+                                                {lookupStatus === 'loading' ? 'Looking up…' : 'Lookup'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => void startCameraScanner()}
+                                                className="inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-[#0f766e] bg-white px-4 py-2 text-sm font-medium text-[#0f766e] transition-colors hover:bg-[#d7f3ed] dark:bg-transparent dark:text-[#78d7cc] dark:hover:bg-[#0f766e]/20"
+                                            >
+                                                Scan with camera
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p id="barcode-help" className="mt-2 text-xs text-[#54706d] dark:text-gray-400">
+                                        Use a USB scanner, enter a code, or scan with your phone camera. The barcode is also used as the starting SKU.
+                                    </p>
+                                    {lookupMessage && (
+                                        <p
+                                            id="barcode-status"
+                                            role={lookupStatus === 'error' || lookupStatus === 'not-found' ? 'alert' : 'status'}
+                                            className={`mt-2 text-xs font-medium ${
+                                                lookupStatus === 'success'
+                                                    ? 'text-[#0f766e] dark:text-[#78d7cc]'
+                                                    : lookupStatus === 'error' || lookupStatus === 'not-found'
+                                                        ? 'text-amber-700 dark:text-amber-300'
+                                                        : 'text-[#54706d] dark:text-gray-400'
+                                            }`}
+                                        >
+                                            {lookupMessage}
+                                        </p>
+                                    )}
+                                </div>
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Product Name <span className="text-red-500">*</span>
@@ -533,6 +732,58 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                     </div>
                 </div>
             </form>
+
+            {cameraScannerOpen && (
+                <div className="fixed inset-0 z-50 flex items-end bg-black/60 p-4 sm:items-center sm:justify-center" role="presentation">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="camera-scanner-title"
+                        className="w-full max-w-lg rounded-xl border border-[#d9e8e5] bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+                    >
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 id="camera-scanner-title" className="text-lg font-semibold text-[#102a2a] dark:text-white">Scan product barcode</h2>
+                                <p className="mt-1 text-sm text-[#54706d] dark:text-gray-400">Use the rear camera and keep the barcode inside the frame.</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeCameraScanner}
+                                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+                                aria-label="Close camera scanner"
+                            >
+                                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="relative mt-4 aspect-[4/3] overflow-hidden rounded-lg bg-[#102a2a]">
+                            <video ref={cameraVideoRef} className="h-full w-full object-cover" autoPlay muted playsInline />
+                            {!cameraScannerError && (
+                                <div className="pointer-events-none absolute inset-x-8 top-1/2 h-20 -translate-y-1/2 rounded-lg border-2 border-[#78d7cc] shadow-[0_0_0_9999px_rgba(0,0,0,0.15)]" />
+                            )}
+                        </div>
+
+                        {(cameraScannerStatus || cameraScannerError) && (
+                            <p
+                                role={cameraScannerError ? 'alert' : 'status'}
+                                className={`mt-3 text-sm ${cameraScannerError ? 'text-amber-700 dark:text-amber-300' : 'text-[#54706d] dark:text-gray-400'}`}
+                            >
+                                {cameraScannerError || cameraScannerStatus}
+                            </p>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={closeCameraScanner}
+                            className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-[#0f766e] px-4 py-2.5 text-sm font-medium text-[#0f766e] transition-colors hover:bg-[#d7f3ed] dark:text-[#78d7cc] dark:hover:bg-[#0f766e]/20"
+                        >
+                            Cancel scanner
+                        </button>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }

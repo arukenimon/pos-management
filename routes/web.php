@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         if ($shops?->count() === 1) {
             $shop = $shops->first();
             $route = $shop->roleOf($user) === 'cashier' ? 'admin.pos.index' : 'admin.dashboard';
+
             return redirect()->route($route, ['shop' => $shop->slug]);
         }
 
@@ -68,6 +69,9 @@ Route::prefix('{shop:slug}')
             Route::get('/products/inventory', [ProductController::class, 'Inventory'])->name('admin.products.inventory');
 
             Route::get('/products/create', [ProductController::class, 'AddProductPage'])->name('admin.products.create');
+            Route::get('/products/barcode-lookup/{barcode}', [ProductController::class, 'LookupBarcode'])
+                ->whereNumber('barcode')
+                ->name('admin.products.barcode-lookup');
             Route::post('/products/create', [ProductController::class, 'StoreProduct'])->name('admin.products.create.post');
             Route::get('/products/edit/{id}', [ProductController::class, 'EditProductPage'])->name('admin.products.edit');
             Route::put('/products/edit/{id}', [ProductController::class, 'UpdateProduct'])->name('admin.products.edit.post');

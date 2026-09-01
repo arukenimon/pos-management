@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    'open_food_facts' => [
+        'base_url' => env('OPEN_FOOD_FACTS_BASE_URL', 'https://world.openfoodfacts.org'),
+        // Open Food Facts asks API clients to identify themselves. Set this to
+        // an app name, version, and monitored support address in production.
+        'user_agent' => env('OPEN_FOOD_FACTS_USER_AGENT', 'TindaHub/1.0 (support@example.com)'),
+        // Do not inherit HTTP(S)_PROXY from the host. Set this only when the
+        // deployed environment deliberately requires an outbound proxy.
+        'proxy' => env('OPEN_FOOD_FACTS_PROXY', ''),
+    ],
+
 ];

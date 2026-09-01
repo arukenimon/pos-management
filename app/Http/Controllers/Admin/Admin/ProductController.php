@@ -3,30 +3,38 @@
 namespace App\Http\Controllers\Admin\Admin;
 
 use App\Http\Controllers\Controller;
-//ProductController ;
+// ProductController ;
 use App\Models\Attribute;
-use App\Models\AttributeValue;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\StockMovement;
+use App\Services\OpenFactsProductLookup;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProductController extends Controller
 {
     public function export()
     {
-        $filename = 'inventory-' . app('current_shop')->slug . '-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'inventory-'.app('current_shop')->slug.'-'.now()->format('Y-m-d').'.csv';
+
         return response()->streamDownload(function () {
             $out = fopen('php://output', 'w');
             fputcsv($out, ['Product', 'SKU', 'Status', 'Stock Batch ID', 'Quantity', 'Cost Price', 'Received At']);
             Product::with('variants.inventories')->orderBy('name')->chunk(100, function ($products) use ($out) {
-                foreach ($products as $product) foreach ($product->variants as $variant) foreach ($variant->inventories as $inventory) {
-                    fputcsv($out, [$product->name, $variant->sku, $product->status, $inventory->id, $inventory->quantity, $inventory->cost_price, $inventory->created_at->toDateTimeString()]);
+                foreach ($products as $product) {
+                    foreach ($product->variants as $variant) {
+                        foreach ($variant->inventories as $inventory) {
+                            fputcsv($out, [$product->name, $variant->sku, $product->status, $inventory->id, $inventory->quantity, $inventory->cost_price, $inventory->created_at->toDateTimeString()]);
+                        }
+                    }
                 }
             });
             fclose($out);
@@ -36,17 +44,19 @@ class ProductController extends Controller
     public function reportPdf()
     {
         $products = Product::with('variants.inventories')->orderBy('name')->get();
+
         return Pdf::loadView('reports.inventory', ['shop' => app('current_shop'), 'products' => $products])
-            ->setPaper('a4', 'landscape')->download('inventory-report-' . now()->format('Y-m-d') . '.pdf');
+            ->setPaper('a4', 'landscape')->download('inventory-report-'.now()->format('Y-m-d').'.pdf');
     }
-    function Inventory(Request $request)
+
+    public function Inventory(Request $request)
     {
         $search = $request->query('search');
         $status = $request->query('status');
 
         $products = Product::query()
             ->with(['variants.inventories', 'variants.attributeValues.attribute'])
-            ->when($search, fn($q) => $q->where('name', 'like', "%{$search}%"))
+            ->when($search, fn ($q) => $q->where('name', 'like', "%{$search}%"))
             ->when($status, function ($q, $status) {
                 if ($status === 'safe') {
                     $q->whereHas('variants.inventories', function ($sq) {
@@ -78,27 +88,27 @@ class ProductController extends Controller
             ->get();
 
         return Inertia::render('Auth/Admin/Products/Inventory', [
-            'products'  => $products,
-            'filters'   => ['search' => $search, 'status' => $status],
+            'products' => $products,
+            'filters' => ['search' => $search, 'status' => $status],
             'analytics' => [
-                'total'    => Product::count(),
-                'active'   => Product::where('status', 'active')->count(),
+                'total' => Product::count(),
+                'active' => Product::where('status', 'active')->count(),
                 'inactive' => Product::where('status', 'inactive')->count(),
             ],
         ]);
     }
 
-    function DeleteProductStock($shop, $id)
+    public function DeleteProductStock($shop, $id)
     {
         $inventory = Inventory::findOrFail($id);
 
         StockMovement::create([
             'product_variant_id' => $inventory->product_variant_id,
-            'inventory_id'       => $inventory->id,
-            'type'               => 'deletion',
-            'quantity'           => -$inventory->quantity,
-            'note'               => 'Stock batch deleted',
-            'performed_by'       => Auth::id(),
+            'inventory_id' => $inventory->id,
+            'type' => 'deletion',
+            'quantity' => -$inventory->quantity,
+            'note' => 'Stock batch deleted',
+            'performed_by' => Auth::id(),
         ]);
 
         $inventory->delete();
@@ -106,10 +116,10 @@ class ProductController extends Controller
         return redirect()->route('admin.products.inventory');
     }
 
-    function AddStock($shop, Request $request, $variant_id)
+    public function AddStock($shop, Request $request, $variant_id)
     {
         $request->validate([
-            'quantity'   => 'required|integer|min:1',
+            'quantity' => 'required|integer|min:1',
             'cost_price' => 'required|numeric|min:0',
         ]);
 
@@ -117,22 +127,22 @@ class ProductController extends Controller
 
         $inventory = Inventory::create([
             'product_variant_id' => $variant_id,
-            'quantity'           => $request->quantity,
-            'cost_price'         => $request->cost_price,
+            'quantity' => $request->quantity,
+            'cost_price' => $request->cost_price,
         ]);
 
         StockMovement::create([
             'product_variant_id' => $variant_id,
-            'inventory_id'       => $inventory->id,
-            'type'               => 'purchase',
-            'quantity'           => $request->quantity,
-            'performed_by'       => Auth::id(),
+            'inventory_id' => $inventory->id,
+            'type' => 'purchase',
+            'quantity' => $request->quantity,
+            'performed_by' => Auth::id(),
         ]);
 
         return redirect()->route('admin.products.inventory');
     }
 
-    function AddProductPage()
+    public function AddProductPage()
     {
         $attributes = Attribute::with('values')->get();
 
@@ -141,7 +151,39 @@ class ProductController extends Controller
         ]);
     }
 
-    function EditProductPage($shop, $id)
+    public function LookupBarcode(string $shop, string $barcode, OpenFactsProductLookup $catalog): JsonResponse
+    {
+        Validator::make(['barcode' => $barcode], [
+            'barcode' => [
+                'required',
+                'string',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! is_string($value) || preg_match('/^\d{8,14}$/', $value) !== 1) {
+                        $fail('The :attribute must be an 8–14 digit UPC, EAN, or GTIN barcode.');
+                    }
+                },
+            ],
+        ])->validate();
+
+        $product = $catalog->find($barcode);
+
+        if ($product === null) {
+            return response()->json([
+                'found' => false,
+                'barcode' => $barcode,
+                'message' => 'No catalog product was found for this barcode.',
+            ], 404);
+        }
+
+        return response()->json([
+            'found' => true,
+            'barcode' => $barcode,
+            'source' => 'Open Food Facts',
+            'product' => $product,
+        ]);
+    }
+
+    public function EditProductPage($shop, $id)
     {
         $product = Product::with([
             'variants.inventories',
@@ -151,42 +193,42 @@ class ProductController extends Controller
         $attributes = Attribute::with('values')->get();
 
         return Inertia::render('Auth/Admin/Products/ModifyProduct', [
-            'product'    => $product,
+            'product' => $product,
             'attributes' => $attributes,
         ]);
     }
 
-    function StoreProduct(Request $request)
+    public function StoreProduct(Request $request)
     {
         $request->validate([
-            'name'                              => 'required|string|max:255',
-            'description'                       => 'nullable|string',
-            'images'                            => 'nullable|array',
-            'images.*'                          => 'string',
-            'variants'                          => 'required|array|min:1',
-            'variants.*.sku'                    => 'required|string|max:100|distinct',
-            'variants.*.price'                  => 'required|numeric|min:0',
-            'variants.*.attribute_value_ids'    => 'nullable|array',
-            'variants.*.attribute_value_ids.*'  => 'integer|exists:attribute_values,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
+            'variants' => 'required|array|min:1',
+            'variants.*.sku' => 'required|string|max:100|distinct',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.attribute_value_ids' => 'nullable|array',
+            'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ]);
 
         try {
             DB::beginTransaction();
 
             $product = Product::create([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'description' => $request->description,
-                'images'      => $request->input('images', []),
+                'images' => $request->input('images', []),
             ]);
 
             foreach ($request->variants as $variantData) {
                 $variant = ProductVariant::create([
                     'product_id' => $product->id,
-                    'sku'        => $variantData['sku'],
-                    'price'      => $variantData['price'] ?? null,
+                    'sku' => $variantData['sku'],
+                    'price' => $variantData['price'] ?? null,
                 ]);
 
-                if (!empty($variantData['attribute_value_ids'])) {
+                if (! empty($variantData['attribute_value_ids'])) {
                     $variant->attributeValues()->sync($variantData['attribute_value_ids']);
                 }
             }
@@ -194,25 +236,26 @@ class ProductController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to add product: ' . $e->getMessage());
+
+            return back()->with('error', 'Failed to add product: '.$e->getMessage());
         }
 
         return redirect()->route('admin.products.inventory')->with('success', 'Product added successfully');
     }
 
-    function UpdateProduct($shop, Request $request, $id)
+    public function UpdateProduct($shop, Request $request, $id)
     {
         $request->validate([
-            'name'                              => 'required|string|max:255',
-            'description'                       => 'nullable|string',
-            'images'                            => 'nullable|array',
-            'images.*'                          => 'string',
-            'variants'                          => 'nullable|array',
-            'variants.*.id'                     => 'nullable|integer|exists:product_variants,id',
-            'variants.*.sku'                    => 'required|string|max:100',
-            'variants.*.price'                  => 'required|numeric|min:0',
-            'variants.*.attribute_value_ids'    => 'nullable|array',
-            'variants.*.attribute_value_ids.*'  => 'integer|exists:attribute_values,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'string',
+            'variants' => 'nullable|array',
+            'variants.*.id' => 'nullable|integer|exists:product_variants,id',
+            'variants.*.sku' => 'required|string|max:100',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.attribute_value_ids' => 'nullable|array',
+            'variants.*.attribute_value_ids.*' => 'integer|exists:attribute_values,id',
         ]);
 
         try {
@@ -220,9 +263,9 @@ class ProductController extends Controller
 
             $product = Product::findOrFail($id);
             $product->update([
-                'name'        => $request->name,
+                'name' => $request->name,
                 'description' => $request->description,
-                'images'      => $request->input('images', $product->images ?? []),
+                'images' => $request->input('images', $product->images ?? []),
             ]);
 
             $submittedVariantIds = collect($request->input('variants', []))
@@ -244,14 +287,14 @@ class ProductController extends Controller
 
                 if ($variant) {
                     $variant->update([
-                        'sku'   => $variantData['sku'],
+                        'sku' => $variantData['sku'],
                         'price' => $variantData['price'],
                     ]);
                 } else {
                     $variant = ProductVariant::create([
                         'product_id' => $product->id,
-                        'sku'        => $variantData['sku'],
-                        'price'      => $variantData['price'],
+                        'sku' => $variantData['sku'],
+                        'price' => $variantData['price'],
                     ]);
                 }
 
@@ -261,7 +304,8 @@ class ProductController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to update product: ' . $e->getMessage());
+
+            return back()->with('error', 'Failed to update product: '.$e->getMessage());
         }
 
         return redirect()->route('admin.products.inventory')->with('success', 'Product updated successfully');

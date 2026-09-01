@@ -20,14 +20,31 @@ class AnalyticsDemoSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    private const SHOP_SLUG  = 'testshopppp';
+    private const DEMO_MARKER = 'TindaHub showcase demo data';
     private const DAYS_BACK  = 365;
     private const TOTAL_ORDERS = 600;
 
     public function run(): void
     {
-        $shop = Shop::where('slug', self::SHOP_SLUG)->firstOrFail();
+        $shopSlug = (string) env('ANALYTICS_DEMO_SHOP_SLUG');
+        if ($shopSlug === '') {
+            throw new \RuntimeException(
+                'Set ANALYTICS_DEMO_SHOP_SLUG before running the analytics demo seeder.'
+            );
+        }
+
+        $shop = Shop::where('slug', $shopSlug)->firstOrFail();
         app()->instance('current_shop', $shop);
+
+        if (Product::withoutGlobalScope('shop')
+            ->where('shop_id', $shop->id)
+            ->where('description', 'like', '%' . self::DEMO_MARKER . '%')
+            ->exists()) {
+            $this->command->warn(
+                "Showcase demo data already exists for shop '{$shop->slug}'; no changes were made."
+            );
+            return;
+        }
 
         $cashierIds = $shop->members()->pluck('users.id')->all();
         if (empty($cashierIds)) {
@@ -78,7 +95,7 @@ class AnalyticsDemoSeeder extends Seeder
             $product = Product::withoutGlobalScope('shop')->firstOrCreate(
                 ['shop_id' => $shop->id, 'name' => $p['name']],
                 [
-                    'description' => $p['name'] . ' for analytics demo',
+                    'description' => $p['name'] . ' — ' . self::DEMO_MARKER,
                     'status'      => 'active',
                     'images'      => [],
                 ]

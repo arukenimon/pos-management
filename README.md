@@ -339,6 +339,21 @@ Create only a backup, without deploying:
 bash deploy.sh --backup-only
 ```
 
+### Seed showcase analytics data
+
+`AnalyticsDemoSeeder` creates a demo catalogue, stock movements, and 600
+completed sales spread over the prior year. It is deliberately opt-in: choose
+the exact workspace with `ANALYTICS_DEMO_SHOP_SLUG`, then run it once.
+
+```bash
+docker compose exec -e ANALYTICS_DEMO_SHOP_SLUG=awesome-shop app \
+  php artisan db:seed --class=AnalyticsDemoSeeder --force
+```
+
+The seeder records a showcase marker on its products and will make no changes
+if that workspace has already been seeded. It does not modify existing
+products or sales.
+
 The backup command creates a timestamped MariaDB dump and storage archive,
 includes the production environment settings, verifies the archive, and records
 the deployed Git commit. See

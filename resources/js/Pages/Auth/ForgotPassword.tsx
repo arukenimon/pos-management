@@ -21,8 +21,8 @@ export default function ForgotPassword({ status }: { status?: string }) {
             <Head title="Forgot Password" />
 
             <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Reset your password</h1>
-                <p className="mt-2 text-sm leading-6 text-[#54706d]">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Reset your password</h1>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Forgot your password? No problem. Just let us know your email
                 address and we will email you a password reset link that will
                 allow you to choose a new one.

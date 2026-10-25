@@ -37,7 +37,7 @@ export default function DeleteUserForm() {
 
     return (
         <>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm text-muted-foreground dark:text-gray-400 mb-4">
                 Once your account is deleted, all of its resources and data will be permanently
                 removed. Download anything you want to keep before continuing.
             </p>
@@ -51,7 +51,7 @@ export default function DeleteUserForm() {
             </button>
 
             <Dialog open={confirmOpen} onOpenChange={(open) => (open ? setConfirmOpen(true) : closeModal())}>
-                <DialogContent className="sm:max-w-md bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+                <DialogContent className="sm:max-w-md bg-card text-foreground dark:bg-gray-900 dark:text-gray-100">
                     <DialogHeader>
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0 h-10 w-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
@@ -68,7 +68,7 @@ export default function DeleteUserForm() {
 
                     <form onSubmit={deleteUser} className="space-y-4 pt-2">
                         <div>
-                            <label htmlFor="delete_password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            <label htmlFor="delete_password" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                                 Confirm with your password
                             </label>
                             <input
@@ -79,7 +79,7 @@ export default function DeleteUserForm() {
                                 onChange={(e) => setData('password', e.target.value)}
                                 autoFocus
                                 placeholder="Password"
-                                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                                className="block w-full px-3 py-2 border border-input dark:border-gray-600 rounded-lg bg-card dark:bg-gray-700 text-foreground dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                             />
                             {errors.password && <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.password}</p>}
                         </div>
@@ -88,7 +88,7 @@ export default function DeleteUserForm() {
                             <button
                                 type="button"
                                 onClick={closeModal}
-                                className="inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                className="inline-flex justify-center rounded-lg border border-input dark:border-gray-600 px-4 py-2 text-sm font-medium text-foreground dark:text-gray-200 hover:bg-accent dark:hover:bg-gray-800"
                             >
                                 Cancel
                             </button>

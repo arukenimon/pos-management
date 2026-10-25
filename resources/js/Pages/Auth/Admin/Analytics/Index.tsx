@@ -8,6 +8,7 @@ import {
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import { TrendingUp, ShoppingCart, Package, BarChart2, DollarSign } from 'lucide-react';
+import { CHART_AXIS, CHART_COLORS, CHART_GRID, CHART_TOOLTIP } from '@/lib/chart-theme';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ interface AnalyticsProps extends PageProps {
 const fmt  = (n: number) => 'P' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtK = (n: number) => n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
 
-const PIE_COLORS = ['#0f766e', '#48b7a7', '#d39c37', '#e06c62', '#2c8c95'];
+const PIE_COLORS = [CHART_COLORS.revenue, CHART_COLORS.orders, CHART_COLORS.profit, CHART_COLORS.positive, CHART_COLORS.negative];
 
 const PERIODS = [
     { value: 'today', label: 'Today' },
@@ -51,30 +52,29 @@ const PERIODS = [
 ];
 
 // Shared chart theme
-const AXIS_STYLE  = { fontSize: 11, fill: '#9ca3af' };
-const GRID_STROKE = '#d9e8e5';
+const AXIS_STYLE = CHART_AXIS;
+const GRID_STROKE = CHART_GRID;
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function KpiCard({ title, value, sub, icon, color }: {
+function KpiCard({ title, value, sub, icon }: {
     title: string; value: string; sub: string;
-    icon: React.ReactNode; color: string;
+    icon: React.ReactNode;
 }) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between shadow-sm">
+        <div className="dashboard-card p-5">
+            <div className="mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400"><span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span><p className="text-xs text-muted-foreground">{title}</p></div>
             <div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{title}</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
+                <p className="break-words text-xl font-semibold tracking-tight tabular-nums text-foreground 2xl:text-2xl">{value}</p>
                 <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{sub}</p>
             </div>
-            <div className={`${color} p-3 rounded-xl text-white flex-shrink-0`}>{icon}</div>
         </div>
     );
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+        <div className="dashboard-card h-full p-5 sm:p-6">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
             {children}
         </div>
@@ -103,6 +103,7 @@ export default function AnalyticsIndex({
     };
 
     const noData = (arr: unknown[]) => arr.length === 0;
+    const maxProductUnits = Math.max(1, ...topProducts.map(product => product.units_sold));
 
     const EmptyState = () => (
         <div className="flex flex-col items-center justify-center h-40 text-gray-400">
@@ -120,14 +121,16 @@ export default function AnalyticsIndex({
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sales and inventory insights</p>
                     </div>
                     {/* Period selector */}
-                    <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                    <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
                         {PERIODS.map(p => (
                             <button
                                 key={p.value}
+                                type="button"
+                                aria-pressed={period === p.value}
                                 onClick={() => changePeriod(p.value)}
                                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                                     period === p.value
-                                        ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                        ? 'bg-primary text-white shadow-sm'
                                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                                 }`}
                             >
@@ -140,34 +143,34 @@ export default function AnalyticsIndex({
         >
             <Head title="Analytics" />
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
                 {/* KPI cards */}
-                <div className="grid grid-cols-2 gap-5 lg:grid-cols-5">
-                    <KpiCard title="Revenue"    value={fmt(summary.totalRevenue)}              sub="Total for period"    icon={<TrendingUp className="h-5 w-5" />}   color="bg-indigo-500" />
-                    <KpiCard title="Profit"     value={fmt(summary.totalProfit)}               sub="Gross profit"        icon={<DollarSign className="h-5 w-5" />}   color="bg-emerald-500" />
-                    <KpiCard title="Orders"     value={summary.totalOrders.toLocaleString()}   sub="Completed sales"     icon={<ShoppingCart className="h-5 w-5" />} color="bg-blue-500" />
-                    <KpiCard title="Avg Order"  value={fmt(summary.avgOrderValue)}             sub="Per transaction"     icon={<BarChart2 className="h-5 w-5" />}    color="bg-violet-500" />
-                    <KpiCard title="Units Sold" value={summary.totalUnitsSold.toLocaleString()} sub="Items sold"         icon={<Package className="h-5 w-5" />}      color="bg-orange-500" />
+                <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:col-span-2 xl:grid-cols-5">
+                    <KpiCard title="Revenue"    value={fmt(summary.totalRevenue)}              sub="Total for period"    icon={<TrendingUp className="h-5 w-5" />}   />
+                    <KpiCard title="Profit"     value={fmt(summary.totalProfit)}               sub="Gross profit"        icon={<DollarSign className="h-5 w-5" />}   />
+                    <KpiCard title="Orders"     value={summary.totalOrders.toLocaleString()}   sub="Completed sales"     icon={<ShoppingCart className="h-5 w-5" />} />
+                    <KpiCard title="Avg Order"  value={fmt(summary.avgOrderValue)}             sub="Per transaction"     icon={<BarChart2 className="h-5 w-5" />}    />
+                    <KpiCard title="Units Sold" value={summary.totalUnitsSold.toLocaleString()} sub="Items sold"         icon={<Package className="h-5 w-5" />}      />
                 </div>
 
                 {/* Revenue + Orders trend — follows selected period */}
-                <ChartCard title={`Revenue, Profit & Orders — ${PERIOD_LABELS[period] ?? period}`}>
+                <div className="xl:col-span-2"><ChartCard title={`Revenue, Profit & Orders — ${PERIOD_LABELS[period] ?? period}`}>
                     {noData(revenueTrend) ? <EmptyState /> : (
                         <ResponsiveContainer width="100%" height={260}>
                             <AreaChart data={revenueTrend} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#0f766e" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#0f766e" stopOpacity={0} />
+                                        <stop offset="5%"  stopColor={CHART_COLORS.revenue} stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor={CHART_COLORS.revenue} stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="profitGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        <stop offset="5%"  stopColor={CHART_COLORS.profit} stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor={CHART_COLORS.profit} stopOpacity={0} />
                                     </linearGradient>
                                     <linearGradient id="ordGrad" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%"  stopColor="#f59e0b" stopOpacity={0.2} />
-                                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                                        <stop offset="5%"  stopColor={CHART_COLORS.orders} stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor={CHART_COLORS.orders} stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
@@ -175,55 +178,64 @@ export default function AnalyticsIndex({
                                 <YAxis yAxisId="rev" tick={AXIS_STYLE} tickLine={false} axisLine={false} tickFormatter={fmtK} />
                                 <YAxis yAxisId="ord" orientation="right" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
-                                    labelStyle={{ color: '#e5e7eb' }}
-                                    itemStyle={{ color: '#d1d5db' }}
+                                    contentStyle={CHART_TOOLTIP}
+                                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                                    itemStyle={{ color: 'hsl(var(--foreground))' }}
                                     formatter={(v: number, name: string) => name === 'Orders' ? [v, 'Orders'] : [fmt(v), name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke="#0f766e" fill="url(#revGrad)"    strokeWidth={2} dot={false} />
-                                <Area yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke="#10b981" fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
-                                <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke="#f59e0b" fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
+                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke={CHART_COLORS.revenue} fill="url(#revGrad)"    strokeWidth={2} dot={false} />
+                                <Area yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke={CHART_COLORS.profit} fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                                <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke={CHART_COLORS.orders} fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     )}
                 </ChartCard>
 
+                </div>
+
                 {/* Top Products + Payment Split */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 xl:col-span-2">
 
                     {/* Top Products */}
                     <div className="lg:col-span-2">
                         <ChartCard title="Top Products by Units Sold">
                             {noData(topProducts) ? <EmptyState /> : (
-                                <ResponsiveContainer width="100%" height={280}>
-                                    <BarChart
-                                        data={topProducts}
-                                        layout="vertical"
-                                        margin={{ top: 0, right: 16, left: 4, bottom: 0 }}
-                                    >
-                                        <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} horizontal={false} />
-                                        <XAxis type="number" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
-                                        <YAxis
-                                            type="category"
-                                            dataKey="name"
-                                            tick={AXIS_STYLE}
-                                            tickLine={false}
-                                            axisLine={false}
-                                            width={90}
-                                            tickFormatter={(v: string) => v.length > 12 ? v.slice(0, 12) + '…' : v}
-                                        />
-                                        <Tooltip
-                                            contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
-                                            labelStyle={{ color: '#e5e7eb' }}
-                                            itemStyle={{ color: '#d1d5db' }}
-                                            formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
-                                        />
-                                        <Legend wrapperStyle={{ fontSize: 12 }} />
-                                        <Bar dataKey="units_sold" name="Units" fill="#0f766e" radius={[0, 4, 4, 0]} />
-                                        <Bar dataKey="revenue"    name="Revenue" fill="#10b981" radius={[0, 4, 4, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                                <div>
+                                    <p className="mb-5 text-xs text-gray-500 dark:text-gray-400">
+                                        Ranked by units sold in the selected period.
+                                    </p>
+                                    <ol className="space-y-5" aria-label="Products ranked by units sold">
+                                        {topProducts.map((product, index) => (
+                                            <li key={`${product.name}-${product.variant}-${index}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2">
+                                                <div className="flex min-w-0 gap-2.5">
+                                                    <span className="pt-0.5 text-xs tabular-nums text-gray-500 dark:text-gray-400" aria-hidden="true">
+                                                        {index + 1}.
+                                                    </span>
+                                                    <div className="min-w-0">
+                                                        <p className="break-words text-sm font-medium text-gray-900 dark:text-white">{product.name}</p>
+                                                        {product.variant && (
+                                                            <p className="mt-0.5 break-words text-xs text-gray-500 dark:text-gray-400">{product.variant}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="text-right tabular-nums">
+                                                    <p className="text-base font-semibold text-indigo-700 dark:text-indigo-300">
+                                                        {product.units_sold.toLocaleString()}{' '}
+                                                        <span className="text-xs font-medium">{product.units_sold === 1 ? 'unit' : 'units'}</span>
+                                                    </p>
+                                                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{fmt(product.revenue)} revenue</p>
+                                                </div>
+                                                <div className="col-span-2 h-2 overflow-hidden rounded-full bg-indigo-50 dark:bg-gray-700" aria-hidden="true">
+                                                    <div
+                                                        className="h-full rounded-full bg-indigo-700 dark:bg-indigo-400"
+                                                        style={{ width: `${(product.units_sold / maxProductUnits) * 100}%` }}
+                                                    />
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                </div>
                             )}
                         </ChartCard>
                     </div>
@@ -250,8 +262,8 @@ export default function AnalyticsIndex({
                                                 ))}
                                             </Pie>
                                             <PieTooltip
-                                                contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
-                                                itemStyle={{ color: '#d1d5db' }}
+                                                contentStyle={CHART_TOOLTIP}
+                                                itemStyle={{ color: 'hsl(var(--foreground))' }}
                                             />
                                             <PieLegend wrapperStyle={{ fontSize: 12 }} />
                                         </PieChart>
@@ -285,13 +297,13 @@ export default function AnalyticsIndex({
                                 <XAxis dataKey="date" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <YAxis tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
-                                    labelStyle={{ color: '#e5e7eb' }}
-                                    itemStyle={{ color: '#d1d5db' }}
+                                    contentStyle={CHART_TOOLTIP}
+                                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                                    itemStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="stock_in"  name="Stock In"  fill="#10b981" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="stock_out" name="Stock Out" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="stock_in"  name="Stock In"  fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="stock_out" name="Stock Out" fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     )}
@@ -306,14 +318,14 @@ export default function AnalyticsIndex({
                                 <XAxis dataKey="hour" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <YAxis tick={AXIS_STYLE} tickLine={false} axisLine={false} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#103f3c', border: 'none', borderRadius: 8, fontSize: 12 }}
-                                    labelStyle={{ color: '#e5e7eb' }}
-                                    itemStyle={{ color: '#d1d5db' }}
+                                    contentStyle={CHART_TOOLTIP}
+                                    labelStyle={{ color: 'hsl(var(--foreground))' }}
+                                    itemStyle={{ color: 'hsl(var(--foreground))' }}
                                     formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="orders"  name="Orders"  fill="#0f766e" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="revenue" name="Revenue" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="orders"  name="Orders"  fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="revenue" name="Revenue" fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     )}

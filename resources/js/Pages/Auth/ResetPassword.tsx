@@ -34,8 +34,8 @@ export default function ResetPassword({
 
             <form onSubmit={submit}>
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Choose a new password</h1>
-                    <p className="mt-2 text-sm text-[#54706d]">Use a long, unique password to keep your account secure.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-foreground">Choose a new password</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">Use a long, unique password to keep your account secure.</p>
                 </div>
                 <div>
                     <InputLabel htmlFor="email" value="Email" />

@@ -17,8 +17,8 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <Head title="Email Verification" />
 
             <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Check your inbox</h1>
-                <p className="mt-2 text-sm leading-6 text-[#54706d]">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Check your inbox</h1>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 Thanks for signing up! Before getting started, could you verify
                 your email address by clicking on the link we just emailed to
                 you? If you didn't receive the email, we will gladly send you

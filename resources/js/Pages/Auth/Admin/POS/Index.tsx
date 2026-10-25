@@ -1,4 +1,4 @@
-﻿import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
@@ -205,7 +205,7 @@ export default function POSIndex({ products }: POSPageProps) {
                             {products.length} products available
                         </p>
                     </div>
-                    <a href={`/${shop}/pos/shifts`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-3 py-2 text-sm font-medium text-[#0f766e]"><CircleDollarSign className="h-4 w-4" />Cash shifts</a>
+                    <a href={`/${shop}/pos/shifts`} className="inline-flex items-center gap-2 rounded-lg border border-primary px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300"><CircleDollarSign className="h-4 w-4" />Cash shifts</a>
                 </div>
             }
         >

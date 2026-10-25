@@ -1,4 +1,4 @@
-﻿import { Head, Link, useForm, usePage } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { FormEventHandler, useEffect, useRef, useState } from 'react';
@@ -364,7 +364,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                             <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h2>
                             <div className="space-y-4">
-                                <div className="rounded-lg border border-[#0f766e]/30 bg-[#d7f3ed]/40 p-4 dark:border-[#0f766e]/60 dark:bg-[#0f766e]/10">
+                                <div className="rounded-lg border border-primary/30 bg-accent/40 p-4 dark:border-primary/60 dark:bg-primary/10">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                                         <div className="flex-1">
                                             <label htmlFor="barcode" className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
@@ -377,7 +377,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                 value={barcode}
                                                 onChange={event => setBarcode(event.target.value)}
                                                 onKeyDown={handleBarcodeKeyDown}
-                                                className="block w-full px-3 py-2 border border-[#0f766e]/40 dark:border-[#5ab8ad]/50 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#0f766e] focus:border-transparent"
+                                                className="block w-full px-3 py-2 border border-primary/40 dark:border-[#5ab8ad]/50 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="UPC, EAN, or GTIN"
                                                 aria-describedby="barcode-help barcode-status"
                                             />
@@ -387,20 +387,20 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                 type="button"
                                                 onClick={() => void lookupBarcode()}
                                                 disabled={lookupStatus === 'loading'}
-                                                className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-[#0f766e] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0b5f59] disabled:cursor-not-allowed disabled:opacity-60"
+                                                className="inline-flex min-h-10 flex-1 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0b5f59] disabled:cursor-not-allowed disabled:opacity-60"
                                             >
                                                 {lookupStatus === 'loading' ? 'Looking up…' : 'Lookup'}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => void startCameraScanner()}
-                                                className="inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-[#0f766e] bg-white px-4 py-2 text-sm font-medium text-[#0f766e] transition-colors hover:bg-[#d7f3ed] dark:bg-transparent dark:text-[#78d7cc] dark:hover:bg-[#0f766e]/20"
+                                                className="inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-primary bg-white px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:bg-accent dark:bg-transparent dark:text-[#78d7cc] dark:hover:bg-primary/20"
                                             >
                                                 Scan with camera
                                             </button>
                                         </div>
                                     </div>
-                                    <p id="barcode-help" className="mt-2 text-xs text-[#54706d] dark:text-gray-400">
+                                    <p id="barcode-help" className="mt-2 text-xs text-muted-foreground dark:text-gray-400">
                                         Use a USB scanner, enter a code, or scan with your phone camera. The barcode is also used as the starting SKU.
                                     </p>
                                     {lookupMessage && (
@@ -409,10 +409,10 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                             role={lookupStatus === 'error' || lookupStatus === 'not-found' ? 'alert' : 'status'}
                                             className={`mt-2 text-xs font-medium ${
                                                 lookupStatus === 'success'
-                                                    ? 'text-[#0f766e] dark:text-[#78d7cc]'
+                                                    ? 'text-indigo-600 dark:text-indigo-300 dark:text-[#78d7cc]'
                                                     : lookupStatus === 'error' || lookupStatus === 'not-found'
                                                         ? 'text-amber-700 dark:text-amber-300'
-                                                        : 'text-[#54706d] dark:text-gray-400'
+                                                        : 'text-muted-foreground dark:text-gray-400'
                                             }`}
                                         >
                                             {lookupMessage}
@@ -739,12 +739,12 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="camera-scanner-title"
-                        className="w-full max-w-lg rounded-xl border border-[#d9e8e5] bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+                        className="w-full max-w-lg rounded-xl border border-border bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h2 id="camera-scanner-title" className="text-lg font-semibold text-[#102a2a] dark:text-white">Scan product barcode</h2>
-                                <p className="mt-1 text-sm text-[#54706d] dark:text-gray-400">Use the rear camera and keep the barcode inside the frame.</p>
+                                <h2 id="camera-scanner-title" className="text-lg font-semibold text-foreground dark:text-white">Scan product barcode</h2>
+                                <p className="mt-1 text-sm text-muted-foreground dark:text-gray-400">Use the rear camera and keep the barcode inside the frame.</p>
                             </div>
                             <button
                                 type="button"
@@ -768,7 +768,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         {(cameraScannerStatus || cameraScannerError) && (
                             <p
                                 role={cameraScannerError ? 'alert' : 'status'}
-                                className={`mt-3 text-sm ${cameraScannerError ? 'text-amber-700 dark:text-amber-300' : 'text-[#54706d] dark:text-gray-400'}`}
+                                className={`mt-3 text-sm ${cameraScannerError ? 'text-amber-700 dark:text-amber-300' : 'text-muted-foreground dark:text-gray-400'}`}
                             >
                                 {cameraScannerError || cameraScannerStatus}
                             </p>
@@ -777,7 +777,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         <button
                             type="button"
                             onClick={closeCameraScanner}
-                            className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-[#0f766e] px-4 py-2.5 text-sm font-medium text-[#0f766e] transition-colors hover:bg-[#d7f3ed] dark:text-[#78d7cc] dark:hover:bg-[#0f766e]/20"
+                            className="mt-5 inline-flex w-full items-center justify-center rounded-lg border border-primary px-4 py-2.5 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:bg-accent dark:text-[#78d7cc] dark:hover:bg-primary/20"
                         >
                             Cancel scanner
                         </button>

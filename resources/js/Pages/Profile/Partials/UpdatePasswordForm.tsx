@@ -44,12 +44,12 @@ export default function UpdatePasswordForm() {
     };
 
     const inputCls =
-        'block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
+        'block w-full px-3 py-2 pr-10 border border-input dark:border-gray-600 rounded-lg bg-card dark:bg-gray-700 text-foreground dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent';
 
     return (
         <form onSubmit={updatePassword} className="space-y-5">
             <div>
-                <label htmlFor="current_password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label htmlFor="current_password" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                     Current Password
                 </label>
                 <div className="relative">
@@ -65,7 +65,7 @@ export default function UpdatePasswordForm() {
                     <button
                         type="button"
                         onClick={() => setShowCurrent(v => !v)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-muted-foreground dark:hover:text-gray-200"
                         tabIndex={-1}
                         aria-label={showCurrent ? 'Hide password' : 'Show password'}
                     >
@@ -77,7 +77,7 @@ export default function UpdatePasswordForm() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label htmlFor="password" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                         New Password
                     </label>
                     <div className="relative">
@@ -93,7 +93,7 @@ export default function UpdatePasswordForm() {
                         <button
                             type="button"
                             onClick={() => setShowNew(v => !v)}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-muted-foreground dark:hover:text-gray-200"
                             tabIndex={-1}
                             aria-label={showNew ? 'Hide password' : 'Show password'}
                         >
@@ -104,7 +104,7 @@ export default function UpdatePasswordForm() {
                 </div>
 
                 <div>
-                    <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label htmlFor="password_confirmation" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                         Confirm Password
                     </label>
                     <div className="relative">
@@ -119,7 +119,7 @@ export default function UpdatePasswordForm() {
                         <button
                             type="button"
                             onClick={() => setShowConfirm(v => !v)}
-                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-muted-foreground dark:hover:text-gray-200"
                             tabIndex={-1}
                             aria-label={showConfirm ? 'Hide password' : 'Show password'}
                         >

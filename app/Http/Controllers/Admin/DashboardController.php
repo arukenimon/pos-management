@@ -26,6 +26,24 @@ class DashboardController extends Controller
             'total_members'       => app('current_shop')->members()->count(),
         ];
 
+        $from = $today->copy()->subDays(13);
+        $dailySales = (clone $completedOrders)
+            ->whereBetween('created_at', [$from, $today->copy()->endOfDay()])
+            ->selectRaw('DATE(created_at) as day, SUM(total) as revenue, COUNT(*) as orders')
+            ->groupBy('day')
+            ->get()
+            ->keyBy('day');
+        $revenueTrend = collect(range(0, 13))->map(function (int $offset) use ($from, $dailySales) {
+            $date = $from->copy()->addDays($offset);
+            $sales = $dailySales->get($date->toDateString());
+
+            return [
+                'date' => $date->format('M j'),
+                'revenue' => (float) ($sales?->revenue ?? 0),
+                'orders' => (int) ($sales?->orders ?? 0),
+            ];
+        });
+
         $recentMovements = StockMovement::with([
             'variant.product:id,name,images',
             'variant.attributeValues.attribute',
@@ -78,6 +96,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Auth/Admin/AdminDashboard', [
             'stats'           => $stats,
+            'revenueTrend'    => $revenueTrend,
             'recentMovements' => $recentMovements,
             'lowStock'        => [
                 'count'     => $lowStockItems->count(),

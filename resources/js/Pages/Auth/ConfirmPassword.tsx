@@ -24,8 +24,8 @@ export default function ConfirmPassword() {
             <Head title="Confirm Password" />
 
             <div className="mb-6">
-                <h1 className="text-2xl font-bold tracking-tight text-[#102a2a]">Confirm your password</h1>
-                <p className="mt-2 text-sm leading-6 text-[#54706d]">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">Confirm your password</h1>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
                 This is a secure area of the application. Please confirm your
                 password before continuing.
                 </p>

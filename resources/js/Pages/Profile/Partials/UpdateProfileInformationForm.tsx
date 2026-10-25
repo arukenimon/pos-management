@@ -27,7 +27,7 @@ export default function UpdateProfileInformation({
         <form onSubmit={submit} className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                         Name
                     </label>
                     <input
@@ -38,13 +38,13 @@ export default function UpdateProfileInformation({
                         required
                         autoFocus
                         autoComplete="name"
-                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="block w-full px-3 py-2 border border-input dark:border-gray-600 rounded-lg bg-card dark:bg-gray-700 text-foreground dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                     {errors.name && <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.name}</p>}
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label htmlFor="email" className="block text-sm font-medium text-foreground dark:text-gray-300 mb-1.5">
                         Email
                     </label>
                     <input
@@ -54,7 +54,7 @@ export default function UpdateProfileInformation({
                         onChange={(e) => setData('email', e.target.value)}
                         required
                         autoComplete="username"
-                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="block w-full px-3 py-2 border border-input dark:border-gray-600 rounded-lg bg-card dark:bg-gray-700 text-foreground dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     />
                     {errors.email && <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{errors.email}</p>}
                 </div>

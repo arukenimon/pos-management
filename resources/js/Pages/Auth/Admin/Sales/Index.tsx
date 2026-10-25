@@ -123,7 +123,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completed sales and their correction history</p>
                     </div>
                     <div className="flex gap-2">
-                        {auth.shopRole === 'owner' && <><a href={`/${shop}/sales/export`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Export CSV</a><a href={`/${shop}/sales/report.pdf`} className="inline-flex items-center gap-2 rounded-lg border border-[#0f766e] px-4 py-2 text-sm font-medium text-[#0f766e] hover:bg-[#d7f3ed]">Sales PDF</a></>}
+                        {auth.shopRole === 'owner' && <><a href={`/${shop}/sales/export`} className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Export CSV</a><a href={`/${shop}/sales/report.pdf`} className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Sales PDF</a></>}
                         <Link href={`/${shop}/pos`} className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors"><ShoppingBag className="h-4 w-4" />Go to POS</Link>
                     </div>
                 </div>
@@ -142,7 +142,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         { label: 'Refunds & Voids',  value: analytics.corrections_total, icon: RotateCcw,    color: 'bg-amber-500',   fmt: 'money', sub: `${analytics.corrections_count} corrected` },
                         { label: "Today's Net Sales", value: analytics.today_sales,      icon: Calendar,     color: 'bg-blue-500',    fmt: 'count' },
                         { label: "Today's Revenue", value: analytics.today_revenue,     icon: Banknote,     color: 'bg-amber-500',   fmt: 'money' },
-                        { label: "Today's Profit",  value: analytics.today_profit,      icon: DollarSign,   color: 'bg-teal-500',    fmt: 'money' },
+                        { label: "Today's Profit",  value: analytics.today_profit,      icon: DollarSign,   color: 'bg-indigo-500',    fmt: 'money' },
                     ].map(s => (
                         <div key={s.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between">
                             <div>

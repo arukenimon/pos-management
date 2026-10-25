@@ -25,12 +25,17 @@ export default {
     			sm: 'calc(var(--radius) - 4px)'
     		},
 			colors: {
-				// Retain existing utility names while giving the product a single,
-				// consistent POS accent instead of the starter indigo palette.
+				// Existing indigo utilities use the product's violet accent.
 				indigo: {
-					'50': '#eefaf7', '100': '#d7f3ed', '200': '#b5e6dc',
-					'300': '#83d3c5', '400': '#48b7a7', '500': '#168b80',
-					'600': '#0f766e', '700': '#0b625c', '800': '#0d4f4b', '900': '#103f3c',
+					'50': '#faf5ff', '100': '#f3e8ff', '200': '#e9d5ff',
+					'300': '#d8b4fe', '400': '#c084fc', '500': '#b044ee',
+					'600': '#9128db', '700': '#7e22ce', '800': '#6b21a8', '900': '#3b1760',
+				},
+				gray: {
+					'50': '#f7f8fc', '100': '#eef0f7', '200': '#dce0ed',
+					'300': '#c4cbe0', '400': '#a0acc9', '500': '#6b7897',
+					'600': '#52617e', '700': '#253251', '800': '#101a37',
+					'900': '#080f21', '950': '#060c1c',
 				},
 				background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',

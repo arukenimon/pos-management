@@ -3,7 +3,7 @@ import { Checkbox } from '@/Components/ui/checkbox';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Eye, EyeOff, Lock, Mail, Store } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 export default function Login({
@@ -31,19 +31,10 @@ export default function Login({
         <>
             <Head title="Log in" />
 
-            <div className="grid min-h-screen bg-[#f8fbf8] dark:bg-gray-950 lg:grid-cols-2">
+            <div className="auth-page grid min-h-screen bg-background text-foreground lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
                 {/* Brand panel */}
-                <div className="relative hidden flex-col justify-between overflow-hidden bg-gradient-to-br from-[#103f3c] via-indigo-700 to-[#0f766e] p-12 text-white lg:flex">
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute -left-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl"
-                    />
-                    <div
-                        aria-hidden
-                        className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 translate-x-1/4 translate-y-1/4 rounded-full bg-indigo-400/30 blur-3xl"
-                    />
-
-                    <a href="/" className="relative z-10 flex items-center gap-3">
+                <div className="hidden flex-col justify-between border-r border-border/70 bg-card/70 p-12 lg:flex xl:p-16">
+                    <a href="/" className="flex w-fit items-center gap-3 rounded-md">
                         <img
                             src="/favicon.svg"
                             alt=""
@@ -53,29 +44,29 @@ export default function Login({
                         <span className="text-lg font-semibold tracking-tight">TindaHub</span>
                     </a>
 
-                    <div className="relative z-10 max-w-md space-y-6">
-                        <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight">
+                    <div className="max-w-md space-y-5 py-12">
+                        <h2 className="text-4xl font-semibold leading-tight tracking-tight">
                             Welcome back.
                             <br />
                             Run your shop smarter.
-                        </h1>
-                        <p className="text-base leading-relaxed text-indigo-100/90">
+                        </h2>
+                        <p className="max-w-sm text-base leading-relaxed text-muted-foreground">
                             Track sales, manage inventory, and grow your
                             business — all from one dashboard.
                         </p>
                     </div>
 
-                    <div className="relative z-10 text-sm text-indigo-100/70">
+                    <div className="text-xs leading-relaxed text-muted-foreground">
                         &copy; {new Date().getFullYear()} TindaHub. All rights reserved.
                     </div>
                 </div>
 
                 {/* Form panel */}
-                <div className="flex items-center justify-center px-6 py-12 sm:px-12">
-                    <div className="w-full max-w-md">
+                <main aria-labelledby="sign-in-heading" className="flex items-center justify-center px-6 py-12 sm:px-12">
+                    <div className="w-full max-w-md xl:max-w-[25rem]">
                         <a
                             href="/"
-                            className="mb-8 inline-flex items-center gap-2 lg:hidden"
+                            className="mb-10 inline-flex items-center gap-3 rounded-md lg:hidden"
                         >
                             <img
                                 src="/favicon.svg"
@@ -83,22 +74,22 @@ export default function Login({
                                 aria-hidden="true"
                                 className="h-10 w-10 rounded-xl"
                             />
-                            <span className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white">
+                            <span className="text-lg font-semibold tracking-tight">
                                 TindaHub
                             </span>
                         </a>
 
                         <div className="mb-8">
-                            <h2 className="text-3xl font-bold tracking-tight text-[#102a2a] dark:text-white">
+                            <h1 id="sign-in-heading" className="text-3xl font-semibold tracking-tight">
                                 Sign in
-                            </h2>
-                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            </h1>
+                            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                                 Enter your credentials to access your account.
                             </p>
                         </div>
 
                         {status && (
-                            <div className="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/50 dark:text-green-300">
+                            <div role="status" className="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700 dark:border-green-900/50 dark:bg-green-950/50 dark:text-green-300">
                                 {status}
                             </div>
                         )}
@@ -107,68 +98,73 @@ export default function Login({
                             <div className="space-y-2">
                                 <Label
                                     htmlFor="email"
-                                    className="text-gray-700 dark:text-gray-300"
+                                    className="text-foreground"
                                 >
                                     Email
                                 </Label>
                                 <div className="relative">
-                                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                    <Mail aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="email"
                                         type="email"
                                         name="email"
                                         placeholder="you@example.com"
                                         autoComplete="username"
-                                        autoFocus
                                         value={data.email}
                                         onChange={(e) =>
                                             setData('email', e.target.value)
                                         }
-                                        className="h-11 pl-9"
+                                        aria-invalid={!!errors.email}
+                                        aria-describedby={errors.email ? 'email-error' : undefined}
+                                        className="h-12 border-input/70 bg-card pl-10 shadow-none"
                                     />
                                 </div>
                                 {errors.email && (
-                                    <p className="text-xs text-red-600 dark:text-red-400">
+                                    <p id="email-error" className="text-sm text-red-600 dark:text-red-400">
                                         {errors.email}
                                     </p>
                                 )}
                             </div>
 
                             <div className="space-y-2">
-                                <div className="flex items-center justify-between">
+                                <div className="flex flex-wrap items-center justify-between gap-2">
                                     <Label
                                         htmlFor="password"
-                                        className="text-gray-700 dark:text-gray-300"
+                                        className="text-foreground"
                                     >
                                         Password
                                     </Label>
                                     {canResetPassword && (
                                         <Link
                                             href={route('password.request')}
-                                            className="text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                            className="rounded-sm text-sm font-medium text-accent-foreground underline-offset-4 hover:underline"
                                         >
                                             Forgot password?
                                         </Link>
                                     )}
                                 </div>
                                 <div className="relative">
-                                    <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                                    <Lock aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <Input
                                         id="password"
                                         type={showPassword ? 'text' : 'password'}
                                         name="password"
-                                        placeholder="••••••••"
+                                        placeholder="Enter your password"
                                         autoComplete="current-password"
                                         value={data.password}
                                         onChange={(e) =>
                                             setData('password', e.target.value)
                                         }
-                                        className="h-11 pl-9 pr-10"
+                                        aria-invalid={!!errors.password}
+                                        aria-describedby={errors.password ? 'password-error' : undefined}
+                                        className="h-12 border-input/70 bg-card pl-10 pr-12 shadow-none"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword((v) => !v)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-gray-200"
+                                        className="absolute inset-y-0 right-0 grid w-12 place-items-center rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:ring-inset"
+                                        aria-controls="password"
+                                        aria-pressed={showPassword}
                                         aria-label={
                                             showPassword
                                                 ? 'Hide password'
@@ -183,14 +179,17 @@ export default function Login({
                                     </button>
                                 </div>
                                 {errors.password && (
-                                    <p className="text-xs text-red-600 dark:text-red-400">
+                                    <p id="password-error" className="text-sm text-red-600 dark:text-red-400">
                                         {errors.password}
                                     </p>
                                 )}
                             </div>
 
-                            <label className="flex cursor-pointer items-center gap-2">
+                            <div className="flex items-center gap-2.5">
                                 <Checkbox
+                                    id="remember"
+                                    name="remember"
+                                    className="border-input bg-card shadow-none"
                                     checked={data.remember}
                                     onCheckedChange={(checked) =>
                                         setData(
@@ -199,31 +198,31 @@ export default function Login({
                                         )
                                     }
                                 />
-                                <span className="text-sm text-gray-600 dark:text-gray-400">
+                                <label htmlFor="remember" className="cursor-pointer py-1 text-sm text-muted-foreground">
                                     Remember me
-                                </span>
-                            </label>
+                                </label>
+                            </div>
 
                             <Button
                                 type="submit"
                                 disabled={processing}
-                                className="h-11 w-full bg-indigo-600 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+                                className="h-12 w-full text-sm font-semibold shadow-none"
                             >
                                 {processing ? 'Signing in...' : 'Sign in'}
                             </Button>
                         </form>
 
-                        <p className="mt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <p className="mt-8 text-center text-sm leading-relaxed text-muted-foreground">
                             Don't have an account?{' '}
                             <Link
                                 href={route('register')}
-                                className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                className="rounded-sm font-medium text-accent-foreground underline-offset-4 hover:underline"
                             >
                                 Create one
                             </Link>
                         </p>
                     </div>
-                </div>
+                </main>
             </div>
         </>
     );

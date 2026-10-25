@@ -53,10 +53,12 @@ interface AdminLayoutProps extends PropsWithChildren {
 
 const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     useToasts();
-    const { auth, url, currentShop } = usePage<PageProps>().props;
+    const page = usePage<PageProps>();
+    const { auth, currentShop } = page.props;
+    const url = page.url;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-    const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [theme, setTheme] = useState<'light' | 'dark'>(() => document.documentElement.classList.contains('dark') ? 'dark' : 'light');
 
     // Inject the current shop slug as a Ziggy default so all route() calls
     // automatically resolve to the correct /{shop}/... URLs without any changes
@@ -79,18 +81,23 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     }, [currentShop?.slug]);
 
     useEffect(() => {
-        const saved = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const nextTheme = saved === 'dark' || saved === 'light' ? saved : (prefersDark ? 'dark' : 'light');
-        setTheme(nextTheme);
-        document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+        setIsMobileMenuOpen(false);
+        setIsProfileDropdownOpen(false);
+    }, [url]);
+
+    useEffect(() => {
+        const close = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setIsProfileDropdownOpen(false);
+        };
+        document.addEventListener('keydown', close);
+        return () => document.removeEventListener('keydown', close);
     }, []);
 
     const toggleTheme = () => {
         const nextTheme = theme === 'dark' ? 'light' : 'dark';
         setTheme(nextTheme);
-        localStorage.setItem('theme', nextTheme);
         document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+        try { localStorage.setItem('tindahub.theme.v2', nextTheme); } catch (_) { /* Theme still works when storage is unavailable. */ }
     };
 
     // Define navigation items — build URLs directly from slug to avoid Ziggy dependency
@@ -188,8 +195,8 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
     
 
     return (
-        <div className="min-h-screen bg-[#f8fbf8] dark:bg-gray-900">
-            <ToastContainer />
+        <div className="min-h-screen bg-background text-foreground">
+            <ToastContainer theme={theme} />
             {/* Sidebar */}
             <AdminSidebar
                 navigation={navigation}
@@ -202,10 +209,13 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
             {/* Main Content */}
             <div className="lg:pl-64">
                 {/* Top Header */}
-                <header className="sticky top-0 z-30 border-b border-[#d9e8e5] bg-white/95 shadow-[0_1px_0_rgba(15,118,110,0.03)] backdrop-blur dark:border-gray-700 dark:bg-gray-800">
+                <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur">
                     <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
                         {/* Mobile menu button */}
                         <button
+                            type="button"
+                            aria-label="Open navigation"
+                            aria-expanded={isMobileMenuOpen}
                             onClick={() => setIsMobileMenuOpen(true)}
                             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
                         >
@@ -215,27 +225,16 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                         </button>
 
                         {/* Search Bar */}
-                        <div className="flex-1 max-w-2xl px-4 flex items-center gap-3">
+                        <div className="min-w-0 flex-1 flex items-center gap-3">
                             {currentShop && (
-                                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200 dark:border-indigo-700 flex-shrink-0">
+                                <span className="hidden sm:inline-flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
                                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                     </svg>
-                                    {currentShop.name}
+                                    <span className="max-w-48 truncate">{currentShop.name}</span><span className="ml-2 text-border">/</span><span>Workspace</span>
                                 </span>
                             )}
-                            <div className="relative flex-1">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
-                                <input
-                                    type="search"
-                                    placeholder="Search..."
-                                    className="block w-full rounded-lg border border-[#d9e8e5] bg-[#f8fbf8] py-2 pl-10 pr-3 text-gray-900 placeholder-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
+
                         </div>
 
                         {/* Right side actions */}
@@ -244,7 +243,7 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                             <button
                                 onClick={toggleTheme}
                                 className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                                aria-label="Toggle theme"
+                                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                                 title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                             >
                                 {theme === 'dark' ? (
@@ -264,6 +263,9 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
                             {/* Profile dropdown */}
                             <div className="relative">
                                 <button
+                                    type="button"
+                                    aria-label="Account menu"
+                                    aria-expanded={isProfileDropdownOpen}
                                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
                                     className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
                                 >
@@ -326,15 +328,15 @@ const AdminLayout = ({ children, header }: AdminLayoutProps) => {
 
                 {/* Page Header */}
                 {header && (
-                    <div className="border-b border-[#d9e8e5] bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <div className="px-4 sm:px-6 lg:px-8 py-6">
+                    <div className="mx-auto max-w-[1600px]">
+                        <div className="px-4 pt-7 sm:px-6 lg:px-8 lg:pt-9">
                             {header}
                         </div>
                     </div>
                 )}
 
                 {/* Main Content */}
-                <main className="p-4 sm:p-6 lg:p-8">
+                <main className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
                     {children}
                 </main>
             </div>

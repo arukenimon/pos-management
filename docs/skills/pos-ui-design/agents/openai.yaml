@@ -1,0 +1,4 @@
+interface:
+  display_name: "POS UI Design"
+  short_description: "Design TindaHub with dark navy, violet, and cyan"
+  default_prompt: "Design or refine this POS interface using the TindaHub dark navy dashboard visual system."

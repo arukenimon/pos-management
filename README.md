@@ -29,7 +29,7 @@ A modern, full-stack Point of Sale system built with Laravel, React, TypeScript,
 - Period selector: Today / 7 days / 30 days / 90 days
 - KPI cards: Revenue, Orders, Avg Order Value, Units Sold
 - **Revenue & Orders over time** — dual-axis area chart
-- **Top Products by Units Sold** — horizontal bar chart (units + revenue)
+- **Top Products by Units Sold** — ranked units-only bars with separate revenue amounts and variant labels
 - **Payment Method split** — donut chart with per-method breakdown
 - **Stock In vs Out trend** — grouped bar chart per day
 - **Sales by Hour of Day** — bar chart for peak-hour analysis

@@ -1,0 +1,7 @@
+/node_modules/
+/out/
+/build/
+/public/soundtrack.wav
+/public/soundtrack-*.wav
+/public/soundtrack.mp3
+*.log

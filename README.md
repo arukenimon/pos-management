@@ -239,6 +239,20 @@ pos/
 php artisan test
 ```
 
+To watch a Playwright browser demo, keep Vite running with `npm run dev`, then run:
+
+```bash
+npm run test:e2e:headed
+```
+
+The demo uses an installed Microsoft Edge browser with a fresh browser profile.
+It types sample credentials, checks password visibility and Remember me, visits
+registration, then returns to sign in. It does not submit either form. Actions
+are slowed down for viewing, and the window stays open for 10 seconds at the end.
+Playwright reuses Laravel at `http://127.0.0.1:8000`, or starts it if needed.
+Use `npm run test:e2e` to run the same checks with the browser window hidden.
+For another running app URL, set `PLAYWRIGHT_BASE_URL` before running the command.
+
 ---
 
 ## 🚢 Docker VPS deployment

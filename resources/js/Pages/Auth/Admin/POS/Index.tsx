@@ -58,7 +58,7 @@ const priceRange = (product: POSProduct): string => {
     if (!prices.length) return '—';
     const min = Math.min(...prices);
     const max = Math.max(...prices);
-    return min === max ? `P${min.toFixed(2)}` : `P${min.toFixed(2)} – P${max.toFixed(2)}`;
+    return min === max ? `₱${min.toFixed(2)}` : `₱${min.toFixed(2)} – P${max.toFixed(2)}`;
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -200,8 +200,8 @@ export default function POSIndex({ products }: POSPageProps) {
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Point of Sale</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <h1 className="text-2xl font-bold text-foreground">Point of Sale</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
                             {products.length} products available
                         </p>
                     </div>
@@ -212,14 +212,14 @@ export default function POSIndex({ products }: POSPageProps) {
             <Head title="POS" />
 
             {/* Mobile tab bar */}
-            <div className="flex md:hidden border-b border-gray-200 dark:border-gray-700 mb-3">
+            <div className="flex md:hidden border-b border-border mb-3">
                 <button
                     type="button"
                     onClick={() => setMobileTab('products')}
                     className={`flex-1 py-2.5 text-sm font-semibold transition-colors ${
                         mobileTab === 'products'
                             ? 'border-b-2 border-indigo-600 text-indigo-600'
-                            : 'text-gray-500 dark:text-gray-400'
+                            : 'text-muted-foreground'
                     }`}
                 >
                     Products
@@ -230,7 +230,7 @@ export default function POSIndex({ products }: POSPageProps) {
                     className={`flex-1 py-2.5 text-sm font-semibold transition-colors relative ${
                         mobileTab === 'cart'
                             ? 'border-b-2 border-indigo-600 text-indigo-600'
-                            : 'text-gray-500 dark:text-gray-400'
+                            : 'text-muted-foreground'
                     }`}
                 >
                     Cart
@@ -242,7 +242,7 @@ export default function POSIndex({ products }: POSPageProps) {
                 </button>
             </div>
 
-            <div className="flex gap-4 md:h-[calc(100vh-11rem)]">
+            <div className="flex gap-5 md:h-[calc(100dvh-15rem)] md:min-h-[540px]">
 
                 {/* ── Left: Product browser ──────────────────────────────── */}
                 <div className={`flex-1 flex-col gap-3 min-w-0 ${
@@ -251,7 +251,7 @@ export default function POSIndex({ products }: POSPageProps) {
 
                     {/* Search */}
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                         <input
                             ref={searchInputRef}
                             type="text"
@@ -263,11 +263,12 @@ export default function POSIndex({ products }: POSPageProps) {
                                     handleProductClick(filteredProducts[0]);
                                 }
                             }}
-                            placeholder="Search by product name or SKU… (Enter to add first result)"
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                            aria-label="Search products or scan barcode"
+                            placeholder="Search by name or SKU… (Enter to add)"
+                            className="w-full pl-10 pr-4 py-2.5 border border-input rounded-lg bg-card text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <button aria-label="Clear product search" onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gray-600">
                                 <X className="h-4 w-4" />
                             </button>
                         )}
@@ -276,7 +277,7 @@ export default function POSIndex({ products }: POSPageProps) {
                     {/* Product grid */}
                     <div className="flex-1 overflow-y-auto pr-1">
                         {filteredProducts.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                                 <Package className="h-16 w-16 mb-3 opacity-30" />
                                 <p className="font-medium">No products found</p>
                                 {searchQuery && <p className="text-sm mt-1">Try a different search term</p>}
@@ -290,10 +291,10 @@ export default function POSIndex({ products }: POSPageProps) {
                                             key={product.id}
                                             type="button"
                                             onClick={() => handleProductClick(product)}
-                                            className="group text-left bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-md transition-all duration-150 overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            className="group text-left bg-card rounded-xl border border-border hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-md transition-all duration-150 overflow-hidden focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         >
                                             {/* Image */}
-                                            <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+                                            <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                                                 {product.images?.length ? (
                                                     <img
                                                         src={resolveImageSrc(product.images[0])}
@@ -316,7 +317,7 @@ export default function POSIndex({ products }: POSPageProps) {
 
                                             {/* Info */}
                                             <div className="p-2.5">
-                                                <p className="text-xs font-semibold text-gray-900 dark:text-white leading-tight line-clamp-2 mb-1">
+                                                <p className="text-xs font-semibold text-foreground leading-tight line-clamp-2 mb-1">
                                                     {product.name}
                                                 </p>
                                                 <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400">
@@ -335,15 +336,15 @@ export default function POSIndex({ products }: POSPageProps) {
                 </div>
 
                 {/* ── Right: Cart ────────────────────────────────────────── */}
-                <div className={`md:w-80 flex-shrink-0 flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden ${
+                <div className={`md:w-[300px] xl:w-[340px] 2xl:w-[380px] flex-shrink-0 flex-col bg-card rounded-xl border border-border overflow-hidden ${
                     mobileTab === 'cart' ? 'flex w-full' : 'hidden md:flex'
                 }`}>
 
                     {/* Cart Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                         <div className="flex items-center gap-2">
-                            <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                            <span className="font-semibold text-gray-900 dark:text-white">
+                            <ShoppingCart className="h-5 w-5 text-muted-foreground dark:text-foreground/80" />
+                            <span className="font-semibold text-foreground">
                                 Cart
                                 {cart.length > 0 && (
                                     <span className="ml-1.5 text-xs bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold px-1.5 py-0.5 rounded-full">
@@ -365,36 +366,36 @@ export default function POSIndex({ products }: POSPageProps) {
                     {/* Cart Items */}
                     <div className="flex-1 overflow-y-auto">
                         {cart.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-gray-400 p-6 text-center">
+                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6 text-center">
                                 <ShoppingCart className="h-12 w-12 mb-3 opacity-20" />
                                 <p className="text-sm font-medium">Cart is empty</p>
                                 <p className="text-xs mt-1">Click products to add them</p>
                             </div>
                         ) : (
-                            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                            <div className="divide-y divide-gray-100 dark:divide-border">
                                 {cart.map(item => (
                                     <div key={item.variant.id} className="flex gap-3 px-4 py-3">
                                         {/* Thumbnail */}
-                                        <div className="w-10 h-10 rounded-md bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-md bg-muted overflow-hidden flex-shrink-0">
                                             {item.product.images?.length ? (
                                                 <img src={resolveImageSrc(item.product.images[0])} alt={item.product.name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <Package className="h-5 w-5 text-gray-400" />
+                                                    <Package className="h-5 w-5 text-muted-foreground" />
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Details */}
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">{item.product.name}</p>
+                                            <p className="text-xs font-semibold text-foreground truncate">{item.product.name}</p>
                                             {item.variant.attribute_values?.length ? (
-                                                <p className="text-[10px] text-gray-500 dark:text-gray-400">{variantLabel(item.variant)}</p>
+                                                <p className="text-[10px] text-muted-foreground">{variantLabel(item.variant)}</p>
                                             ) : (
-                                                <p className="text-[10px] font-mono text-gray-400">{item.variant.sku}</p>
+                                                <p className="text-[10px] font-mono text-muted-foreground">{item.variant.sku}</p>
                                             )}
                                             <div className="flex items-center gap-1.5 mt-1.5">
-                                                <button onClick={() => updateQty(item.variant.id, -1)} className="h-5 w-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                <button onClick={() => updateQty(item.variant.id, -1)} className="h-5 w-5 rounded border border-input flex items-center justify-center hover:bg-muted dark:hover:bg-muted text-muted-foreground dark:text-foreground/80">
                                                     <Minus className="h-3 w-3" />
                                                 </button>
                                                 <input
@@ -404,9 +405,9 @@ export default function POSIndex({ products }: POSPageProps) {
                                                     value={item.quantity === 0 ? '' : item.quantity}
                                                     onChange={e => setQty(item.variant.id, e.target.value)}
                                                     onBlur={() => commitQty(item.variant.id)}
-                                                    className="w-10 text-xs font-bold text-center text-gray-900 dark:text-white bg-transparent border border-gray-300 dark:border-gray-600 rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                                    className="w-10 text-xs font-bold text-center text-foreground bg-transparent border border-input rounded focus:outline-none focus:ring-1 focus:ring-indigo-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 />
-                                                <button onClick={() => updateQty(item.variant.id, 1)} className="h-5 w-5 rounded border border-gray-300 dark:border-gray-600 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                                <button onClick={() => updateQty(item.variant.id, 1)} className="h-5 w-5 rounded border border-input flex items-center justify-center hover:bg-muted dark:hover:bg-muted text-muted-foreground dark:text-foreground/80">
                                                     <Plus className="h-3 w-3" />
                                                 </button>
                                                 <button onClick={() => removeFromCart(item.variant.id)} className="ml-1 text-red-400 hover:text-red-600">
@@ -417,10 +418,10 @@ export default function POSIndex({ products }: POSPageProps) {
 
                                         {/* Line total */}
                                         <div className="text-right flex-shrink-0">
-                                            <p className="text-xs font-bold text-gray-900 dark:text-white">
+                                            <p className="text-xs font-bold text-foreground">
                                                 P{(Number(item.variant.price) * item.quantity).toFixed(2)}
                                             </p>
-                                            <p className="text-[10px] text-gray-400">
+                                            <p className="text-[10px] text-muted-foreground">
                                                 P{Number(item.variant.price).toFixed(2)} each
                                             </p>
                                         </div>
@@ -432,33 +433,35 @@ export default function POSIndex({ products }: POSPageProps) {
 
                     {/* Checkout section */}
                     {cart.length > 0 && (
-                        <div className="border-t border-gray-200 dark:border-gray-700 p-4 space-y-3">
+                        <div className="border-t border-border p-4 space-y-3">
                             {/* Total */}
                             <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Total</span>
-                                <span className="text-xl font-bold text-gray-900 dark:text-white">P{subtotal.toFixed(2)}</span>
+                                <span className="text-sm font-medium text-muted-foreground">Total</span>
+                                <span className="text-xl font-bold text-foreground">₱{subtotal.toFixed(2)}</span>
                             </div>
 
                             {/* Payment method */}
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
+                                    aria-pressed={paymentMethod === 'cash'}
                                     onClick={() => { setPaymentMethod('cash'); setCashReceived(''); }}
                                     className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium border transition-colors ${
                                         paymentMethod === 'cash'
                                             ? 'bg-indigo-600 border-indigo-600 text-white'
-                                            : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-indigo-400'
+                                            : 'bg-card dark:bg-muted border-input text-foreground/80 hover:border-indigo-400'
                                     }`}
                                 >
                                     <Banknote className="h-4 w-4" /> Cash
                                 </button>
                                 <button
                                     type="button"
+                                    aria-pressed={paymentMethod === 'card'}
                                     onClick={() => { setPaymentMethod('card'); setCashReceived(''); }}
                                     className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium border transition-colors ${
                                         paymentMethod === 'card'
                                             ? 'bg-indigo-600 border-indigo-600 text-white'
-                                            : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-indigo-400'
+                                            : 'bg-card dark:bg-muted border-input text-foreground/80 hover:border-indigo-400'
                                     }`}
                                 >
                                     <CreditCard className="h-4 w-4" /> Card
@@ -468,23 +471,23 @@ export default function POSIndex({ products }: POSPageProps) {
                             {/* Cash received */}
                             {paymentMethod === 'cash' && (
                                 <div className="space-y-1.5">
-                                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400">Cash Received</label>
+                                    <label htmlFor="cash-received" className="text-xs font-medium text-muted-foreground">Cash received</label>
                                     <div className="relative">
-                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm pointer-events-none">P</span>
+                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-muted-foreground text-sm pointer-events-none">₱</span>
                                         <input
                                             type="number"
-                                            min={subtotal}
+                                            id="cash-received" min={subtotal}
                                             step="0.01"
                                             value={cashReceived}
                                             onChange={e => setCashReceived(e.target.value)}
                                             placeholder={subtotal.toFixed(2)}
-                                            className="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            className="w-full pl-7 pr-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         />
                                     </div>
                                     {cashReceived && (
                                         <div className={`flex justify-between text-sm font-semibold ${change >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                                             <span>Change</span>
-                                            <span>P{change.toFixed(2)}</span>
+                                            <span>₱{change.toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>
@@ -495,7 +498,7 @@ export default function POSIndex({ products }: POSPageProps) {
                                 type="button"
                                 onClick={handleCheckout}
                                 disabled={processing || (paymentMethod === 'cash' && change < 0)}
-                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm"
+                                className="w-full py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors text-sm"
                             >
                                 {processing ? 'Processing…' : `Complete Sale — P${subtotal.toFixed(2)}`}
                             </button>
@@ -506,14 +509,14 @@ export default function POSIndex({ products }: POSPageProps) {
 
             {/* ── Variant Picker Dialog ──────────────────────────────────── */}
             <Dialog open={!!variantPickerProduct} onOpenChange={() => setVariantPickerProduct(null)}>
-                <DialogContent className="sm:max-w-[420px] bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                <DialogContent className="sm:max-w-[420px] bg-card dark:bg-background text-foreground">
                     <DialogHeader>
                         <DialogTitle>Select Variant</DialogTitle>
                     </DialogHeader>
 
                     {variantPickerProduct && (
                         <div className="space-y-2 mt-2">
-                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            <p className="text-sm text-muted-foreground font-medium">
                                 {variantPickerProduct.name}
                             </p>
                             <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto">
@@ -525,14 +528,14 @@ export default function POSIndex({ products }: POSPageProps) {
                                             type="button"
                                             disabled={outOfStock}
                                             onClick={() => addToCart(variantPickerProduct, variant)}
-                                            className="flex items-center justify-between px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-left"
+                                            className="flex items-center justify-between px-4 py-3 rounded-lg border border-border hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-left"
                                         >
                                             <div>
                                                 <p className="text-sm font-semibold">
                                                     {variant.attribute_values?.length ? variantLabel(variant) : variant.sku}
                                                 </p>
                                                 {variant.attribute_values?.length ? (
-                                                    <p className="text-[11px] font-mono text-gray-400 mt-0.5">{variant.sku}</p>
+                                                    <p className="text-[11px] font-mono text-muted-foreground mt-0.5">{variant.sku}</p>
                                                 ) : null}
                                             </div>
                                             <div className="text-right ml-4 flex-shrink-0">

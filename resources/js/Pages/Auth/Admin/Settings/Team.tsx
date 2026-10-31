@@ -19,7 +19,7 @@ interface TeamProps extends PageProps {
 const ROLE_COLORS = {
     owner:   'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     manager: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    cashier: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    cashier: 'bg-muted text-foreground/80 dark:bg-muted dark:text-foreground/80',
 };
 
 const ROLE_LABELS = { owner: 'Owner', manager: 'Manager', cashier: 'Cashier' };
@@ -56,8 +56,8 @@ export default function Team({ shop, members, auth }: TeamProps) {
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Team Management</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{shop.name} · Manage who has access and their roles</p>
+                        <h1 className="text-2xl font-bold text-foreground">Team Management</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">{shop.name} · Manage who has access and their roles</p>
                     </div>
                     {isOwner && (
                         <button
@@ -77,24 +77,24 @@ export default function Team({ shop, members, auth }: TeamProps) {
 
                 {/* Invite form */}
                 {isOwner && showInvite && (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">Add a team member</h2>
+                    <div className="dashboard-card bg-card rounded-xl border border-border p-5">
+                        <h2 className="text-sm font-semibold text-foreground/80 mb-4">Add a team member</h2>
                         <form onSubmit={handleInvite} className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1">
                                 <input
                                     type="email"
-                                    placeholder="Email address"
+                                    aria-label="Team member email" placeholder="Email address"
                                     value={invite.data.email}
                                     onChange={e => invite.setData('email', e.target.value)}
                                     required
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="w-full px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                 />
                                 {invite.errors.email && <p className="text-red-500 text-xs mt-1">{invite.errors.email}</p>}
                             </div>
                             <select
-                                value={invite.data.role}
+                                aria-label="New member role" value={invite.data.role}
                                 onChange={e => invite.setData('role', e.target.value as Member['role'])}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                className="px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                                 <option value="cashier">Cashier</option>
                                 <option value="manager">Manager</option>
@@ -108,21 +108,21 @@ export default function Team({ shop, members, auth }: TeamProps) {
                                 Add
                             </button>
                         </form>
-                        <p className="text-xs text-gray-400 mt-2">
+                        <p className="text-xs text-muted-foreground mt-2">
                             If the email doesn't have an account yet, one will be created automatically.
                         </p>
                     </div>
                 )}
 
                 {/* Members list */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{members.length} member{members.length !== 1 ? 's' : ''}</h2>
+                <div className="dashboard-card bg-card rounded-xl border border-border overflow-hidden">
+                    <div className="px-5 py-3 border-b border-border flex items-center gap-2">
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <h2 className="text-sm font-semibold text-foreground/80">{members.length} member{members.length !== 1 ? 's' : ''}</h2>
                     </div>
-                    <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+                    <ul className="divide-y divide-gray-100 dark:divide-border">
                         {members.map(member => (
-                            <li key={member.id} className="flex items-center justify-between px-5 py-4">
+                            <li key={member.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
                                 <div className="flex items-center gap-3">
                                     <div className="h-9 w-9 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center flex-shrink-0">
                                         <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
@@ -130,21 +130,21 @@ export default function Team({ shop, members, auth }: TeamProps) {
                                         </span>
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                        <p className="text-sm font-medium text-foreground">
                                             {member.name}
                                             {member.id === auth.user.id && (
-                                                <span className="ml-2 text-xs text-gray-400">(you)</span>
+                                                <span className="ml-2 text-xs text-muted-foreground">(you)</span>
                                             )}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{member.email}</p>
+                                        <p className="text-xs text-muted-foreground">{member.email}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {isOwner && member.id !== auth.user.id ? (
                                         <select
-                                            value={member.role}
+                                            aria-label={`Role for ${member.name}`} value={member.role}
                                             onChange={e => handleRoleChange(member.id, e.target.value as Member['role'])}
-                                            className="text-xs px-2 py-1 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                            className="text-xs px-2 py-1 rounded-md border border-input bg-card dark:bg-muted text-foreground/80 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                         >
                                             <option value="cashier">Cashier</option>
                                             <option value="manager">Manager</option>
@@ -159,8 +159,8 @@ export default function Team({ shop, members, auth }: TeamProps) {
                                     {isOwner && member.id !== auth.user.id && (
                                         <button
                                             onClick={() => handleRemove(member.id, member.name)}
-                                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                                            title="Remove member"
+                                            className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                                            title="Remove member" aria-label={`Remove ${member.name}`}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
@@ -172,8 +172,8 @@ export default function Team({ shop, members, auth }: TeamProps) {
                 </div>
 
                 {/* Role reference */}
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-                    <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Role permissions</h2>
+                <div className="dashboard-card bg-card rounded-xl border border-border p-5">
+                    <h2 className="text-sm font-semibold text-foreground/80 mb-3">Role permissions</h2>
                     <div className="space-y-2 text-sm">
                         {[
                             { role: 'owner',   color: ROLE_COLORS.owner,   desc: 'Full access. Can manage products, view sales & analytics, and manage team members.' },
@@ -185,7 +185,7 @@ export default function Team({ shop, members, auth }: TeamProps) {
                                     <Shield className="h-3 w-3" />
                                     {ROLE_LABELS[r.role as Member['role']]}
                                 </span>
-                                <p className="text-gray-500 dark:text-gray-400 text-xs leading-5">{r.desc}</p>
+                                <p className="text-muted-foreground text-xs leading-5">{r.desc}</p>
                             </div>
                         ))}
                     </div>

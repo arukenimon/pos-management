@@ -10,7 +10,7 @@ import UpdateProfileInformationForm from './Partials/UpdateProfileInformationFor
 const ROLE_BADGE: Record<string, string> = {
     owner:   'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
     manager: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
-    cashier: 'bg-gray-100 text-foreground dark:bg-gray-700 dark:text-gray-300',
+    cashier: 'bg-muted text-foreground dark:bg-muted dark:text-foreground/80',
 };
 
 export default function Edit({
@@ -26,8 +26,8 @@ export default function Edit({
         <AdminLayout
             header={
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground dark:text-white">Profile</h1>
-                    <p className="mt-1 text-sm text-muted-foreground dark:text-gray-400">
+                    <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Manage your account information, password, and preferences.
                     </p>
                 </div>
@@ -37,17 +37,17 @@ export default function Edit({
 
             <div className="max-w-4xl space-y-6">
                 {/* Hero card */}
-                <section className="bg-card dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div className="h-24 bg-gradient-to-r from-indigo-600 to-purple-600" />
-                    <div className="px-6 pb-6 -mt-10 flex items-end gap-4">
-                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 ring-4 ring-white dark:ring-gray-800 flex items-center justify-center shadow-md">
-                            <span className="text-white text-3xl font-bold">{initial}</span>
+                <section className="dashboard-card bg-card rounded-xl border border-border overflow-hidden">
+                    <div className="h-16 border-b border-border bg-primary/5" />
+                    <div className="px-5 pb-6 -mt-7 flex flex-wrap items-end gap-4 sm:px-6">
+                        <div className="h-16 w-16 rounded-xl bg-primary ring-4 ring-card flex items-center justify-center shadow-md">
+                            <span className="text-white text-2xl font-semibold">{initial}</span>
                         </div>
-                        <div className="pb-2 min-w-0 flex-1">
-                            <h2 className="text-2xl font-bold text-foreground dark:text-white truncate">
+                        <div className="pb-1 min-w-0 flex-1">
+                            <h2 className="text-xl font-semibold text-foreground truncate">
                                 {user?.name}
                             </h2>
-                            <p className="text-sm text-muted-foreground dark:text-gray-400 truncate">{user?.email}</p>
+                            <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
                         </div>
                         {role && (
                             <span className={`mb-3 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${ROLE_BADGE[role] ?? ROLE_BADGE.cashier}`}>
@@ -58,14 +58,14 @@ export default function Edit({
                 </section>
 
                 {/* Profile information */}
-                <section className="bg-card dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-start gap-3">
+                <section className="dashboard-card bg-card rounded-xl border border-border">
+                    <div className="px-6 py-5 border-b border-border flex items-start gap-3">
                         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
                             <UserIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
                         </div>
                         <div>
-                            <h3 className="text-base font-semibold text-foreground dark:text-white">Profile Information</h3>
-                            <p className="mt-0.5 text-sm text-muted-foreground dark:text-gray-400">
+                            <h3 className="text-base font-semibold text-foreground">Profile Information</h3>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                                 Update your account's name and email address.
                             </p>
                         </div>
@@ -79,14 +79,14 @@ export default function Edit({
                 </section>
 
                 {/* Password */}
-                <section className="bg-card dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700 flex items-start gap-3">
+                <section className="dashboard-card bg-card rounded-xl border border-border">
+                    <div className="px-6 py-5 border-b border-border flex items-start gap-3">
                         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
                             <KeyRound className="h-5 w-5 text-emerald-600 dark:text-emerald-300" />
                         </div>
                         <div>
-                            <h3 className="text-base font-semibold text-foreground dark:text-white">Password</h3>
-                            <p className="mt-0.5 text-sm text-muted-foreground dark:text-gray-400">
+                            <h3 className="text-base font-semibold text-foreground">Password</h3>
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                                 Use a long, random password to keep your account secure.
                             </p>
                         </div>
@@ -97,14 +97,14 @@ export default function Edit({
                 </section>
 
                 {/* Danger zone */}
-                <section className="bg-card dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-900/50">
+                <section className="dashboard-card bg-card rounded-xl border border-red-200 dark:border-red-900/50">
                     <div className="px-6 py-5 border-b border-red-200 dark:border-red-900/50 flex items-start gap-3">
                         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                         </div>
                         <div>
                             <h3 className="text-base font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
-                            <p className="mt-0.5 text-sm text-muted-foreground dark:text-gray-400">
+                            <p className="mt-0.5 text-sm text-muted-foreground">
                                 Permanently delete your account and all associated data.
                             </p>
                         </div>

@@ -1,3 +1,4 @@
+import useReducedMotion from '@/hooks/useReducedMotion';
 import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
@@ -38,8 +39,8 @@ interface AnalyticsProps extends PageProps {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const fmt  = (n: number) => 'P' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const fmtK = (n: number) => n >= 1000 ? `P${(n / 1000).toFixed(1)}k` : `P${n.toFixed(0)}`;
+const fmt  = (n: number) => '₱' + n.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtK = (n: number) => n >= 1000 ? `₱${(n / 1000).toFixed(1)}k` : `₱${n.toFixed(0)}`;
 
 const PIE_COLORS = [CHART_COLORS.revenue, CHART_COLORS.orders, CHART_COLORS.profit, CHART_COLORS.positive, CHART_COLORS.negative];
 
@@ -66,7 +67,7 @@ function KpiCard({ title, value, sub, icon }: {
             <div className="mb-4 flex items-center gap-2 text-indigo-600 dark:text-indigo-400"><span className="[&>svg]:h-4 [&>svg]:w-4">{icon}</span><p className="text-xs text-muted-foreground">{title}</p></div>
             <div>
                 <p className="break-words text-xl font-semibold tracking-tight tabular-nums text-foreground 2xl:text-2xl">{value}</p>
-                <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{sub}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
             </div>
         </div>
     );
@@ -75,7 +76,7 @@ function KpiCard({ title, value, sub, icon }: {
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div className="dashboard-card h-full p-5 sm:p-6">
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-4">{title}</h3>
             {children}
         </div>
     );
@@ -95,6 +96,7 @@ export default function AnalyticsIndex({
     period, summary, revenueTrend, topProducts, paymentSplit, stockTrend, hourlySales,
 }: AnalyticsProps) {
 
+    const reducedMotion = useReducedMotion();
     const { currentShop } = usePage<PageProps>().props;
     const shop = currentShop?.slug ?? '';
 
@@ -106,7 +108,7 @@ export default function AnalyticsIndex({
     const maxProductUnits = Math.max(1, ...topProducts.map(product => product.units_sold));
 
     const EmptyState = () => (
-        <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+        <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
             <BarChart2 className="h-8 w-8 mb-2 opacity-30" />
             <p className="text-sm">No data for this period</p>
         </div>
@@ -117,11 +119,11 @@ export default function AnalyticsIndex({
             header={
                 <div className="flex items-center justify-between flex-wrap gap-3">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sales and inventory insights</p>
+                        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">Sales and inventory insights</p>
                     </div>
                     {/* Period selector */}
-                    <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
+                    <div className="dashboard-card flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
                         {PERIODS.map(p => (
                             <button
                                 key={p.value}
@@ -131,7 +133,7 @@ export default function AnalyticsIndex({
                                 className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
                                     period === p.value
                                         ? 'bg-primary text-white shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                        : 'text-muted-foreground hover:text-gray-700 dark:hover:text-gray-200'
                                 }`}
                             >
                                 {p.label}
@@ -146,7 +148,7 @@ export default function AnalyticsIndex({
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
                 {/* KPI cards */}
-                <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:col-span-2 xl:grid-cols-5">
+                <div className="analytics-metrics grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:col-span-2 xl:grid-cols-5">
                     <KpiCard title="Revenue"    value={fmt(summary.totalRevenue)}              sub="Total for period"    icon={<TrendingUp className="h-5 w-5" />}   />
                     <KpiCard title="Profit"     value={fmt(summary.totalProfit)}               sub="Gross profit"        icon={<DollarSign className="h-5 w-5" />}   />
                     <KpiCard title="Orders"     value={summary.totalOrders.toLocaleString()}   sub="Completed sales"     icon={<ShoppingCart className="h-5 w-5" />} />
@@ -184,9 +186,9 @@ export default function AnalyticsIndex({
                                     formatter={(v: number, name: string) => name === 'Orders' ? [v, 'Orders'] : [fmt(v), name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Area yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke={CHART_COLORS.revenue} fill="url(#revGrad)"    strokeWidth={2} dot={false} />
-                                <Area yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke={CHART_COLORS.profit} fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
-                                <Area yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke={CHART_COLORS.orders} fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
+                                <Area isAnimationActive={!reducedMotion} yAxisId="rev" type="monotone" dataKey="revenue" name="Revenue" stroke={CHART_COLORS.revenue} fill="url(#revGrad)"    strokeWidth={2} dot={false} />
+                                <Area isAnimationActive={!reducedMotion} yAxisId="rev" type="monotone" dataKey="profit"  name="Profit"  stroke={CHART_COLORS.profit} fill="url(#profitGrad)" strokeWidth={2} dot={false} strokeDasharray="5 3" connectNulls />
+                                <Area isAnimationActive={!reducedMotion} yAxisId="ord" type="monotone" dataKey="orders"  name="Orders"  stroke={CHART_COLORS.orders} fill="url(#ordGrad)"    strokeWidth={2} dot={false} />
                             </AreaChart>
                         </ResponsiveContainer>
                     )}
@@ -202,20 +204,20 @@ export default function AnalyticsIndex({
                         <ChartCard title="Top Products by Units Sold">
                             {noData(topProducts) ? <EmptyState /> : (
                                 <div>
-                                    <p className="mb-5 text-xs text-gray-500 dark:text-gray-400">
+                                    <p className="mb-5 text-xs text-muted-foreground">
                                         Ranked by units sold in the selected period.
                                     </p>
                                     <ol className="space-y-5" aria-label="Products ranked by units sold">
                                         {topProducts.map((product, index) => (
                                             <li key={`${product.name}-${product.variant}-${index}`} className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-4 gap-y-2">
                                                 <div className="flex min-w-0 gap-2.5">
-                                                    <span className="pt-0.5 text-xs tabular-nums text-gray-500 dark:text-gray-400" aria-hidden="true">
+                                                    <span className="pt-0.5 text-xs tabular-nums text-muted-foreground" aria-hidden="true">
                                                         {index + 1}.
                                                     </span>
                                                     <div className="min-w-0">
-                                                        <p className="break-words text-sm font-medium text-gray-900 dark:text-white">{product.name}</p>
+                                                        <p className="break-words text-sm font-medium text-foreground">{product.name}</p>
                                                         {product.variant && (
-                                                            <p className="mt-0.5 break-words text-xs text-gray-500 dark:text-gray-400">{product.variant}</p>
+                                                            <p className="mt-0.5 break-words text-xs text-muted-foreground">{product.variant}</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -224,9 +226,9 @@ export default function AnalyticsIndex({
                                                         {product.units_sold.toLocaleString()}{' '}
                                                         <span className="text-xs font-medium">{product.units_sold === 1 ? 'unit' : 'units'}</span>
                                                     </p>
-                                                    <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{fmt(product.revenue)} revenue</p>
+                                                    <p className="mt-0.5 text-xs text-muted-foreground">{fmt(product.revenue)} revenue</p>
                                                 </div>
-                                                <div className="col-span-2 h-2 overflow-hidden rounded-full bg-indigo-50 dark:bg-gray-700" aria-hidden="true">
+                                                <div className="col-span-2 h-2 overflow-hidden rounded-full bg-indigo-50 dark:bg-muted" aria-hidden="true">
                                                     <div
                                                         className="h-full rounded-full bg-indigo-700 dark:bg-indigo-400"
                                                         style={{ width: `${(product.units_sold / maxProductUnits) * 100}%` }}
@@ -247,7 +249,7 @@ export default function AnalyticsIndex({
                                 <div className="space-y-4">
                                     <ResponsiveContainer width="100%" height={200}>
                                         <PieChart>
-                                            <Pie
+                                            <Pie isAnimationActive={!reducedMotion}
                                                 data={paymentSplit}
                                                 dataKey="count"
                                                 nameKey="method"
@@ -273,11 +275,11 @@ export default function AnalyticsIndex({
                                             <div key={i} className="flex items-center justify-between text-xs">
                                                 <div className="flex items-center gap-2">
                                                     <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                                                    <span className="text-gray-600 dark:text-gray-400">{p.method}</span>
+                                                    <span className="text-muted-foreground">{p.method}</span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="font-semibold text-gray-900 dark:text-white">{p.count} orders</span>
-                                                    <span className="ml-2 text-gray-400">{fmt(p.revenue)}</span>
+                                                    <span className="font-semibold text-foreground">{p.count} orders</span>
+                                                    <span className="ml-2 text-muted-foreground">{fmt(p.revenue)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -302,8 +304,8 @@ export default function AnalyticsIndex({
                                     itemStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="stock_in"  name="Stock In"  fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="stock_out" name="Stock Out" fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
+                                <Bar isAnimationActive={!reducedMotion} dataKey="stock_in"  name="Stock In"  fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
+                                <Bar isAnimationActive={!reducedMotion} dataKey="stock_out" name="Stock Out" fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     )}
@@ -316,7 +318,8 @@ export default function AnalyticsIndex({
                             <BarChart data={hourlySales} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
                                 <XAxis dataKey="hour" tick={AXIS_STYLE} tickLine={false} axisLine={false} />
-                                <YAxis tick={AXIS_STYLE} tickLine={false} axisLine={false} />
+                                <YAxis yAxisId="revenue" tick={AXIS_STYLE} tickLine={false} axisLine={false} tickFormatter={fmtK} width={62} />
+                                <YAxis yAxisId="orders" orientation="right" tick={AXIS_STYLE} tickLine={false} axisLine={false} allowDecimals={false} width={28} />
                                 <Tooltip
                                     contentStyle={CHART_TOOLTIP}
                                     labelStyle={{ color: 'hsl(var(--foreground))' }}
@@ -324,8 +327,8 @@ export default function AnalyticsIndex({
                                     formatter={(v: number, name: string) => [name === 'Revenue' ? fmt(v) : v, name]}
                                 />
                                 <Legend wrapperStyle={{ fontSize: 12 }} />
-                                <Bar dataKey="orders"  name="Orders"  fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="revenue" name="Revenue" fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
+                                <Bar isAnimationActive={!reducedMotion} yAxisId="orders" dataKey="orders"  name="Orders"  fill={CHART_COLORS.revenue} radius={[4, 4, 0, 0]} />
+                                <Bar isAnimationActive={!reducedMotion} yAxisId="revenue" dataKey="revenue" name="Revenue" fill={CHART_COLORS.orders} radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     )}

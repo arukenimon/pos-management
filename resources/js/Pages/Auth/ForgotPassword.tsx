@@ -36,6 +36,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
             )}
 
             <form onSubmit={submit}>
+                <label htmlFor="email" className="text-xs font-medium">Email</label>
                 <TextInput
                     id="email"
                     type="email"

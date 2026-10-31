@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [
         laravel({
-            input: 'resources/js/app.tsx',
+            input: ['resources/js/app.tsx', 'resources/js/marketing.ts', 'resources/css/app.css'],
             refresh: true,
         }),
         react(),
@@ -14,8 +14,5 @@ export default defineConfig({
         host: true,        // expose to LAN
         port: 5173,
         strictPort: true,
-        hmr: {
-            host: '192.168.1.46', // 👈 your PC IP },
-        }
     },
 })

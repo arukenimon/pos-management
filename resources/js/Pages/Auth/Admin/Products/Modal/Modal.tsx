@@ -82,11 +82,11 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
         //     case 'active':
         //         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
         //     case 'inactive':
-        //         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        //         return 'bg-muted text-foreground dark:bg-muted dark:text-foreground/80';
         //     case 'out_of_stock':
         //         return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
         //     default:
-        //         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        //         return 'bg-muted text-foreground dark:bg-muted dark:text-foreground/80';
         // }
 
         const statMap: { [key: string]: { title: string; bg: string } } = {
@@ -96,7 +96,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
             },
             'inactive': {
                 title: 'Inactive',
-                bg: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                bg: 'bg-muted text-foreground dark:bg-muted dark:text-foreground/80'
             },
             'out_of_stock': {
                 title: 'Out of Stock',
@@ -116,7 +116,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
         <div>
             {/* Stock Modal */}
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="sm:max-w-[600px] bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+                <DialogContent className="sm:max-w-[600px] bg-card text-foreground dark:bg-background dark:text-foreground">
                     <DialogHeader>
                         <div className="flex items-center gap-3">
                             <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
@@ -136,7 +136,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                     <div className="space-y-4 py-4">
                         {/* Add Price also */}
                         <div>
-                            <label htmlFor="stock-quantity" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                            <label htmlFor="stock-quantity" className="block text-sm font-medium mb-2 text-foreground/80 dark:text-foreground">
                                 Quantity to Add
                             </label>
                             <div className="relative">
@@ -147,11 +147,11 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                     min="1"
                                     value={data.quantity}
                                     onChange={(e) => setData('quantity', parseInt(e.target.value) || 0)}
-                                    className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                    className="block w-full pr-12 border rounded-md bg-card text-foreground placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-border dark:bg-card dark:text-foreground dark:placeholder-gray-500"
                                     placeholder="0"
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <span className="text-gray-500 dark:text-gray-400 sm:text-sm">stock(s)</span>
+                                    <span className="text-muted-foreground sm:text-sm">stock(s)</span>
                                 </div>
                             </div>
                             {errors.quantity && (
@@ -161,7 +161,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                             )}
                         </div>
                         <div>
-                            <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                            <label htmlFor="stock-price" className="block text-sm font-medium mb-2 text-foreground/80 dark:text-foreground">
                                 Cost Price
                             </label>
                             <div className="relative">
@@ -173,11 +173,11 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                     step="0.01"
                                     value={data.cost_price}
                                     onChange={(e) => setData('cost_price', parseFloat(e.target.value) || 0)}
-                                    className="block w-full pr-12 border rounded-md bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-500"
+                                    className="block w-full pr-12 border rounded-md bg-card text-foreground placeholder-gray-400 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm dark:border-border dark:bg-card dark:text-foreground dark:placeholder-gray-500"
                                     placeholder="0.00"
                                 />
                                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                                    <span className="text-gray-500 dark:text-gray-400 sm:text-sm">$</span>
+                                    <span className="text-muted-foreground sm:text-sm">$</span>
                                 </div>
                             </div>
                             {errors.cost_price && (
@@ -188,30 +188,30 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                         </div>
 
                         {/* Current info */}
-                        <div className="bg-gray-100 dark:bg-gray-800 rounded-md p-3">
+                        <div className="bg-muted dark:bg-card rounded-md p-3">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-500 dark:text-gray-400">Product SKU:</span>
+                                <span className="text-muted-foreground">Product SKU:</span>
                                 <span className="font-medium">{firstVariant?.sku || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between text-sm mt-1">
-                                <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                                <span className="text-muted-foreground">Status:</span>
                                 <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${effectiveProduct && getStatusBadge(effectiveProduct.status).bg}`}>
                                     {effectiveProduct && getStatusBadge(effectiveProduct.status).title}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm mt-1">
-                                <span className="text-gray-500 dark:text-gray-400">Total Stocks:</span>
+                                <span className="text-muted-foreground">Total Stocks:</span>
                                 <span className={`font-medium ${stocksData && getStockColor(stocksData?.reduce((sum, stock) => sum + stock.quantity, 0))}`}>{stocksData?.reduce((sum, stock) => sum + stock.quantity, 0) || 'N/A'}</span>
                             </div>
                         </div>
 
                         {/* Batch Stocks */}
                         <div>
-                            <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">Current Stock Batches:</h4>
+                            <h4 className="text-sm font-medium mb-2 text-foreground/80 dark:text-foreground">Current Stock Batches:</h4>
                             {stocksData && stocksData?.length > 0 ? (
-                                <ul className="max-h-60 overflow-y-auto divide-y border rounded-md border-gray-200 dark:border-gray-700">
+                                <ul className="max-h-60 overflow-y-auto divide-y border rounded-md border-border">
                                     {stocksData.map((batch) => (
-                                        <li key={batch.id} className="px-4 py-3 flex justify-between items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                        <li key={batch.id} className="px-4 py-3 flex justify-between items-start gap-3 hover:bg-muted/40 dark:hover:bg-gray-800 transition-colors">
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <span className="text-sm font-medium">
@@ -221,7 +221,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                                         {batch.quantity} stock{batch.quantity > 1 ? "s" : ""}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                                     <span className="flex items-center gap-1">
                                                         {/* <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -249,7 +249,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <p className="text-sm text-muted-foreground">
                                     {isFetching ? 'Loading stock batches...' : 'No stock batches available.'}
                                 </p>
                             )}
@@ -265,7 +265,7 @@ export default function Modal({ open, onOpenChange, selectedProduct }:
                                 reset();
                                 clearErrors();
                             }}
-                            className="inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                            className="inline-flex justify-center rounded-md border border-input px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted/40 dark:border-border dark:text-foreground dark:hover:bg-gray-800"
                         >
                             Close
                         </button>

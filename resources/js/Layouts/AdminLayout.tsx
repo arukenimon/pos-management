@@ -1,347 +1,93 @@
-import { useEffect, useState, PropsWithChildren } from 'react';
+import { PropsWithChildren, useEffect, useRef, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import AdminSidebar, { SidebarNavItem, ShopRole } from '@/Components/Admin/AdminSidebar';
-import { PageProps, Shop } from '@/types';
-
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
+import { ArrowUpRight, Boxes, ChartNoAxesCombined, ChevronDown, CircleDollarSign, LayoutDashboard, LogOut, Menu as MenuIcon, Moon, Plus, ReceiptText, ScanLine, Settings2, Store, Sun, UserRound, Users } from 'lucide-react';
 import { ToastContainer } from 'react-toastify';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import useToasts from '@/hooks/useToasts';
+import AdminSidebar, { SidebarNavItem, ShopRole } from '@/Components/Admin/AdminSidebar';
 import NotificationBell from '@/Components/Admin/NotificationBell';
-import { Computer } from 'lucide-react';
+import useToasts from '@/hooks/useToasts';
+import usePageEntrance from '@/hooks/usePageEntrance';
+import { PageProps } from '@/types';
 
-// Icon Components
-const HomeIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-);
-
-const UsersIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-    </svg>
-);
-
-const ShoppingCartIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-);
-
-const ProductsIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-    </svg>
-);
-
-const ChartIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-);
-
-const SettingsIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
-interface AdminLayoutProps extends PropsWithChildren {
-    header?: React.ReactNode;
-}
-
-const AdminLayout = ({ children, header }: AdminLayoutProps) => {
+export default function AdminLayout({ children, header }: PropsWithChildren<{ header?: React.ReactNode }>) {
     useToasts();
-    const page = usePage<PageProps>();
-    const { auth, currentShop } = page.props;
-    const url = page.url;
+    const { props: { auth, currentShop }, url } = usePage<PageProps>();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>(() => document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    const scope = useRef<HTMLDivElement>(null);
+    const pathname = url.split('?')[0];
+    usePageEntrance(scope, pathname);
 
-    // Inject the current shop slug as a Ziggy default so all route() calls
-    // automatically resolve to the correct /{shop}/... URLs without any changes
-    // in individual page components.
-    // Set synchronously so route() calls on first render resolve correctly.
+    // Set the shop default before child pages resolve their routes.
     if (currentShop?.slug && (window as any).Ziggy) {
-        (window as any).Ziggy.defaults = {
-            ...(window as any).Ziggy.defaults,
-            shop: currentShop.slug,
-        };
+        (window as any).Ziggy.defaults = { ...(window as any).Ziggy.defaults, shop: currentShop.slug };
     }
-
-    useEffect(() => {
-        if (currentShop?.slug && (window as any).Ziggy) {
-            (window as any).Ziggy.defaults = {
-                ...(window as any).Ziggy.defaults,
-                shop: currentShop.slug,
-            };
-        }
-    }, [currentShop?.slug]);
-
-    useEffect(() => {
-        setIsMobileMenuOpen(false);
-        setIsProfileDropdownOpen(false);
-    }, [url]);
-
-    useEffect(() => {
-        const close = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') setIsProfileDropdownOpen(false);
-        };
-        document.addEventListener('keydown', close);
-        return () => document.removeEventListener('keydown', close);
-    }, []);
+    useEffect(() => { setIsMobileMenuOpen(false); }, [url]);
 
     const toggleTheme = () => {
-        const nextTheme = theme === 'dark' ? 'light' : 'dark';
-        setTheme(nextTheme);
-        document.documentElement.classList.toggle('dark', nextTheme === 'dark');
-        try { localStorage.setItem('tindahub.theme.v2', nextTheme); } catch (_) { /* Theme still works when storage is unavailable. */ }
+        const next = theme === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+        document.documentElement.classList.toggle('dark', next === 'dark');
+        try { localStorage.setItem('tindahub.theme.v2', next); } catch (_) { /* The theme works without local storage. */ }
     };
+    const base = currentShop ? `/${currentShop.slug}` : '';
+    const allNavigation: SidebarNavItem[] = currentShop ? [
+        { name: 'Overview', href: `${base}/`, icon: LayoutDashboard, roles: ['owner', 'manager'] },
+        { name: 'Inventory', href: `${base}/products/inventory`, icon: Boxes, roles: ['owner', 'manager'], children: [
+            { name: 'All products', href: `${base}/products/inventory`, icon: Boxes, roles: ['owner', 'manager'] },
+            { name: 'Stock movements', href: `${base}/inventory/movements`, icon: Boxes, roles: ['owner', 'manager'] },
+        ] },
+        { name: 'Sales', href: `${base}/sales`, icon: ReceiptText, roles: ['owner', 'manager'] },
+        { name: 'Point of sale', href: `${base}/pos`, icon: ScanLine, roles: ['owner', 'manager', 'cashier'] },
+        { name: 'Cash shifts', href: `${base}/pos/shifts`, icon: CircleDollarSign, roles: ['owner', 'manager', 'cashier'] },
+        { name: 'Analytics', href: `${base}/analytics`, icon: ChartNoAxesCombined, roles: ['owner', 'manager'] },
+        { name: 'Settings', href: `${base}/settings`, icon: Settings2, roles: ['owner'], children: [
+            { name: 'Shop settings', href: `${base}/settings`, icon: Settings2, roles: ['owner'] },
+            { name: 'Team & access', href: `${base}/settings/team`, icon: Users, roles: ['owner'] },
+        ] },
+    ] : [];
+    const role: ShopRole | null = auth.shopRole ?? null;
+    const filterNavigation = (items: SidebarNavItem[]): SidebarNavItem[] => items
+        .filter(item => !item.roles || (role !== null && item.roles.includes(role)))
+        .map(item => ({ ...item, ...(item.children ? { children: filterNavigation(item.children) } : {}) }));
+    const navigation = filterNavigation(allNavigation);
+    const entries = navigation.flatMap(item => [item, ...(item.children ?? [])]);
+    const currentPage = entries.find(item => item.href.replace(/\/$/, '') === pathname.replace(/\/$/, ''))?.name
+        ?? (pathname.includes('/products/') ? 'Product details' : pathname.includes('/sales/') ? 'Sale details' : 'Your account');
 
-    // Define navigation items — build URLs directly from slug to avoid Ziggy dependency
-    const slug = currentShop?.slug ?? '';
-    const base = slug ? `/${slug}` : '';
-    const allNavigation: SidebarNavItem[] = [
-        {
-            name: 'Dashboard',
-            href: `${base}/`,
-            icon: HomeIcon,
-            routename: 'admin.dashboard',
-            roles: ['owner', 'manager'],
-        },
-        {
-            name: 'Products',
-            href: `${base}/products/inventory`,
-            isParent: true,
-            icon: ProductsIcon,
-            roles: ['owner', 'manager'],
-            children: [
-                {
-                    name: 'Inventory',
-                    href: `${base}/products/inventory`,
-                    routename: 'admin.products.inventory',
-                    icon: ProductsIcon,
-                    roles: ['owner', 'manager'],
-                },
-            ],
-        },
-        {
-            name: 'Sales',
-            href: `${base}/sales`,
-            routename: 'admin.sales.index',
-            icon: ShoppingCartIcon,
-            roles: ['owner', 'manager'],
-        },
-        {
-            name: 'POS',
-            href: `${base}/pos`,
-            routename: 'admin.pos.index',
-            icon: Computer,
-            roles: ['owner', 'manager', 'cashier'],
-        },
-        {
-            name: 'Analytics',
-            href: `${base}/analytics`,
-            routename: 'admin.analytics',
-            icon: ChartIcon,
-            roles: ['owner', 'manager'],
-        },
-        {
-            name: 'Settings',
-            href: '#',
-            icon: SettingsIcon,
-            isParent: true,
-            roles: ['owner'],
-            children: [
-                {
-                    name: 'Admin Settings',
-                    href: `${base}/settings`,
-                    routename: 'admin.settings.index',
-                    icon: SettingsIcon,
-                    roles: ['owner'],
-                },
-                {
-                    name: 'Team & Access',
-                    href: `${base}/settings/team`,
-                    routename: 'admin.settings.team',
-                    icon: UsersIcon,
-                    roles: ['owner'],
-                },
-            ],
-        },
-    ];
-
-    const shopRole: ShopRole | null = auth?.shopRole ?? null;
-    const isAllowed = (item: SidebarNavItem): boolean =>
-        !item.roles || (shopRole !== null && item.roles.includes(shopRole));
-
-    const filterNav = (items: SidebarNavItem[]): SidebarNavItem[] =>
-        items
-            .filter(isAllowed)
-            .map(item => {
-                if (!item.children) return item;
-                const children = filterNav(item.children);
-                if (children.length === 0) return null;
-                return { ...item, children };
-            })
-            .filter((item): item is SidebarNavItem => item !== null);
-
-    const navigation = filterNav(allNavigation);
-
-    const queryClient = new QueryClient();
-
-    
-
-    return (
-        <div className="min-h-screen bg-background text-foreground">
-            <ToastContainer theme={theme} />
-            {/* Sidebar */}
-            <AdminSidebar
-                navigation={navigation}
-
-                currentPath={url}
-                isMobileMenuOpen={isMobileMenuOpen}
-                onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
-            />
-
-            {/* Main Content */}
-            <div className="lg:pl-64">
-                {/* Top Header */}
-                <header className="sticky top-0 z-30 border-b border-border/60 bg-background/95 backdrop-blur">
-                    <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-                        {/* Mobile menu button */}
-                        <button
-                            type="button"
-                            aria-label="Open navigation"
-                            aria-expanded={isMobileMenuOpen}
-                            onClick={() => setIsMobileMenuOpen(true)}
-                            className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-
-                        {/* Search Bar */}
-                        <div className="min-w-0 flex-1 flex items-center gap-3">
-                            {currentShop && (
-                                <span className="hidden sm:inline-flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
-                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                    </svg>
-                                    <span className="max-w-48 truncate">{currentShop.name}</span><span className="ml-2 text-border">/</span><span>Workspace</span>
-                                </span>
-                            )}
-
-                        </div>
-
-                        {/* Right side actions */}
-                        <div className="flex items-center">
-                            {/* Theme */}
-                            <button
-                                onClick={toggleTheme}
-                                className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                            >
-                                {theme === 'dark' ? (
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m6.364.636-1.414 1.414M21 12h-2m-.636 6.364-1.414-1.414M12 21v-2m-6.364-.636 1.414-1.414M3 12h2m.636-6.364 1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                                    </svg>
-                                ) : (
-                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 118.646 3.646 9.003 9.003 0 0021.354 15.354z" />
-                                    </svg>
-                                )}
-                            </button>
-
-                            {/* Notifications */}
-                            <NotificationBell />
-
-                            {/* Profile dropdown */}
-                            <div className="relative">
-                                <button
-                                    type="button"
-                                    aria-label="Account menu"
-                                    aria-expanded={isProfileDropdownOpen}
-                                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                                >
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600">
-                                        <span className="text-white font-medium text-sm">
-                                            {auth.user?.name?.charAt(0).toUpperCase()}
-                                        </span>
-                                    </div>
-                                    <div className="hidden md:block text-left">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                            {auth.user?.name}
-                                        </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                                            {auth?.shopRole ? auth.shopRole.charAt(0).toUpperCase() + auth.shopRole.slice(1) : 'No Role'}
-                                        </p>
-                                    </div>
-                                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-
-                                {/* Dropdown menu */}
-                                {isProfileDropdownOpen && (
-                                    <>
-                                        <div
-                                            className="fixed inset-0 z-10"
-                                            onClick={() => setIsProfileDropdownOpen(false)}
-                                        />
-                                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-20">
-                                            <Link
-                                                href="/profile"
-                                                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Profile Settings
-                                            </Link>
-                                            {auth?.shopRole === 'owner' && currentShop && (
-                                                <Link
-                                                    href={`/${currentShop.slug}/settings`}
-                                                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                >
-                                                    Admin Settings
-                                                </Link>
-                                            )}
-                                            <hr className="my-1 border-gray-200 dark:border-gray-700" />
-                                            <Link
-                                                href="/logout"
-                                                method="post"
-                                                as="button"
-                                                className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                Sign out
-                                            </Link>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+    return <div className="app-shell min-h-screen bg-background text-foreground">
+        <a href="#workspace-content" className="skip-link">Skip to content</a>
+        <ToastContainer theme={theme} />
+        <AdminSidebar navigation={navigation} currentPath={url} isMobileMenuOpen={isMobileMenuOpen} onCloseMobileMenu={() => setIsMobileMenuOpen(false)} />
+        <div ref={scope} className="min-w-0 lg:pl-64">
+            <header className="app-utility sticky top-0 z-30 border-b border-border/70 bg-background/95 backdrop-blur-xl">
+                <div className="flex h-[72px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+                    <div className="flex min-w-0 items-center gap-3">
+                        <button type="button" aria-label="Open navigation" aria-expanded={isMobileMenuOpen} onClick={() => setIsMobileMenuOpen(true)} className="utility-button lg:hidden"><MenuIcon className="h-5 w-5" /></button>
+                        <Link href={currentShop ? '/select-shop' : '/profile'} className="flex min-w-0 items-center gap-2 rounded-md text-xs text-muted-foreground hover:text-foreground"><Store className="hidden h-3.5 w-3.5 shrink-0 sm:block" /><span className="max-w-[130px] truncate sm:max-w-44">{currentShop?.name ?? 'TindaHub'}</span><ChevronDown className="h-3 w-3 shrink-0" /></Link>
+                        <span aria-hidden="true" className="text-border">/</span><span className="truncate text-xs font-medium">{currentPage}</span>
                     </div>
-                </header>
-
-                {/* Page Header */}
-                {header && (
-                    <div className="mx-auto max-w-[1600px]">
-                        <div className="px-4 pt-7 sm:px-6 lg:px-8 lg:pt-9">
-                            {header}
-                        </div>
+                    <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
+                        {currentShop && pathname !== `${base}/pos` && <Link href={`${base}/pos`} className="hidden items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium transition-colors hover:border-primary/50 sm:inline-flex"><Plus className="h-3.5 w-3.5 text-accent-foreground" />New sale<ArrowUpRight className="ml-2 h-3 w-3 text-muted-foreground" /></Link>}
+                        <button type="button" onClick={toggleTheme} className="utility-button" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>{theme === 'dark' ? <Sun className="h-[18px] w-[18px]" /> : <Moon className="h-[18px] w-[18px]" />}</button>
+                        <NotificationBell />
+                        <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-border sm:block" />
+                        <Menu as="div" className="relative">
+                            <MenuButton aria-label="Account menu" className="flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-muted"><span className="account-avatar">{auth.user.name.charAt(0).toUpperCase()}</span><ChevronDown className="hidden h-3 w-3 text-muted-foreground sm:block" /></MenuButton>
+                            <MenuItems transition className="absolute right-0 mt-3 w-56 origin-top-right rounded-xl border border-border bg-popover p-1.5 shadow-xl transition duration-150 data-[closed]:scale-95 data-[closed]:opacity-0">
+                                <div className="border-b border-border px-3 py-3"><p className="truncate text-sm font-semibold">{auth.user.name}</p><p className="mt-1 truncate text-xs text-muted-foreground">{auth.user.email}</p></div>
+                                <MenuItem><Link href="/profile" className="account-menu-link"><UserRound className="h-4 w-4" />Your profile</Link></MenuItem>
+                                {role === 'owner' && currentShop && <MenuItem><Link href={`${base}/settings`} className="account-menu-link"><Settings2 className="h-4 w-4" />Shop settings</Link></MenuItem>}
+                                <MenuItem><Link href="/logout" method="post" as="button" className="account-menu-link w-full text-rose-600 dark:text-rose-300"><LogOut className="h-4 w-4" />Sign out</Link></MenuItem>
+                            </MenuItems>
+                        </Menu>
                     </div>
-                )}
-
-                {/* Main Content */}
-                <main className="mx-auto max-w-[1600px] p-4 sm:p-6 lg:p-8">
-                    {children}
-                </main>
+                </div>
+            </header>
+            <div className="mx-auto max-w-[1600px]">
+                {header && <div data-page-heading className="page-heading px-4 pt-7 sm:px-6 lg:px-8 lg:pt-9">{header}</div>}
+                <main id="workspace-content" tabIndex={-1} className="workspace-content min-w-0 p-4 sm:p-6 lg:p-8">{children}</main>
             </div>
         </div>
-    );
-};
-
-export default AdminLayout;
+    </div>;
+}

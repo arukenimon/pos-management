@@ -1,3 +1,4 @@
+import MetricCard from '@/Components/Admin/MetricCard';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
@@ -119,8 +120,8 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Sales</h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Completed sales and their correction history</p>
+                        <h1 className="text-3xl font-bold text-foreground">Sales</h1>
+                        <p className="mt-1 text-sm text-muted-foreground">Completed sales and their correction history</p>
                     </div>
                     <div className="flex gap-2">
                         {auth.shopRole === 'owner' && <><a href={`/${shop}/sales/export`} className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Export CSV</a><a href={`/${shop}/sales/report.pdf`} className="inline-flex items-center gap-2 rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Sales PDF</a></>}
@@ -134,35 +135,26 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
             <div className="space-y-6">
 
                 {/* Stats */}
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 min-[400px]:grid-cols-2 xl:grid-cols-4">
                     {[
-                        { label: 'Net Sales',        value: analytics.total_sales,       icon: Receipt,      color: 'bg-indigo-500',  fmt: 'count' },
-                        { label: 'Net Revenue',      value: analytics.total_revenue,     icon: TrendingUp,   color: 'bg-emerald-500', fmt: 'money' },
-                        { label: 'Net Profit',       value: analytics.total_profit,      icon: DollarSign,   color: 'bg-violet-500',  fmt: 'money' },
-                        { label: 'Refunds & Voids',  value: analytics.corrections_total, icon: RotateCcw,    color: 'bg-amber-500',   fmt: 'money', sub: `${analytics.corrections_count} corrected` },
-                        { label: "Today's Net Sales", value: analytics.today_sales,      icon: Calendar,     color: 'bg-blue-500',    fmt: 'count' },
-                        { label: "Today's Revenue", value: analytics.today_revenue,     icon: Banknote,     color: 'bg-amber-500',   fmt: 'money' },
-                        { label: "Today's Profit",  value: analytics.today_profit,      icon: DollarSign,   color: 'bg-indigo-500',    fmt: 'money' },
-                    ].map(s => (
-                        <div key={s.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-5 flex items-center justify-between">
-                            <div>
-                                <p className="text-xs font-medium text-gray-500 dark:text-gray-400">{s.label}</p>
-                                <p className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
-                                    {s.fmt === 'money' ? `P${Number(s.value).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` : s.value}
-                                </p>
-                                {s.sub && <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.sub}</p>}
-                            </div>
-                            <div className={`p-2.5 ${s.color} rounded-lg`}>
-                                <s.icon className="h-5 w-5 text-white" />
-                            </div>
-                        </div>
-                    ))}
+                        { label: 'Net sales', value: analytics.total_sales, icon: Receipt, fmt: 'count', detail: 'Completed transactions' },
+                        { label: 'Net revenue', value: analytics.total_revenue, icon: TrendingUp, fmt: 'money', detail: 'After corrections' },
+                        { label: 'Net profit', value: analytics.total_profit, icon: DollarSign, fmt: 'money', detail: 'After product costs' },
+                        { label: 'Refunds & voids', value: analytics.corrections_total, icon: RotateCcw, fmt: 'money', detail: `${analytics.corrections_count} corrected transactions` },
+                    ].map(metric => <MetricCard key={metric.label} label={metric.label} value={metric.fmt === 'money' ? `₱${Number(metric.value).toLocaleString('en-PH', { minimumFractionDigits: 2 })}` : Number(metric.value).toLocaleString()} detail={metric.detail} icon={metric.icon} />)}
+                </div>
+                <div className="dashboard-card grid grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                    {[
+                        { label: 'Sales today', value: analytics.today_sales.toLocaleString(), icon: Calendar },
+                        { label: 'Revenue today', value: `₱${Number(analytics.today_revenue).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, icon: Banknote },
+                        { label: 'Profit today', value: `₱${Number(analytics.today_profit).toLocaleString('en-PH', { minimumFractionDigits: 2 })}`, icon: DollarSign },
+                    ].map(metric => <div key={metric.label} className="flex min-w-0 items-center gap-3 px-5 py-4"><metric.icon className="h-4 w-4 shrink-0 text-accent-foreground" /><span className="min-w-0"><span className="block text-[11px] text-muted-foreground">{metric.label}</span><strong className="mt-1 block break-words text-sm font-semibold tabular-nums">{metric.value}</strong></span></div>)}
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex flex-col sm:flex-row gap-3">
+                <div className="dashboard-card bg-card rounded-lg border border-border p-4 flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
-                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
                         <input
@@ -170,19 +162,19 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                             value={search}
                             onChange={e => handleSearch(e.target.value)}
                             placeholder="Search by order # or cashier name…"
-                            className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full pl-9 pr-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                     </div>
                     <select
                         value={paymentFilter}
                         onChange={e => handlePaymentFilter(e.target.value)}
-                        className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                         <option value="">All Methods</option>
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
                     </select>
-                    <select value={statusFilter} onChange={e => handleStatusFilter(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <select value={statusFilter} onChange={e => handleStatusFilter(e.target.value)} className="px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <option value="">All Statuses</option>
                         <option value="completed">Completed</option>
                         <option value="voided">Voided</option>
@@ -191,9 +183,9 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                 </div>
 
                 {/* Table */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="dashboard-card bg-card rounded-lg border border-border overflow-hidden">
                     {orders.data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                             <Receipt className="h-16 w-16 mb-3 opacity-20" />
                             <p className="font-medium">No sales yet</p>
                             <p className="text-sm mt-1">Completed sales will appear here</p>
@@ -202,47 +194,47 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                         <>
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Items</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cashier</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Payment</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Total</th>
-                                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                                    <tr className="border-b border-border bg-background dark:bg-gray-700/50">
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Items</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cashier</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Payment</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
+                                        <th className="text-right px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Date</th>
                                         <th className="px-4 py-3" />
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tbody className="divide-y divide-gray-100 dark:divide-border">
                                     {orders.data.map(order => (
-                                        <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                        <tr key={order.id} className="hover:bg-muted/40 dark:hover:bg-gray-700/30 transition-colors">
                                             <td className="px-4 py-3 font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
                                                 #{String(order.id).padStart(5, '0')}
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex -space-x-2">
                                                     {order.items.slice(0, 3).map(item => (
-                                                        <div key={item.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-gray-800 bg-gray-100 dark:bg-gray-700 overflow-hidden flex-shrink-0" title={`${item.variant?.product?.name} × ${item.quantity}`}>
+                                                        <div key={item.id} className="h-8 w-8 rounded-full border-2 border-white dark:border-gray-800 bg-muted overflow-hidden flex-shrink-0" title={`${item.variant?.product?.name} × ${item.quantity}`}>
                                                             {item.variant?.product?.images?.[0] ? (
                                                                 <img src={resolveImageSrc(item.variant.product.images[0])} className="w-full h-full object-cover" alt="" />
                                                             ) : (
-                                                                <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-gray-400">
+                                                                <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-muted-foreground">
                                                                     {item.variant?.product?.name?.[0]}
                                                                 </div>
                                                             )}
                                                         </div>
                                                     ))}
                                                     {order.items.length > 3 && (
-                                                        <div className="h-8 w-8 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-bold text-gray-500 dark:text-gray-300">
+                                                        <div className="h-8 w-8 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-[10px] font-bold text-muted-foreground dark:text-foreground/80">
                                                             +{order.items.length - 3}
                                                         </div>
                                                     )}
                                                 </div>
-                                                <p className="text-xs text-gray-400 mt-1">
+                                                <p className="text-xs text-muted-foreground mt-1">
                                                     {order.items.reduce((s, i) => s + i.quantity, 0)} units
                                                 </p>
                                             </td>
-                                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{order.cashier?.name ?? '—'}</td>
+                                            <td className="px-4 py-3 text-foreground/80">{order.cashier?.name ?? '—'}</td>
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
                                                     order.payment_method === 'cash'
@@ -259,14 +251,14 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                             <td className="px-4 py-3">
                                                 <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold capitalize ${
                                                     order.status === 'completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' :
-                                                    order.status === 'voided' ? 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300' :
+                                                    order.status === 'voided' ? 'bg-gray-200 text-foreground/80 dark:bg-muted dark:text-foreground/80' :
                                                     'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
                                                 }`}>{order.status}</span>
                                             </td>
-                                            <td className="px-4 py-3 text-right font-semibold text-gray-900 dark:text-white">
+                                            <td className="px-4 py-3 text-right font-semibold text-foreground">
                                                 P{Number(order.total).toFixed(2)}
                                             </td>
-                                            <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                            <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
                                                 {formatDate(order.created_at)}
                                             </td>
                                             <td className="px-4 py-3 text-right">
@@ -284,8 +276,8 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
 
                             {/* Pagination */}
                             {orders.last_page > 1 && (
-                                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+                                    <p className="text-xs text-muted-foreground">
                                         Showing {orders.from}–{orders.to} of {orders.total}
                                     </p>
                                     <div className="flex gap-1">
@@ -296,7 +288,7 @@ export default function SalesIndex({ orders, filters, analytics }: SalesPageProp
                                                 className={`px-3 py-1 text-xs rounded-md font-medium transition-colors ${
                                                     link.active
                                                         ? 'bg-indigo-600 text-white'
-                                                        : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                                        : 'bg-card dark:bg-muted text-muted-foreground dark:text-foreground/80 border border-input hover:bg-muted/40 dark:hover:bg-gray-600'
                                                 } ${!link.url ? 'opacity-40 pointer-events-none' : ''}`}
                                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                             />

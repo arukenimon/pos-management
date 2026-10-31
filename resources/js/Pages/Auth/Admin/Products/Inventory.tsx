@@ -3,7 +3,8 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { Loader2 } from 'lucide-react';
+import { Boxes, CheckCircle2, CircleDashed, Loader2 } from 'lucide-react';
+import MetricCard from '@/Components/Admin/MetricCard';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/Components/ui/dialog';
 import { Attribute, AttributeValue, ProductVariant } from './ModifyProduct';
@@ -184,9 +185,9 @@ export default function Products({ auth, products, filters, analytics }: Product
     const getStatusBadge = (status: string): { title: string; bg: string } => {
         const map: Record<string, { title: string; bg: string }> = {
             active:   { title: 'Active',   bg: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-            inactive: { title: 'Inactive', bg: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
+            inactive: { title: 'Inactive', bg: 'bg-muted text-foreground dark:bg-muted dark:text-foreground/80' },
         };
-        return map[status] ?? { title: status, bg: 'bg-gray-100 text-gray-800' };
+        return map[status] ?? { title: status, bg: 'bg-muted text-foreground' };
     };
 
     const getStockColor = (qty: number) => {
@@ -206,8 +207,8 @@ export default function Products({ auth, products, filters, analytics }: Product
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Inventory</h1>
-                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Manage your product inventory</p>
+                        <h1 className="text-3xl font-bold text-foreground">Inventory</h1>
+                        <p className="mt-2 text-sm text-muted-foreground">Manage your product inventory</p>
                     </div>
                     <div className="flex gap-2">
                         {auth.shopRole === 'owner' && <><a href={`/${shop}/products/inventory/export`} className="inline-flex items-center rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Export CSV</a><a href={`/${shop}/products/inventory/report.pdf`} className="inline-flex items-center rounded-lg border border-primary px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 hover:bg-accent">Inventory PDF</a></>}
@@ -223,36 +224,20 @@ export default function Products({ auth, products, filters, analytics }: Product
 
             <div className="space-y-6">
                 {/* Stats */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-                    {[
-                        { label: 'Total Products', value: analytics.total,    color: 'bg-blue-500',  icon: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4' },
-                        { label: 'Active',          value: analytics.active,   color: 'bg-green-500', icon: 'M5 13l4 4L19 7' },
-                        { label: 'Inactive',        value: analytics.inactive, color: 'bg-gray-500',  icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636' },
-                    ].map(stat => (
-                        <div key={stat.label} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
-                                    <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                                </div>
-                                <div className={`p-3 ${stat.color} rounded-lg`}>
-                                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <MetricCard label="Total products" value={analytics.total.toLocaleString()} detail="Your complete catalog" icon={Boxes} />
+                    <MetricCard label="Active products" value={analytics.active.toLocaleString()} detail="Available in your shop" icon={CheckCircle2} />
+                    <MetricCard label="Inactive products" value={analytics.inactive.toLocaleString()} detail="Currently set aside" icon={CircleDashed} />
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                <div className="dashboard-card bg-card rounded-lg border border-border p-6">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search Products</label>
+                            <label htmlFor="inventory-search" className="block text-xs font-medium text-muted-foreground mb-2">Search products</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="h-5 w-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>
@@ -260,17 +245,17 @@ export default function Products({ auth, products, filters, analytics }: Product
                                     type="text"
                                     value={searchQuery}
                                     onChange={e => handleSearch(e.target.value)}
-                                    placeholder="Search by name..."
-                                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                    id="inventory-search" placeholder="Search products by name..."
+                                    className="block w-full pl-10 pr-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                 />
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stock Status</label>
+                            <label htmlFor="inventory-status" className="block text-xs font-medium text-muted-foreground mb-2">Stock status</label>
                             <select
-                                value={selectedStatus}
+                                id="inventory-status" value={selectedStatus}
                                 onChange={e => handleSelectedStatusChange(e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                className="block w-full px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                             >
                                 <option value="">All</option>
                                 <option value="safe">Safe (&gt;10)</option>
@@ -298,48 +283,48 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                 {/* Select all toolbar */}
                 {filteredProducts.length > 0 && (
-                    <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="dashboard-card flex items-center justify-between px-4 py-3 bg-card rounded-lg border border-border">
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
-                                checked={selectedProducts.size === filteredProducts.length}
+                                aria-label="Select all products" checked={selectedProducts.size === filteredProducts.length}
                                 onChange={toggleAllProducts}
-                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-input rounded"
                             />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All ({filteredProducts.length})</span>
+                            <span className="text-sm font-medium text-foreground/80">Select All ({filteredProducts.length})</span>
                         </div>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">{filteredProducts.length} products</span>
+                        <span className="text-sm text-muted-foreground">{filteredProducts.length} products</span>
                     </div>
                 )}
 
                 {/* Product grid */}
                 {filteredProducts.length === 0 ? (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 flex flex-col items-center justify-center">
-                        <svg className="h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="dashboard-card bg-card rounded-lg border border-border p-12 flex flex-col items-center justify-center">
+                        <svg className="h-16 w-16 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                         </svg>
-                        <p className="mt-4 text-lg font-medium text-gray-900 dark:text-white">No products found</p>
-                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Try adjusting your search or filter criteria</p>
+                        <p className="mt-4 text-lg font-medium text-foreground">No products found</p>
+                        <p className="mt-2 text-sm text-muted-foreground">Try adjusting your search or filter criteria</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-1 min-[400px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                         {filteredProducts.map(product => {
                             const stock = totalStock(product);
                             return (
                                 <div
                                     key={product.id}
-                                    className={`group relative bg-white dark:bg-gray-800 rounded-lg border-2 transition-all duration-200 ${
+                                    className={`group relative bg-card rounded-lg border-2 transition-all duration-200 ${
                                         selectedProducts.has(product.id)
                                             ? 'border-indigo-500 shadow-lg shadow-indigo-500/20'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md'
+                                            : 'border-border hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-md'
                                     }`}
                                 >
                                     <div className="absolute top-3 left-3 z-10">
                                         <input
                                             type="checkbox"
-                                            checked={selectedProducts.has(product.id)}
+                                            aria-label={`Select ${product.name}`} checked={selectedProducts.has(product.id)}
                                             onChange={() => toggleProductSelection(product.id)}
-                                            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer shadow-sm"
+                                            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-input rounded cursor-pointer shadow-sm"
                                         />
                                     </div>
                                     <div className="absolute top-3 right-3 z-10">
@@ -354,7 +339,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                                             <img src={resolveImageSrc(product.images[0])} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
                                         ) : (
                                             <div className="absolute inset-0 flex items-center justify-center">
-                                                <svg className="h-20 w-20 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="h-20 w-20 text-muted-foreground dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                                 </svg>
                                             </div>
@@ -364,12 +349,12 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                                     {/* Details */}
                                     <div className="p-4">
-                                        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1 truncate">{product.name}</h3>
-                                        <p className="text-[11px] text-gray-500 dark:text-gray-400 mb-2">
+                                        <h3 className="text-base font-semibold text-foreground mb-1 truncate">{product.name}</h3>
+                                        <p className="text-[11px] text-muted-foreground mb-2">
                                             {product.variants?.length ?? 0} variant{(product.variants?.length ?? 0) !== 1 ? 's' : ''}
                                         </p>
-                                        <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">Total stock</span>
+                                        <div className="flex items-center justify-between mb-3 pb-3 border-b border-border">
+                                            <span className="text-xs text-muted-foreground">Total stock</span>
                                             <span className={`text-sm font-semibold ${getStockColor(stock)}`}>{stock}</span>
                                         </div>
 
@@ -409,7 +394,7 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                 {/* Add Stock Modal */}
                 <Dialog open={stockModalOpen} onOpenChange={setStockModalOpen}>
-                    <DialogContent className="sm:max-w-[560px] bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+                    <DialogContent className="sm:max-w-[560px] bg-card text-foreground dark:bg-background dark:text-foreground">
                         <DialogHeader>
                             <div className="flex items-center gap-3">
                                 <div className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-full bg-emerald-100 dark:bg-emerald-900/20">
@@ -430,11 +415,11 @@ export default function Products({ auth, products, filters, analytics }: Product
                             {/* Variant selector */}
                             {(selectedProductForStock?.variants?.length ?? 0) > 1 && (
                                 <div>
-                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Select Variant</label>
+                                    <label className="block text-sm font-medium mb-1 text-foreground/80 dark:text-foreground">Select Variant</label>
                                     <select
                                         value={selectedVariantId ?? ''}
                                         onChange={e => setSelectedVariantId(Number(e.target.value))}
-                                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                        className="block w-full px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     >
                                         {selectedProductForStock?.variants?.map(v => (
                                             <option key={v.id} value={v.id}>
@@ -447,8 +432,8 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                             {/* Selected variant info */}
                             {selectedVariant && (
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-md px-3 py-2 text-sm flex items-center justify-between">
-                                    <span className="text-gray-500 dark:text-gray-400">SKU</span>
+                                <div className="bg-background dark:bg-card rounded-md px-3 py-2 text-sm flex items-center justify-between">
+                                    <span className="text-muted-foreground">SKU</span>
                                     <span className="font-mono font-medium">{selectedVariant.sku}</span>
                                 </div>
                             )}
@@ -456,31 +441,31 @@ export default function Products({ auth, products, filters, analytics }: Product
                             {/* Inputs */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">Quantity</label>
+                                    <label className="block text-sm font-medium mb-1 text-foreground/80 dark:text-foreground">Quantity</label>
                                     <input
                                         type="number"
                                         min="1"
                                         value={data.quantity || ''}
                                         onChange={e => setData('quantity', parseInt(e.target.value) || 0)}
-                                        className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                        className="block w-full px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                         placeholder="0"
                                     />
                                     {errors.quantity && <p className="mt-1 text-xs text-red-600">{errors.quantity}</p>}
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-200">
+                                    <label className="block text-sm font-medium mb-1 text-foreground/80 dark:text-foreground">
                                         Cost Price
-                                        <span className="ml-1 text-xs font-normal text-gray-400">(what you paid the supplier)</span>
+                                        <span className="ml-1 text-xs font-normal text-muted-foreground">(what you paid the supplier)</span>
                                     </label>
                                     <div className="relative">
-                                        <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-gray-500 text-sm pointer-events-none">P</span>
+                                        <span className="absolute inset-y-0 left-0 pl-2.5 flex items-center text-muted-foreground text-sm pointer-events-none">₱</span>
                                         <input
                                             type="number"
                                             min="0"
                                             step="0.01"
                                             value={data.cost_price || ''}
                                             onChange={e => setData('cost_price', parseFloat(e.target.value) || 0)}
-                                            className="block w-full pl-6 pr-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                            className="block w-full pl-6 pr-2 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                                             placeholder="0.00"
                                         />
                                     </div>
@@ -490,30 +475,30 @@ export default function Products({ auth, products, filters, analytics }: Product
 
                             {/* Selling price read-only info */}
                             {selectedVariant?.price && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Selling price will be set to <span className="font-semibold text-gray-700 dark:text-gray-200">P{Number(selectedVariant.price).toFixed(2)}</span> (from variant).
+                                <p className="text-xs text-muted-foreground">
+                                    Selling price will be set to <span className="font-semibold text-foreground/80 dark:text-foreground">₱{Number(selectedVariant.price).toFixed(2)}</span> (from variant).
                                 </p>
                             )}
 
                             {/* Existing inventory batches for selected variant */}
                             {selectedVariant && (
                                 <div>
-                                    <h4 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-200">
+                                    <h4 className="text-sm font-medium mb-2 text-foreground/80 dark:text-foreground">
                                         Current Batches
-                                        <span className="ml-2 text-xs font-normal text-gray-400">
+                                        <span className="ml-2 text-xs font-normal text-muted-foreground">
                                             ({selectedVariant.inventories?.reduce((s, i) => s + i.quantity, 0) ?? 0} total)
                                         </span>
                                     </h4>
                                     {(selectedVariant.inventories?.length ?? 0) > 0 ? (
-                                        <ul className="max-h-48 overflow-y-auto divide-y border rounded-md border-gray-200 dark:border-gray-700">
+                                        <ul className="max-h-48 overflow-y-auto divide-y border rounded-md border-border">
                                             {selectedVariant.inventories!.map(inv => (
-                                                <li key={inv.id} className="px-3 py-2.5 flex justify-between items-center hover:bg-gray-50 dark:hover:bg-gray-800">
+                                                <li key={inv.id} className="px-3 py-2.5 flex justify-between items-center hover:bg-muted/40 dark:hover:bg-gray-800">
                                                     <div className="text-sm">
                                                         <span className="font-medium">Batch #{inv.id}</span>
                                                         <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                                                             {inv.quantity} units
                                                         </span>
-                                                        <span className="ml-2 text-xs text-gray-500">
+                                                        <span className="ml-2 text-xs text-muted-foreground">
                                                             Cost P{Number(inv.cost_price).toFixed(2)} / Sell P{Number(selectedVariant?.price ?? 0).toFixed(2)}
                                                         </span>
                                                     </div>
@@ -529,7 +514,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                                             ))}
                                         </ul>
                                     ) : (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">No stock batches yet.</p>
+                                        <p className="text-sm text-muted-foreground">No stock batches yet.</p>
                                     )}
                                 </div>
                             )}
@@ -539,7 +524,7 @@ export default function Products({ auth, products, filters, analytics }: Product
                             <button
                                 type="button"
                                 onClick={closeStockModal}
-                                className="inline-flex justify-center rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                                className="inline-flex justify-center rounded-md border border-input px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-muted/40 dark:border-border dark:text-foreground dark:hover:bg-gray-800"
                             >
                                 Close
                             </button>

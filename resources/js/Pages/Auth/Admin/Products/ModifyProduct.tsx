@@ -327,7 +327,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
             header={
                 <div className="flex items-center justify-between">
                     <div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
                             <Link href={`/${shop}/products/inventory`} className="hover:text-indigo-600 dark:hover:text-indigo-400">
                                 Inventory
                             </Link>
@@ -336,13 +336,13 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                             </svg>
                             <span>{product ? 'Edit Product' : 'Add New Product'}</span>
                         </div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                        <h1 className="text-3xl font-bold text-foreground">
                             {product ? 'Edit Product' : 'Add New Product'}
                         </h1>
                     </div>
                     <Link
                         href={`/${shop}/products/inventory`}
-                        className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                        className="inline-flex items-center px-4 py-2 bg-card border border-input text-foreground/80 text-sm font-medium rounded-lg hover:bg-muted/40 dark:hover:bg-muted transition-colors duration-200"
                     >
                         <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -361,13 +361,13 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* Basic Information */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Basic Information</h2>
+                        <div className="dashboard-card bg-card rounded-lg border border-border p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Basic Information</h2>
                             <div className="space-y-4">
                                 <div className="rounded-lg border border-primary/30 bg-accent/40 p-4 dark:border-primary/60 dark:bg-primary/10">
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                                         <div className="flex-1">
-                                            <label htmlFor="barcode" className="block text-sm font-medium text-gray-800 dark:text-gray-200 mb-1">
+                                            <label htmlFor="barcode" className="block text-sm font-medium text-foreground mb-1">
                                                 Scan or enter barcode
                                             </label>
                                             <input
@@ -377,7 +377,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                 value={barcode}
                                                 onChange={event => setBarcode(event.target.value)}
                                                 onKeyDown={handleBarcodeKeyDown}
-                                                className="block w-full px-3 py-2 border border-primary/40 dark:border-[#5ab8ad]/50 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                className="block w-full px-3 py-2 border border-primary/40 dark:border-[#5ab8ad]/50 rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                                 placeholder="UPC, EAN, or GTIN"
                                                 aria-describedby="barcode-help barcode-status"
                                             />
@@ -394,13 +394,13 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                             <button
                                                 type="button"
                                                 onClick={() => void startCameraScanner()}
-                                                className="inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-primary bg-white px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:bg-accent dark:bg-transparent dark:text-[#78d7cc] dark:hover:bg-primary/20"
+                                                className="inline-flex min-h-10 flex-1 items-center justify-center whitespace-nowrap rounded-lg border border-primary bg-card px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-300 transition-colors hover:bg-accent dark:bg-transparent dark:text-[#78d7cc] dark:hover:bg-primary/20"
                                             >
                                                 Scan with camera
                                             </button>
                                         </div>
                                     </div>
-                                    <p id="barcode-help" className="mt-2 text-xs text-muted-foreground dark:text-gray-400">
+                                    <p id="barcode-help" className="mt-2 text-xs text-muted-foreground">
                                         Use a USB scanner, enter a code, or scan with your phone camera. The barcode is also used as the starting SKU.
                                     </p>
                                     {lookupMessage && (
@@ -412,7 +412,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                     ? 'text-indigo-600 dark:text-indigo-300 dark:text-[#78d7cc]'
                                                     : lookupStatus === 'error' || lookupStatus === 'not-found'
                                                         ? 'text-amber-700 dark:text-amber-300'
-                                                        : 'text-muted-foreground dark:text-gray-400'
+                                                        : 'text-muted-foreground'
                                             }`}
                                         >
                                             {lookupMessage}
@@ -420,7 +420,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                     )}
                                 </div>
                                 <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    <label htmlFor="name" className="block text-sm font-medium text-foreground/80 mb-2">
                                         Product Name <span className="text-red-500">*</span>
                                     </label>
                                     <input
@@ -428,7 +428,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                         type="text"
                                         value={data.name}
                                         onChange={e => setData('name', e.target.value)}
-                                        className="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                        className="block w-full px-4 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         placeholder="Enter product name"
                                         required
                                         autoFocus
@@ -436,15 +436,15 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                     {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
                                 </div>
                                 <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Description <span className="text-gray-400 font-normal text-xs">(Optional)</span>
+                                    <label htmlFor="description" className="block text-sm font-medium text-foreground/80 mb-2">
+                                        Description <span className="text-muted-foreground font-normal text-xs">(Optional)</span>
                                     </label>
                                     <textarea
                                         id="description"
                                         value={data.description}
                                         onChange={e => setData('description', e.target.value)}
                                         rows={3}
-                                        className="block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                                        className="block w-full px-4 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
                                         placeholder="Enter product description..."
                                     />
                                     {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
@@ -453,16 +453,16 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         </div>
 
                         {/* Variants */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Variants</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-5">
+                        <div className="dashboard-card bg-card rounded-lg border border-border p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-1">Variants</h2>
+                            <p className="text-sm text-muted-foreground mb-5">
                                 Each variant is a sellable version of this product (e.g. Red / Large). At least one is required.
                             </p>
 
                             {/* Added variants list */}
                             {data.variants.length > 0 && (
                                 <div className="mb-5 space-y-2">
-                                    <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">
+                                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                                         Added Variants ({data.variants.length})
                                     </h3>
                                     {data.variants.map((v, i) => {
@@ -472,19 +472,19 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                             <div key={i} className={`flex items-center justify-between rounded-lg px-4 py-3 border transition-colors ${
                                                 isEditing
                                                     ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600'
-                                                    : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700'
+                                                    : 'bg-background dark:bg-gray-900/50 border-border'
                                             }`}>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                    <p className="text-sm font-medium text-foreground">
                                                         <span className="font-mono text-indigo-600 dark:text-indigo-400">{v.sku}</span>
                                                         {v.price ? (
-                                                            <span className="ml-3 text-xs text-gray-500 dark:text-gray-400">
+                                                            <span className="ml-3 text-xs text-muted-foreground">
                                                                 ₱{Number(v.price).toFixed(2)}
                                                             </span>
                                                         ) : null}
                                                     </p>
                                                     {label && (
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</p>
+                                                        <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
                                                     )}
                                                 </div>
                                                 <div className="flex items-center gap-2 ml-3 flex-shrink-0">
@@ -494,7 +494,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                         className={`p-1 rounded transition-colors ${
                                                             isEditing
                                                                 ? 'text-indigo-600 hover:text-indigo-800 dark:text-indigo-400'
-                                                                : 'text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                                                                : 'text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400'
                                                         }`}
                                                         title={isEditing ? 'Cancel edit' : 'Edit variant'}
                                                     >
@@ -526,8 +526,8 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                             )}
 
                             {/* New variant builder */}
-                            <div className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <div className="border border-dashed border-input rounded-lg p-4 space-y-4">
+                                <h3 className="text-sm font-semibold text-foreground/80">
                                     {editingVariantIndex !== null
                                         ? `Editing Variant #${editingVariantIndex + 1}`
                                         : data.variants.length === 0 ? 'Add First Variant' : 'Add Another Variant'
@@ -536,7 +536,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="variant-sku" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label htmlFor="variant-sku" className="block text-sm font-medium text-foreground/80 mb-1">
                                             SKU <span className="text-red-500">*</span>
                                         </label>
                                         <input
@@ -544,16 +544,16 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                             type="text"
                                             value={variantSku}
                                             onChange={e => setVariantSku(e.target.value)}
-                                            className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                            className="block w-full px-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-400 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                             placeholder="e.g. SHIRT-RED-M"
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="variant-price" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                        <label htmlFor="variant-price" className="block text-sm font-medium text-foreground/80 mb-1">
                                             Selling Price <span className="text-red-500">*</span>
                                         </label>
                                         <div className="relative">
-                                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 text-sm pointer-events-none">₱</span>
+                                            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-muted-foreground text-sm pointer-events-none">₱</span>
                                             <input
                                                 id="variant-price"
                                                 type="number"
@@ -561,7 +561,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                 step="0.01"
                                                 value={variantPrice}
                                                 onChange={e => setVariantPrice(e.target.value)}
-                                                className="block w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                                className="block w-full pl-7 pr-3 py-2 border border-input rounded-lg bg-card dark:bg-muted text-foreground placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                                 placeholder="0.00"
                                             />
                                         </div>
@@ -571,12 +571,12 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                 {/* Attribute value picker */}
                                 {attributes.length > 0 ? (
                                     <div className="space-y-3">
-                                        <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                                             Attributes
                                         </p>
                                         {attributes.map(attr => (
                                             <div key={attr.id}>
-                                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{attr.name}</p>
+                                                <p className="text-sm font-medium text-foreground/80 mb-1.5">{attr.name}</p>
                                                 <div className="flex flex-wrap gap-2">
                                                     {attr.values.map(val => {
                                                         const selected = selectedAttrValues.includes(val.id);
@@ -588,7 +588,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                                                 className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${
                                                                     selected
                                                                         ? 'bg-indigo-600 border-indigo-600 text-white'
-                                                                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-indigo-400'
+                                                                        : 'bg-card dark:bg-muted border-input text-foreground/80 hover:border-indigo-400'
                                                                 }`}
                                                             >
                                                                 {val.value}
@@ -625,12 +625,12 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         </div>
 
                         {/* Product Image */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Product Image</h2>
+                        <div className="dashboard-card bg-card rounded-lg border border-border p-6">
+                            <h2 className="text-lg font-semibold text-foreground mb-4">Product Image</h2>
                             <div className="space-y-4">
                                 {imagePreview ? (
                                     <div className="relative">
-                                        <div className="relative w-full h-64 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                                        <div className="relative w-full h-64 bg-muted rounded-lg overflow-hidden">
                                             <img src={imagePreview} alt="Product preview" className="w-full h-full object-contain" />
                                         </div>
                                         <button
@@ -646,16 +646,16 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                 ) : (
                                     <label
                                         htmlFor="image"
-                                        className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                        className="flex flex-col items-center justify-center w-full h-64 border-2 border-input border-dashed rounded-lg cursor-pointer bg-background dark:bg-gray-700/50 hover:bg-muted dark:hover:bg-muted transition-colors"
                                     >
                                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                            <svg className="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-12 h-12 mb-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
-                                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                            <p className="mb-2 text-sm text-muted-foreground">
                                                 <span className="font-semibold">Click to upload</span> or drag and drop
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG or WEBP (MAX. 2MB)</p>
+                                            <p className="text-xs text-muted-foreground">PNG, JPG or WEBP (MAX. 2MB)</p>
                                         </div>
                                         <input id="image" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                                     </label>
@@ -669,7 +669,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                     <div className="lg:col-span-1 space-y-6">
 
                         {/* Actions */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                        <div className="dashboard-card bg-card rounded-lg border border-border p-6">
                             <div className="space-y-3">
                                 <button
                                     type="submit"
@@ -695,7 +695,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                                 </button>
                                 <Link
                                     href={`/${shop}/products/inventory`}
-                                    className="w-full inline-flex items-center justify-center px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                                    className="w-full inline-flex items-center justify-center px-4 py-3 bg-card dark:bg-muted border border-input text-foreground/80 text-sm font-medium rounded-lg hover:bg-muted/40 dark:hover:bg-gray-600 transition-colors"
                                 >
                                     Cancel
                                 </Link>
@@ -739,17 +739,17 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="camera-scanner-title"
-                        className="w-full max-w-lg rounded-xl border border-border bg-white p-5 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+                        className="w-full max-w-lg rounded-xl border border-border bg-card p-5 shadow-2xl dark:border-border dark:bg-card"
                     >
                         <div className="flex items-start justify-between gap-4">
                             <div>
-                                <h2 id="camera-scanner-title" className="text-lg font-semibold text-foreground dark:text-white">Scan product barcode</h2>
-                                <p className="mt-1 text-sm text-muted-foreground dark:text-gray-400">Use the rear camera and keep the barcode inside the frame.</p>
+                                <h2 id="camera-scanner-title" className="text-lg font-semibold text-foreground">Scan product barcode</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">Use the rear camera and keep the barcode inside the frame.</p>
                             </div>
                             <button
                                 type="button"
                                 onClick={closeCameraScanner}
-                                className="rounded-md p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+                                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-gray-700 dark:hover:bg-muted dark:hover:text-gray-200"
                                 aria-label="Close camera scanner"
                             >
                                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -768,7 +768,7 @@ export default function ModifyProduct({ auth, product, attributes }: ModifyProdu
                         {(cameraScannerStatus || cameraScannerError) && (
                             <p
                                 role={cameraScannerError ? 'alert' : 'status'}
-                                className={`mt-3 text-sm ${cameraScannerError ? 'text-amber-700 dark:text-amber-300' : 'text-muted-foreground dark:text-gray-400'}`}
+                                className={`mt-3 text-sm ${cameraScannerError ? 'text-amber-700 dark:text-amber-300' : 'text-muted-foreground'}`}
                             >
                                 {cameraScannerError || cameraScannerStatus}
                             </p>

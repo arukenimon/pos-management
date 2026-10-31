@@ -1,3 +1,5 @@
+import useReducedMotion from '@/hooks/useReducedMotion';
+import MetricCard from '@/Components/Admin/MetricCard';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
@@ -35,6 +37,7 @@ const movementColor = {
 };
 
 export default function AdminDashboard({ auth, stats, recentMovements, lowStock, currentShop, revenueTrend }: DashboardProps) {
+    const reducedMotion = useReducedMotion();
     const base = `/${currentShop?.slug ?? ''}`;
     const periodRevenue = revenueTrend.reduce((sum, day) => sum + day.revenue, 0);
     const todayShare = stats.total_orders ? Math.min(100, stats.today_orders / stats.total_orders * 100) : 0;
@@ -53,11 +56,7 @@ export default function AdminDashboard({ auth, stats, recentMovements, lowStock,
         <Head title="Dashboard" />
         <div className="space-y-6">
             <div className="grid grid-cols-1 gap-4 min-[360px]:grid-cols-2 xl:grid-cols-4">
-                {metrics.map(metric => <div key={metric.label} className="dashboard-card p-5">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground"><metric.icon className="h-4 w-4 text-indigo-500 dark:text-indigo-400" />{metric.label}</div>
-                    <p className="mt-4 break-words text-xl font-semibold tracking-tight tabular-nums text-foreground sm:text-2xl">{metric.value}</p>
-                    <p className="mt-2 text-xs text-muted-foreground">{metric.context}</p>
-                </div>)}
+                {metrics.map(metric => <MetricCard key={metric.label} label={metric.label} value={metric.value} detail={metric.context} icon={metric.icon} />)}
             </div>
             <div className="grid gap-6 xl:grid-cols-[minmax(0,2.2fr)_minmax(260px,1fr)]">
                 <section className="dashboard-card p-5 sm:p-6" aria-labelledby="revenue-heading">
@@ -75,8 +74,8 @@ export default function AdminDashboard({ auth, stats, recentMovements, lowStock,
                                 <YAxis yAxisId="revenue" tick={CHART_AXIS} tickLine={false} axisLine={false} tickFormatter={compact} width={65} />
                                 <YAxis yAxisId="orders" orientation="right" tick={CHART_AXIS} tickLine={false} axisLine={false} allowDecimals={false} width={30} />
                                 <Tooltip contentStyle={CHART_TOOLTIP} labelStyle={{ color: 'hsl(var(--foreground))' }} formatter={(value: number, name: string) => [name === 'Revenue' ? fmt(value) : value, name]} />
-                                <Area yAxisId="revenue" name="Revenue" dataKey="revenue" type="monotone" stroke={CHART_COLORS.revenue} fill="url(#dashboard-revenue)" strokeWidth={2.5} />
-                                <Area yAxisId="orders" name="Orders" dataKey="orders" type="monotone" stroke={CHART_COLORS.orders} fill="transparent" strokeWidth={2} />
+                                <Area isAnimationActive={!reducedMotion} yAxisId="revenue" name="Revenue" dataKey="revenue" type="monotone" stroke={CHART_COLORS.revenue} fill="url(#dashboard-revenue)" strokeWidth={2.5} />
+                                <Area isAnimationActive={!reducedMotion} yAxisId="orders" name="Orders" dataKey="orders" type="monotone" stroke={CHART_COLORS.orders} fill="transparent" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div> : <div className="flex h-64 flex-col items-center justify-center gap-3 text-center"><BarChart3 className="h-9 w-9 text-muted-foreground/50" /><p className="text-sm text-muted-foreground">No completed sales in the last 14 days.</p><Link href={`${base}/pos`} className="dashboard-link">Make your first sale<ArrowRight className="h-3.5 w-3.5" /></Link></div>}

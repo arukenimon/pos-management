@@ -376,6 +376,13 @@ full backup, off-server retention, and carefully documented restore procedure.
 
 ---
 
+## Skill marketplace preparation
+
+The [Agensi preparation workspace](docs/agensi/README.md) tracks the standalone
+POS UI design skill, listing draft, package plan, and remaining validation work.
+
+---
+
 ## 📝 License
 
 MIT License

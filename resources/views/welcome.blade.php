@@ -28,7 +28,8 @@
     <title>{{ $appName }} — Your shop. In a good place.</title>
     <script>try { document.documentElement.classList.toggle('dark', localStorage.getItem('tindahub.theme.v2') !== 'light'); } catch (_) {}</script>
     <script type="application/ld+json">{!! json_encode(['@context' => 'https://schema.org', '@type' => 'SoftwareApplication', 'name' => $appName, 'applicationCategory' => 'BusinessApplication', 'operatingSystem' => 'Web', 'description' => 'A connected point-of-sale and inventory workspace for small businesses.', 'url' => route('home')], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
-    @vite(['resources/css/app.css', 'resources/js/marketing.ts'])
+    @viteReactRefresh
+    @vite(['resources/css/app.css', 'resources/css/marketing.css', 'resources/js/marketing.ts'])
 </head>
 <body class="marketing-page bg-background text-foreground">
     <a href="#main-content" class="skip-link">Skip to content</a>
@@ -46,6 +47,7 @@
     </header>
     <main id="main-content" class="overflow-x-hidden w-full max-w-full">
         <section class="marketing-hero" aria-labelledby="hero-heading">
+            <div id="hero-shader" class="hero-shader" aria-hidden="true"></div>
             <div class="marketing-shell hero-inner">
                 <div class="hero-copy">
                     <h1 id="hero-heading" class="max-w-5xl" data-hero-copy>Your shop.<span>In a good place.</span></h1>

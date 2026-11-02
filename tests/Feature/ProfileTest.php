@@ -79,6 +79,26 @@ class ProfileTest extends TestCase
         $this->assertNull($user->fresh());
     }
 
+    public function test_inertia_account_deletion_navigates_to_the_public_homepage(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->withHeader('X-Inertia', 'true')
+            ->delete('/profile', [
+                'password' => 'password',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertStatus(409)
+            ->assertHeader('X-Inertia-Location', '/');
+
+        $this->assertGuest();
+        $this->assertNull($user->fresh());
+    }
+
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
         $user = User::factory()->create();

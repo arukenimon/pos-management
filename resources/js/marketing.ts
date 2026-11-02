@@ -1,4 +1,4 @@
-import '../css/marketing.css';
+import './hero-background';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 

@@ -1,5 +1,26 @@
 import { expect, test } from '@playwright/test';
 
+test('homepage layout is styled while its JavaScript is still loading', async ({ page }) => {
+    let releaseScript!: () => void;
+    const scriptGate = new Promise<void>(resolve => { releaseScript = resolve; });
+    await page.route(/\/(?:resources\/js\/marketing\.ts|build\/assets\/marketing-[^/]+\.js)(?:\?.*)?$/, async route => {
+        await scriptGate;
+        await route.continue();
+    });
+
+    try {
+        await page.goto('/', { waitUntil: 'commit' });
+        await expect(page.locator('.marketing-nav')).toBeVisible();
+        await expect(page.locator('.marketing-nav')).toHaveCSS('display', 'flex');
+        await expect(page.locator('.marketing-nav')).toHaveCSS('height', '88px');
+        await expect(page.locator('.marketing-nav-actions .marketing-button svg')).toHaveCSS('width', '16px');
+        await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+        await expect(page.locator('#hero-shader canvas')).toHaveCount(0);
+    } finally {
+        releaseScript();
+    }
+});
+
 test('homepage supports product exploration and account entry', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));

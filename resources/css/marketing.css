@@ -21,7 +21,10 @@
 .marketing-button.large { min-height: 52px; padding-inline: 24px; font-size: 14px; }
 .marketing-mobile-menu { display: none; }
 .marketing-hero { position: relative; isolation: isolate; }
-.marketing-hero::before { content: ''; position: absolute; z-index: -1; inset: -88px 0 -80px; background: radial-gradient(ellipse at 78% 53%, hsl(var(--primary) / .12), transparent 52%); pointer-events: none; }
+.hero-shader { position: absolute; z-index: -2; inset: 0; overflow: hidden; pointer-events: none; background: radial-gradient(ellipse at 76% 38%, #5ad2f4, #1b6ca8 48%, #031c26 90%); }
+.hero-shader-canvas { display: block; width: 100%; height: 100%; }
+.marketing-hero::before { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(90deg, hsl(var(--background) / .96), hsl(var(--background) / .88) 38%, hsl(var(--background) / .22)), linear-gradient(0deg, hsl(var(--background)), transparent 36%); pointer-events: none; }
+@media (max-width: 800px) { .marketing-hero::before { background: linear-gradient(180deg, hsl(var(--background) / .84), hsl(var(--background) / .76) 44%, hsl(var(--background) / .2) 68%, hsl(var(--background))); } }
 .hero-inner { position: relative; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); gap: 30px; min-height: 745px; padding-top: 83px; padding-bottom: 86px; }
 .hero-copy { position: relative; z-index: 2; }
 .hero-copy h1 { position: relative; width: 750px; max-width: calc(100vw - 64px); margin: 0; font-family: var(--font-display); font-size: clamp(60px, 6.8vw, 96px); font-weight: 500; line-height: .99; letter-spacing: -.055em; }

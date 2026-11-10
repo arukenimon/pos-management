@@ -138,6 +138,19 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+For access from another device on your LAN, set `APP_URL` in `.env` to the
+computer's reachable address (for example, `http://192.168.1.46:8000`), then run:
+
+```bash
+php artisan serve --host=0.0.0.0 --port=8000
+npm run dev
+```
+
+Vite uses the hostname from `APP_URL` for asset URLs and hot reload. Restart
+`npm run dev` after changing that address. Keep both servers running during
+development; when using built assets, stop Vite normally so Laravel switches
+from `public/hot` to `public/build/manifest.json`.
+
 ---
 
 ## 📁 Project Structure

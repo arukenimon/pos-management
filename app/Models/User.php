@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'suspension_reason',
     ];
 
     /**
@@ -45,6 +46,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
+            'is_super_admin' => 'boolean',
+            'suspended_at' => 'datetime',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];

@@ -15,5 +15,5 @@ use Illuminate\Support\Facades\Broadcast;
 // Private per-user channel. ShopActivity notifications broadcast here, so each
 // member only ever receives notifications addressed to them.
 Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
-    return (int) $user->id === (int) $id;
+    return ! $user->suspended_at && (int) $user->id === (int) $id;
 });

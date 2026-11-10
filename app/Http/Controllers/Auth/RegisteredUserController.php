@@ -42,7 +42,10 @@ class RegisteredUserController extends Controller
             ]);
 
             // Generate a unique slug from the shop name
-            $baseSlug = Str::slug($request->shop_name);
+            $baseSlug = Str::slug($request->shop_name) ?: 'shop';
+            if ($baseSlug === 'super-admin') {
+                $baseSlug = 'super-admin-shop';
+            }
             $slug     = $baseSlug;
             $counter  = 1;
             while (Shop::where('slug', $slug)->exists()) {

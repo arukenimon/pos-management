@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->web(append: [
+            \App\Http\Middleware\EnsureActiveAccount::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ]);
@@ -29,6 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'shop'        => \App\Http\Middleware\ResolveShop::class,
             'shop.member' => \App\Http\Middleware\EnsureShopMember::class,
             'shop.role'   => \App\Http\Middleware\RequireShopRole::class,
+            'account.active' => \App\Http\Middleware\EnsureActiveAccount::class,
+            'shop.active' => \App\Http\Middleware\EnsureActiveShop::class,
+            'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
         ]);
         //
     })

@@ -1,4 +1,5 @@
 import AdminLayout from '@/Layouts/AdminLayout';
+import PlatformLayout from '@/Layouts/PlatformLayout';
 import { PageProps } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { User as UserIcon, KeyRound, AlertTriangle } from 'lucide-react';
@@ -20,10 +21,11 @@ export default function Edit({
     const { auth } = usePage<PageProps>().props;
     const user = auth.user;
     const role = auth.shopRole;
+    const Layout = auth.isSuperAdmin ? PlatformLayout : AdminLayout;
     const initial = user?.name?.charAt(0).toUpperCase() ?? '?';
 
     return (
-        <AdminLayout
+        <Layout
             header={
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">Profile</h1>
@@ -97,7 +99,7 @@ export default function Edit({
                 </section>
 
                 {/* Danger zone */}
-                <section className="dashboard-card bg-card rounded-xl border border-red-200 dark:border-red-900/50">
+                {!auth.isSuperAdmin && <section className="dashboard-card bg-card rounded-xl border border-red-200 dark:border-red-900/50">
                     <div className="px-6 py-5 border-b border-red-200 dark:border-red-900/50 flex items-start gap-3">
                         <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                             <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
@@ -112,8 +114,8 @@ export default function Edit({
                     <div className="px-6 py-6">
                         <DeleteUserForm />
                     </div>
-                </section>
+                </section>}
             </div>
-        </AdminLayout>
+        </Layout>
     );
 }

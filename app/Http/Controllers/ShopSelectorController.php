@@ -15,6 +15,7 @@ class ShopSelectorController extends Controller
             'name' => $s->name,
             'slug' => $s->slug,
             'role' => $s->pivot->role,
+            'suspended' => $s->suspended_at !== null,
         ]);
 
         return Inertia::render('ShopSelector', ['shops' => $shops]);

@@ -46,6 +46,8 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): HttpResponse
     {
+        abort_if($request->user()->is_super_admin, 403, 'Remove platform access through the server command before deleting this account.');
+
         $request->validate([
             'password' => ['required', 'current_password'],
         ]);

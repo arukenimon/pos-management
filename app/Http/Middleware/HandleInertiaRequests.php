@@ -54,6 +54,8 @@ class HandleInertiaRequests extends Middleware
         // ResolveShop (route middleware) runs after this (web group) middleware,
         // so app('current_shop') is not yet bound here. Resolve directly instead.
         $currentShop = null;
+        $platformContext = $request->routeIs('super-admin.*')
+            || ($request->routeIs('profile.*') && $request->user()?->is_super_admin);
         $slug = $request->route('shop');
         if ($slug) {
             $slugStr = is_string($slug) ? $slug : (is_object($slug) ? $slug->slug : null);
@@ -64,8 +66,8 @@ class HandleInertiaRequests extends Middleware
 
         // Fallback so shop-agnostic pages (e.g. /profile) can still render the
         // admin sidebar with working links. Defaults to the user's first shop.
-        if (! $currentShop && $request->user()) {
-            $currentShop = $request->user()->shops()->first();
+        if (! $currentShop && $request->user() && ! $platformContext) {
+            $currentShop = $request->user()->shops()->whereNull('suspended_at')->first();
         }
 
         $shopRole = null;
@@ -75,7 +77,7 @@ class HandleInertiaRequests extends Middleware
 
         $notifications = [];
         $unreadCount = 0;
-        if ($user = $request->user()) {
+        if (($user = $request->user()) && ! $platformContext) {
             $notifications = $user->notifications()->latest()->take(20)->get()
                 ->map(fn ($n) => [
                     'id'         => $n->id,
@@ -91,8 +93,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user'      => $request->user()?->hasVerifiedEmail() ? $request->user() : null,
+                'user'      => $request->user()?->hasVerifiedEmail() ? $request->user()->only(['id', 'name', 'email', 'email_verified_at']) : null,
                 'shopRole'  => $shopRole,
+                'isSuperAdmin' => (bool) $request->user()?->is_super_admin,
             ],
             'currentShop' => $currentShop ? [
                 'id'   => $currentShop->id,

@@ -24,6 +24,7 @@ class Shop extends Model
     protected function casts(): array
     {
         return [
+            'suspended_at' => 'datetime',
             'tax_rate' => 'decimal:2',
             'payment_methods' => 'array',
             'barcode_scanning_enabled' => 'boolean',

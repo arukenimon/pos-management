@@ -26,6 +26,7 @@ export type PageProps<
     auth: {
         user: User;
         shopRole: 'owner' | 'manager' | 'cashier' | null;
+        isSuperAdmin: boolean;
     };
     currentShop: Shop | null;
     notifications: AppNotification[];

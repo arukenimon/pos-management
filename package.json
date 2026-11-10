@@ -6,6 +6,7 @@
         "build": "tsc && vite build",
         "dev": "vite",
         "test:e2e": "playwright test",
+        "test:e2e:platform": "playwright test --config playwright.platform.config.ts",
         "test:e2e:headed": "playwright test --headed --workers=1"
     },
     "devDependencies": {

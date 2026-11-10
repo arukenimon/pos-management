@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\TeamController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShopSelectorController;
+use App\Http\Controllers\SuperAdmin\PlatformController;
 use Illuminate\Support\Facades\Route;
 
 // Public marketing / SEO landing page.
@@ -26,6 +27,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/dashboard', function () {
         $user = request()->user();
+        if ($user?->is_super_admin) {
+            return redirect()->route('super-admin.overview');
+        }
         $shops = $user?->shops;
 
         if ($shops?->count() === 1) {
@@ -56,9 +60,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 require __DIR__.'/auth.php';
 
+Route::prefix('super-admin')->name('super-admin.')
+    ->middleware(['auth', 'verified', 'account.active', 'super-admin'])
+    ->group(function () {
+        Route::get('/', [PlatformController::class, 'overview'])->name('overview');
+        Route::get('/shops', [PlatformController::class, 'shops'])->name('shops.index');
+        Route::get('/shops/{platformShop}', [PlatformController::class, 'shop'])->name('shops.show');
+        Route::patch('/shops/{platformShop}/status', [PlatformController::class, 'shopStatus'])->name('shops.status');
+        Route::get('/users', [PlatformController::class, 'users'])->name('users.index');
+        Route::get('/users/{platformUser}', [PlatformController::class, 'user'])->name('users.show');
+        Route::patch('/users/{platformUser}/status', [PlatformController::class, 'userStatus'])->name('users.status');
+        Route::get('/audit-log', [PlatformController::class, 'audit'])->name('audit');
+    });
+
 // Per-shop admin routes. Keep this catch-all group after fixed routes like /login and /profile.
 Route::prefix('{shop:slug}')
-    ->middleware(['verified', 'shop', 'shop.member'])
+    ->middleware(['verified', 'shop', 'shop.member', 'shop.active'])
     ->group(function () {
         // Full access: owner + manager
         Route::middleware(['shop.role:owner,manager'])->group(function () {

@@ -23,14 +23,15 @@ interface AdminSidebarProps {
     currentPath: string;
     isMobileMenuOpen?: boolean;
     onCloseMobileMenu: () => void;
+    platform?: boolean;
 }
 
-export default function AdminSidebar({ navigation, currentPath, isMobileMenuOpen = false, onCloseMobileMenu }: AdminSidebarProps) {
+export default function AdminSidebar({ navigation, currentPath, isMobileMenuOpen = false, onCloseMobileMenu, platform = false }: AdminSidebarProps) {
     const { auth, currentShop } = usePage<PageProps>().props;
     const [search, setSearch] = useState('');
     const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
     const pathname = currentPath.split('?')[0].replace(/\/$/, '');
-    const role = auth.shopRole ?? 'Member';
+    const role = platform ? 'Super Admin' : auth.shopRole ?? 'Member';
     const isActive = (href: string) => pathname === href.replace(/\/$/, '');
     const toggle = (name: string, expanded: boolean) => setExpandedItems(previous => ({ ...previous, [name]: !expanded }));
     const query = search.trim().toLowerCase();
@@ -42,6 +43,7 @@ export default function AdminSidebar({ navigation, currentPath, isMobileMenuOpen
 
     const renderItem = (item: SidebarNavItem, child = false) => {
         const active = isActive(item.href) || !!item.children?.some(entry => isActive(entry.href))
+            || (platform && item.href !== '/super-admin' && pathname.startsWith(`${item.href}/`))
             || (item.name === 'Inventory' && pathname.includes('/products/'))
             || (item.name === 'Sales' && pathname.startsWith(`${item.href}/`))
             || (item.name === 'Settings' && pathname.startsWith(`${item.href}/`));
@@ -73,14 +75,15 @@ export default function AdminSidebar({ navigation, currentPath, isMobileMenuOpen
             <button type="button" onClick={onCloseMobileMenu} aria-label="Close navigation" className="rounded-lg p-2 text-muted-foreground hover:bg-accent lg:hidden"><X className="h-5 w-5" /></button>
         </div>
         <div className="px-5 pb-5">
-            {currentShop && <Link href="/select-shop" onClick={onCloseMobileMenu} className="mb-5 flex items-center gap-2.5 rounded-lg border border-sidebar-border bg-card/50 px-3 py-3 transition-colors hover:border-primary/50"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-background"><Store className="h-4 w-4 text-accent-foreground" /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{currentShop.name}</span><span className="mt-0.5 block text-[10px] capitalize text-muted-foreground">{role} workspace</span></span><ChevronsUpDown className="h-3 w-3 shrink-0 text-muted-foreground" /></Link>}
+            {platform && <div className="mb-5 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3"><p className="text-xs font-semibold text-foreground">Platform administration</p><Link href="/select-shop" onClick={onCloseMobileMenu} className="mt-2 inline-flex items-center gap-1.5 text-xs text-accent-foreground">Your shops<ArrowUpRight className="h-3 w-3" /></Link></div>}
+            {!platform && currentShop && <Link href="/select-shop" onClick={onCloseMobileMenu} className="mb-5 flex items-center gap-2.5 rounded-lg border border-sidebar-border bg-card/50 px-3 py-3 transition-colors hover:border-primary/50"><span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-border bg-background"><Store className="h-4 w-4 text-accent-foreground" /></span><span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold">{currentShop.name}</span><span className="mt-0.5 block text-[10px] capitalize text-muted-foreground">{role} workspace</span></span><ChevronsUpDown className="h-3 w-3 shrink-0 text-muted-foreground" /></Link>}
             <div className="relative">
                 <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <input type="search" value={search} onChange={event => setSearch(event.target.value)} aria-label="Search navigation" placeholder="Search navigation..." className="h-10 w-full rounded-md border border-input/60 bg-card pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-ring" />
             </div>
         </div>
         <nav aria-label="Main navigation" className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
-            <p className="mb-3 px-3 text-[11px] font-medium text-muted-foreground">Your workspace</p>
+            <p className="mb-3 px-3 text-[11px] font-medium text-muted-foreground">{platform ? 'Platform' : 'Your workspace'}</p>
             <div className="space-y-1">{filtered.map(item => <div key={item.name} className={item.name === 'Settings' ? 'mt-5 border-t border-sidebar-border pt-4' : ''}>{renderItem(item)}</div>)}</div>
             {!filtered.length && <p className="px-3 py-5 text-sm text-muted-foreground">No matching pages.</p>}
         </nav>

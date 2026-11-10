@@ -22,7 +22,9 @@ class RootRedirectController extends Controller
         if(!Auth::check())
             return redirect()->route('login');
 
-        //return redirect()->route('register');
+        if (Auth::user()->is_super_admin) {
+            return redirect()->route('super-admin.overview');
+        }
 
         switch(Auth::user()->role){ // For Route . ->name()
              case "admin":
